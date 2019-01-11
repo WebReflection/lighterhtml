@@ -4,6 +4,7 @@ var lighterhtml = (function (document,exports) {
   /*! (c) Andrea Giammarchi - ISC */
   var Wire = function (slice, proto) {
     proto = Wire.prototype;
+    proto.nodeType = 11;
 
     proto.remove = function (keepFirst) {
       var childNodes = this.childNodes;
