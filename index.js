@@ -1266,15 +1266,18 @@ var lighterhtml = (function (document,exports) {
     return node;
   }
   var html = outer$1('html');
-  var svg = outer$1('svg');
+  var svg = outer$1('svg'); // the Template class
 
   function Template($, _) {
     this.$ = $;
     this._ = _;
-    this.nodeType = -1;
   }
 
-  Template.prototype.valueOf = function () {
+  var TP = Template.prototype; // used to avoid bad checks round
+
+  TP.nodeType = 0; // used to force rended into wire/node
+
+  TP.valueOf = function () {
     return unroll(this);
   };
 

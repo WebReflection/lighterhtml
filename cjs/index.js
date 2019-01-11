@@ -38,13 +38,19 @@ exports.html = html;
 const svg = outer('svg');
 exports.svg = svg;
 
+// the Template class
 function Template($, _) {
   this.$ = $;
   this._ = _;
-  this.nodeType = -1;
 }
 
-Template.prototype.valueOf = function () {
+const TP = Template.prototype;
+
+// used to avoid bad checks round
+TP.nodeType = 0;
+
+// used to force rended into wire/node
+TP.valueOf = function () {
   return unroll(this);
 };
 
