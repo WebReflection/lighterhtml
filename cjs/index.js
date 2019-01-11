@@ -17,17 +17,29 @@ function render(node, callback) {
   // TODO: perf measurement about guarding this via try/catch/finally
   const result = callback();
 
-  const template = result._[0];
-  const diff = current.template !== template;
-  if (diff && current.template)
-    current.stack.splice(0);
-  current.i = 0;
-  const dom = result.valueOf();
-  if (diff) {
-    current.template = template;
-    node.textContent = '';
-    node.appendChild(dom.valueOf(true));
+  if (result.constructor === Template) {
+    const template = result._[0];
+    const diff = current.template !== template;
+    if (diff && current.template)
+      current.stack.splice(0);
+    current.i = 0;
+    const dom = result.valueOf();
+    if (diff) {
+      current.template = template;
+      node.textContent = '';
+      node.appendChild(dom.valueOf(true));
+    }
   }
+  else {
+    const {nodeType} = result;
+    if (nodeType === 1 && node.firstChild !== result) {
+      node.textContent = '';
+      node.appendChild(result);
+    }
+    else
+      node.appendChild(result.valueOf());
+  }
+
   current = prev;
   return node;
 }

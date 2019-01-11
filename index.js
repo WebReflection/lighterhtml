@@ -1251,16 +1251,26 @@ var lighterhtml = (function (document,exports) {
     current = wm.get(node) || set$1(node); // TODO: perf measurement about guarding this via try/catch/finally
 
     var result = callback();
-    var template = result._[0];
-    var diff = current.template !== template;
-    if (diff && current.template) current.stack.splice(0);
-    current.i = 0;
-    var dom = result.valueOf();
 
-    if (diff) {
-      current.template = template;
-      node.textContent = '';
-      node.appendChild(dom.valueOf(true));
+    if (result.constructor === Template) {
+      var template = result._[0];
+      var diff = current.template !== template;
+      if (diff && current.template) current.stack.splice(0);
+      current.i = 0;
+      var dom = result.valueOf();
+
+      if (diff) {
+        current.template = template;
+        node.textContent = '';
+        node.appendChild(dom.valueOf(true));
+      }
+    } else {
+      var nodeType = result.nodeType;
+
+      if (nodeType === 1 && node.firstChild !== result) {
+        node.textContent = '';
+        node.appendChild(result);
+      } else node.appendChild(result.valueOf());
     }
 
     current = prev;
