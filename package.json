@@ -44,5 +44,13 @@
     "domtagger": "^0.2.3",
     "hyperhtml-style": "^0.1.2",
     "hyperhtml-wire": "^2.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebReflection/lighthtml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebReflection/lighthtml/issues"
+  },
+  "homepage": "https://github.com/WebReflection/lighthtml#readme"
 }
