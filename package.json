@@ -47,10 +47,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WebReflection/lighthtml.git"
+    "url": "git+https://github.com/WebReflection/lighterhtml.git"
   },
   "bugs": {
-    "url": "https://github.com/WebReflection/lighthtml/issues"
+    "url": "https://github.com/WebReflection/lighterhtml/issues"
   },
-  "homepage": "https://github.com/WebReflection/lighthtml#readme"
+  "homepage": "https://github.com/WebReflection/lighterhtml#readme"
 }
