@@ -1,0 +1,48 @@
+{
+  "name": "lighthtml",
+  "version": "0.1.2",
+  "description": "coming soon",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "unpkg": "min.js",
+  "scripts": {
+    "build": "npm run rollup && npm run clean && npm run cjs && npm run min && npm run size",
+    "cjs": "ascjs esm cjs",
+    "clean": "sed -i.bck -e 's/var isNoOp =.*/var isNoOp = false;/' index.js && sed -i.bck 's/(exports)/(document,exports)/;s/({}));/(document,{}));/' index.js && rm index.js.bck",
+    "min": "echo '/*! (c) Andrea Giammarchi - ISC */' > min.js && uglifyjs index.js -c -m >> min.js",
+    "rollup": "rollup --config rollup.config.js && drop-babel-typeof index.js",
+    "size": "cat index.js | wc -c;cat min.js | wc -c;gzip -c9 min.js | wc -c"
+  },
+  "keywords": [
+    "html",
+    "svg",
+    "render",
+    "hyper",
+    "lit",
+    "alternative"
+  ],
+  "author": "Andrea Giammarchi",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "ascjs": "^2.5.1",
+    "drop-babel-typeof": "^1.0.3",
+    "rollup": "^1.1.0",
+    "rollup-plugin-babel": "^4.3.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "uglify-es": "^3.3.9"
+  },
+  "dependencies": {
+    "@ungap/create-content": "^0.1.4",
+    "@ungap/custom-event": "^0.2.0",
+    "@ungap/template-tag-arguments": "^0.1.1",
+    "@ungap/weakmap": "^0.1.4",
+    "@ungap/weakset": "^0.1.5",
+    "disconnected": "^0.1.6",
+    "domdiff": "^2.0.2",
+    "domtagger": "^0.2.3",
+    "hyperhtml-style": "^0.1.2",
+    "hyperhtml-wire": "^2.0.0"
+  }
+}
