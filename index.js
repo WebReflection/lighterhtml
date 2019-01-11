@@ -1254,7 +1254,7 @@ var lighterhtml = (function (document,exports) {
     var diff = current.template !== template;
     if (diff && current.template) current.stack.splice(0);
     current.i = 0;
-    var dom = unroll(result);
+    var dom = result.valueOf();
 
     if (diff) {
       current.template = template;
@@ -1271,7 +1271,12 @@ var lighterhtml = (function (document,exports) {
   function Template($, _) {
     this.$ = $;
     this._ = _;
+    this.nodeType = -1;
   }
+
+  Template.prototype.valueOf = function () {
+    return unroll(this);
+  };
 
   function getWire(type, args) {
     var _current = current,

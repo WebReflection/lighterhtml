@@ -22,7 +22,7 @@ function render(node, callback) {
   if (diff && current.template)
     current.stack.splice(0);
   current.i = 0;
-  const dom = unroll(result);
+  const dom = result.valueOf();
   if (diff) {
     current.template = template;
     node.textContent = '';
@@ -41,7 +41,12 @@ exports.svg = svg;
 function Template($, _) {
   this.$ = $;
   this._ = _;
+  this.nodeType = -1;
 }
+
+Template.prototype.valueOf = function () {
+  return unroll(this);
+};
 
 function getWire(type, args) {
   const {i, stack} = current;
