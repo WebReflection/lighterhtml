@@ -1,4 +1,4 @@
-var lighthtml = (function (document,exports) {
+var lighterhtml = (function (document,exports) {
   'use strict';
 
   /*! (c) Andrea Giammarchi - ISC */

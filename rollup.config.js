@@ -15,6 +15,6 @@ export default {
     exports: 'named',
     file: 'index.js',
     format: 'iife',
-    name: 'lighthtml'
+    name: 'lighterhtml'
   }
 };
