@@ -1247,36 +1247,20 @@ var lighterhtml = (function (document,exports) {
 
   var wm = new WeakMap();
   var templateType = 0;
-  var current = null;
+  var current = null; // can be used with any useRef hook
+  // returns an `html` and `svg` function
+
+  var hook = function hook(useRef) {
+    return {
+      html: craeteHook(useRef, html),
+      svg: craeteHook(useRef, svg)
+    };
+  }; // generic render
+
   function render(node, callback) {
     var content = update(node, callback);
     if (content !== null) appendClean(node, content);
     return node;
-  }
-  function update(reference, callback) {
-    var prev = current;
-    current = wm.get(reference) || set$1(reference);
-    current.i = 0; // TODO: perf measurement about guarding this
-
-    var result = callback();
-    var ret = null;
-
-    if (result.nodeType === templateType) {
-      var template = result._[0]; // TODO: perf measurement about guarding this
-
-      var content = unroll(result);
-
-      if (current.template !== template) {
-        setTemplate(template);
-        ret = asNode$1(content);
-      }
-    } else {
-      setTemplate(null);
-      ret = asNode$1(result);
-    }
-
-    current = prev;
-    return ret;
   }
   var html = outer$1('html');
   var svg = outer$1('svg');
@@ -1288,6 +1272,28 @@ var lighterhtml = (function (document,exports) {
 
   function asNode$1(result) {
     return result.nodeType === wireType ? result.valueOf(true) : result;
+  }
+
+  function craeteHook(useRef, view) {
+    return function () {
+      var ref = useRef(null);
+      if (ref.current === null) ref.current = content.bind(ref);
+      return ref.current.apply(null, arguments);
+    };
+
+    function content() {
+      var args = [];
+
+      for (var i = 0, length = arguments.length; i < length; i++) {
+        args[i] = arguments[i];
+      }
+
+      var content = update(this, function () {
+        return view.apply(null, args);
+      });
+      if (content) this.content = content;
+      return this.content;
+    }
   }
 
   function getWire(type, args) {
@@ -1339,6 +1345,32 @@ var lighterhtml = (function (document,exports) {
     current.template = template;
   }
 
+  function update(reference, callback) {
+    var prev = current;
+    current = wm.get(reference) || set$1(reference);
+    current.i = 0; // TODO: perf measurement about guarding this
+
+    var result = callback();
+    var ret = null;
+
+    if (result.nodeType === templateType) {
+      var template = result._[0]; // TODO: perf measurement about guarding this
+
+      var content = unroll(result);
+
+      if (current.template !== template) {
+        setTemplate(template);
+        ret = asNode$1(content);
+      }
+    } else {
+      setTemplate(null);
+      ret = asNode$1(result);
+    }
+
+    current = prev;
+    return ret;
+  }
+
   function unroll(template) {
     var $ = template.$,
         _ = template._;
@@ -1375,8 +1407,8 @@ var lighterhtml = (function (document,exports) {
     return unroll(this);
   };
 
+  exports.hook = hook;
   exports.render = render;
-  exports.update = update;
   exports.html = html;
   exports.svg = svg;
 

@@ -8,6 +8,15 @@ const templateType = 0;
 
 let current = null;
 
+// can be used with any useRef hook
+// returns an `html` and `svg` function
+const hook = useRef => ({
+  html: craeteHook(useRef, html),
+  svg: craeteHook(useRef, svg)
+});
+exports.hook = hook;
+
+// generic render
 function render(node, callback) {
   const content = update(node, callback);
   if (content !== null)
@@ -15,34 +24,6 @@ function render(node, callback) {
   return node;
 }
 exports.render = render
-
-function update(reference, callback) {
-  const prev = current;
-  current = wm.get(reference) || set(reference);
-  current.i = 0;
-
-  // TODO: perf measurement about guarding this
-  const result = callback();
-
-  let ret = null;
-  if (result.nodeType === templateType) {
-    const template = result._[0];
-    // TODO: perf measurement about guarding this
-    const content = unroll(result);
-    if (current.template !== template) {
-      setTemplate(template);
-      ret = asNode(content);
-    }
-  }
-  else {
-    setTemplate(null);
-    ret = asNode(result);
-  }
-
-  current = prev;
-  return ret;
-}
-exports.update = update
 
 const html = outer('html');
 exports.html = html;
@@ -56,6 +37,26 @@ function appendClean(node, fragment) {
 
 function asNode(result) {
   return result.nodeType === wireType ? result.valueOf(true) : result;
+}
+
+function craeteHook(useRef, view) {
+
+  return function () {
+    const ref = useRef(null);
+    if (ref.current === null)
+      ref.current = content.bind(ref);
+    return ref.current.apply(null, arguments);
+  };
+
+  function content() {
+    const args = [];
+    for (let i = 0, {length} = arguments; i < length; i++)
+      args[i] = arguments[i];
+    const content = update(this, () => view.apply(null, args));
+    if (content)
+      this.content = content;
+    return this.content;
+  }
 }
 
 function getWire(type, args) {
@@ -93,6 +94,33 @@ function setTemplate(template) {
   if (current.template)
     current.stack.splice(0);
   current.template = template;
+}
+
+function update(reference, callback) {
+  const prev = current;
+  current = wm.get(reference) || set(reference);
+  current.i = 0;
+
+  // TODO: perf measurement about guarding this
+  const result = callback();
+
+  let ret = null;
+  if (result.nodeType === templateType) {
+    const template = result._[0];
+    // TODO: perf measurement about guarding this
+    const content = unroll(result);
+    if (current.template !== template) {
+      setTemplate(template);
+      ret = asNode(content);
+    }
+  }
+  else {
+    setTemplate(null);
+    ret = asNode(result);
+  }
+
+  current = prev;
+  return ret;
 }
 
 function unroll(template) {
