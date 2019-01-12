@@ -184,7 +184,7 @@ Tagger.prototype = {
                 case 'string':
                 case 'number':
                 case 'boolean':
-                  anyContent({html: value});
+                  anyContent({text: value});
                   break;
                 case 'object':
                   if (isArray(value[0])) {
