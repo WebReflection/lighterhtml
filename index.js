@@ -1248,9 +1248,13 @@ var lighterhtml = (function (document,exports) {
   var wm = new WeakMap();
   var templateType = 0;
   var current = null;
-  function render(node, callback) {
+  function hook(reference, callback) {
+    var ret = {
+      reference: reference,
+      content: null
+    };
     var prev = current;
-    current = wm.get(node) || set$1(node);
+    current = wm.get(reference) || set$1(reference);
     current.i = 0; // TODO: perf measurement about guarding this
 
     var result = callback();
@@ -1263,13 +1267,22 @@ var lighterhtml = (function (document,exports) {
       if (current.template !== template) {
         if (current.template) current.stack.splice(0);
         current.i = 0;
-        appendClean(node, content);
         current.template = template;
+        ret.content = asNode$1(content);
+        appendClean(reference, asNode$1(content));
       }
-    } else appendClean(node, result.valueOf(true));
+    } else ret.content = asNode$1(result);
 
     current = prev;
-    return node;
+    return ret;
+  }
+  function render(node, callback) {
+    var _hook = hook(node, callback),
+        reference = _hook.reference,
+        content = _hook.content;
+
+    if (content !== null) appendClean(reference, content);
+    return reference;
   }
   var html = outer$1('html');
   var svg = outer$1('svg');
@@ -1278,6 +1291,10 @@ var lighterhtml = (function (document,exports) {
     current.template = null;
     node.textContent = '';
     node.appendChild(fragment);
+  }
+
+  function asNode$1(result) {
+    return result.nodeType === wireType ? result.valueOf(true) : result;
   }
 
   function getWire(type, args) {
@@ -1349,7 +1366,6 @@ var lighterhtml = (function (document,exports) {
   }
 
   function Template($, _) {
-    this.C = current;
     this.$ = $;
     this._ = _;
   }
@@ -1358,15 +1374,10 @@ var lighterhtml = (function (document,exports) {
   TP.nodeType = templateType;
 
   TP.valueOf = function () {
-    var prev = current;
-    current = this.C;
-    current.i = 0; // TODO: perf measurement about guarding this
-
-    var result = unroll(this);
-    current = prev;
-    return result;
+    return unroll(this);
   };
 
+  exports.hook = hook;
   exports.render = render;
   exports.html = html;
   exports.svg = svg;

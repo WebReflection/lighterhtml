@@ -1,6 +1,6 @@
 'use strict';
 const tta = (m => m.__esModule ? m.default : m)(require('@ungap/template-tag-arguments'));
-const {Wire, isArray} = require('./shared.js');
+const {Wire, wireType, isArray} = require('./shared.js');
 const Tagger = (m => m.__esModule ? m.default : m)(require('./tagger.js'));
 
 const wm = new WeakMap;
@@ -8,9 +8,10 @@ const templateType = 0;
 
 let current = null;
 
-function render(node, callback) {
+function hook(reference, callback) {
+  const ret = {reference, content: null};
   const prev = current;
-  current = wm.get(node) || set(node);
+  current = wm.get(reference) || set(reference);
   current.i = 0;
 
   // TODO: perf measurement about guarding this
@@ -24,15 +25,24 @@ function render(node, callback) {
       if (current.template)
         current.stack.splice(0);
       current.i = 0;
-      appendClean(node, content);
       current.template = template;
+      ret.content = asNode(content);
+      appendClean(reference, asNode(content));
     }
   }
   else
-    appendClean(node, result.valueOf(true));
+    ret.content = asNode(result);
 
   current = prev;
-  return node;
+  return ret;
+}
+exports.hook = hook
+
+function render(node, callback) {
+  const {reference, content} = hook(node, callback);
+  if (content !== null)
+    appendClean(reference, content);
+  return reference;
 }
 exports.render = render
 
@@ -45,6 +55,10 @@ function appendClean(node, fragment) {
   current.template = null;
   node.textContent = '';
   node.appendChild(fragment);
+}
+
+function asNode(result) {
+  return result.nodeType === wireType ? result.valueOf(true) : result;
 }
 
 function getWire(type, args) {
@@ -104,7 +118,6 @@ function wireContent(node) {
 }
 
 function Template($, _) {
-  this.C = current;
   this.$ = $;
   this._ = _;
 }
@@ -112,11 +125,5 @@ function Template($, _) {
 const TP = Template.prototype;
 TP.nodeType = templateType;
 TP.valueOf = function () {
-  const prev = current;
-  current = this.C;
-  current.i = 0;
-  // TODO: perf measurement about guarding this
-  const result = unroll(this);
-  current = prev;
-  return result;
+  return unroll(this);
 };
