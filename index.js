@@ -53,7 +53,8 @@ var lighterhtml = (function (document,exports) {
   /*! (c) Andrea Giammarchi - ISC */
   var Wire = function (slice, proto) {
     proto = Wire.prototype;
-    proto.nodeType = 11;
+    proto.ELEMENT_NODE = 1;
+    proto.nodeType = 111;
 
     proto.remove = function (keepFirst) {
       var childNodes = this.childNodes;
@@ -99,6 +100,7 @@ var lighterhtml = (function (document,exports) {
   }([].slice);
 
   var isArray = Array.isArray;
+  var wireType = Wire.prototype.nodeType;
 
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
@@ -1005,12 +1007,12 @@ var lighterhtml = (function (document,exports) {
   var OWNER_SVG_ELEMENT = 'ownerSVGElement'; // returns nodes from wires and components
 
   var asNode = function asNode(item, i) {
-    return item.constructor === Wire ? 1 / i < 0 ? i ? item.remove(true) : item.lastChild : i ? item.valueOf(true) : item.firstChild : item;
+    return item.nodeType === wireType ? 1 / i < 0 ? i ? item.remove(true) : item.lastChild : i ? item.valueOf(true) : item.firstChild : item;
   }; // returns true if domdiff can handle the value
 
 
   var canDiff = function canDiff(value) {
-    return value.constructor === Wire || 'ELEMENT_NODE' in value;
+    return 'ELEMENT_NODE' in value;
   }; // generic attributes helpers
 
 
@@ -1244,56 +1246,36 @@ var lighterhtml = (function (document,exports) {
   };
 
   var wm = new WeakMap();
+  var templateType = 0;
   var current = null;
   function render(node, callback) {
     var prev = current;
-    current = wm.get(node) || set$1(node); // TODO: perf measurement about guarding this via try/catch/finally
+    current = wm.get(node) || set$1(node);
+    current.i = 0; // TODO: perf measurement about guarding this
 
     var result = callback();
 
-    switch (result.constructor) {
-      case Template:
-        var template = result._[0];
-        var diff = current.template !== template;
-        if (diff && current.template) current.stack.splice(0);
-        current.i = 0;
+    if (result.nodeType === templateType) {
+      var template = result._[0];
+      var content = result.valueOf(true);
 
-        if (diff) {
-          current.template = template;
-          appendChild(node, result.valueOf(true));
-        }
+      if (current.template !== template) {
+        if (current.template) current.stack.splice(0);
+        current.i = 0; // TODO: perf measurement about guarding this
 
-        break;
-
-      case Wire:
-        if (node.firstChild !== result.firstChild) appendChild(node, result.valueOf(true));
-        break;
-
-      default:
-        appendChild(node, result);
-        break;
-    }
+        appendClean(node, content);
+        current.template = template;
+      }
+    } else appendClean(node, result.valueOf(true));
 
     current = prev;
     return node;
   }
   var html = outer$1('html');
-  var svg = outer$1('svg'); // the Template class
+  var svg = outer$1('svg');
 
-  function Template($, _) {
-    this.$ = $;
-    this._ = _;
-  }
-
-  var TP = Template.prototype; // used to avoid bad checks round
-
-  TP.nodeType = 0; // used to force rended into wire/node
-
-  TP.valueOf = function () {
-    return unroll(this);
-  };
-
-  function appendChild(node, fragment) {
+  function appendClean(node, fragment) {
+    current.template = null;
     node.textContent = '';
     node.appendChild(fragment);
   }
@@ -1356,7 +1338,7 @@ var lighterhtml = (function (document,exports) {
 
   function unrollDeep(value, i, array) {
     if (value) {
-      if (value.constructor === Template) array[i] = unroll(value);else if (isArray(value)) value.forEach(unrollDeep);
+      if (value.nodeType === 0) array[i] = unroll(value);else if (isArray(value)) value.forEach(unrollDeep);
     }
   }
 
@@ -1365,6 +1347,18 @@ var lighterhtml = (function (document,exports) {
     var length = childNodes.length;
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   }
+
+  function Template($, _) {
+    this.$ = $;
+    this._ = _;
+  }
+
+  var TP = Template.prototype;
+  TP.nodeType = templateType;
+
+  TP.valueOf = function () {
+    return unroll(this);
+  };
 
   exports.render = render;
   exports.html = html;

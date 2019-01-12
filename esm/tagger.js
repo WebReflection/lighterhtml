@@ -3,12 +3,12 @@ import domdiff from 'domdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
 
-import {Wire, isArray} from './shared.js';
+import {wireType, isArray} from './shared.js';
 
 const OWNER_SVG_ELEMENT = 'ownerSVGElement';
 
 // returns nodes from wires and components
-const asNode = (item, i) => item.constructor === Wire ?
+const asNode = (item, i) => item.nodeType === wireType ?
   (
     (1 / i) < 0 ?
       (i ? item.remove(true) : item.lastChild) :
@@ -18,7 +18,7 @@ const asNode = (item, i) => item.constructor === Wire ?
 ;
 
 // returns true if domdiff can handle the value
-const canDiff = value => value.constructor === Wire || 'ELEMENT_NODE' in value;
+const canDiff = value => 'ELEMENT_NODE' in value;
 
 // generic attributes helpers
 const hyperAttribute = (node, attribute) => {

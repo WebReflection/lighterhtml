@@ -3,36 +3,32 @@ import {Wire, isArray} from './shared.js';
 import Tagger from './tagger.js';
 
 const wm = new WeakMap;
+const templateType = 0;
 
 let current = null;
 
 export function render(node, callback) {
   const prev = current;
   current = wm.get(node) || set(node);
+  current.i = 0;
 
-  // TODO: perf measurement about guarding this via try/catch/finally
+  // TODO: perf measurement about guarding this
   const result = callback();
 
-  switch (result.constructor) {
-    case Template:
-      const template = result._[0];
-      const diff = current.template !== template;
-      if (diff && current.template)
+  if (result.nodeType === templateType) {
+    const template = result._[0];
+    const content = result.valueOf(true);
+    if (current.template !== template) {
+      if (current.template)
         current.stack.splice(0);
       current.i = 0;
-      if (diff) {
-        current.template = template;
-        appendChild(node, result.valueOf(true));
-      }
-      break;
-    case Wire:
-      if (node.firstChild !== result.firstChild)
-        appendChild(node, result.valueOf(true));
-      break;
-    default:
-      appendChild(node, result);
-      break;
+      // TODO: perf measurement about guarding this
+      appendClean(node, content);
+      current.template = template;
+    }
   }
+  else
+    appendClean(node, result.valueOf(true));
 
   current = prev;
   return node;
@@ -41,23 +37,8 @@ export function render(node, callback) {
 export const html = outer('html');
 export const svg = outer('svg');
 
-// the Template class
-function Template($, _) {
-  this.$ = $;
-  this._ = _;
-}
-
-const TP = Template.prototype;
-
-// used to avoid bad checks round
-TP.nodeType = 0;
-
-// used to force rended into wire/node
-TP.valueOf = function () {
-  return unroll(this);
-};
-
-function appendChild(node, fragment) {
+function appendClean(node, fragment) {
+  current.template = null;
   node.textContent = '';
   node.appendChild(fragment);
 }
@@ -103,7 +84,7 @@ function unroll(template) {
 
 function unrollDeep(value, i, array) {
   if (value) {
-    if (value.constructor === Template)
+    if (value.nodeType === 0)
       array[i] = unroll(value);
     else if (isArray(value))
       value.forEach(unrollDeep);
@@ -117,3 +98,14 @@ function wireContent(node) {
     childNodes[0] :
     (length ? new Wire(childNodes) : node);
 }
+
+function Template($, _) {
+  this.$ = $;
+  this._ = _;
+}
+
+const TP = Template.prototype;
+TP.nodeType = templateType;
+TP.valueOf = function () {
+  return unroll(this);
+};
