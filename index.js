@@ -1257,7 +1257,7 @@ var lighterhtml = (function (document,exports) {
 
     if (result.nodeType === templateType) {
       var template = result._[0];
-      var content = result.valueOf(true);
+      var content = unroll(result);
 
       if (current.template !== template) {
         if (current.template) current.stack.splice(0);
@@ -1349,6 +1349,7 @@ var lighterhtml = (function (document,exports) {
   }
 
   function Template($, _) {
+    this.C = current;
     this.$ = $;
     this._ = _;
   }
@@ -1357,7 +1358,12 @@ var lighterhtml = (function (document,exports) {
   TP.nodeType = templateType;
 
   TP.valueOf = function () {
-    return unroll(this);
+    var prev = current;
+    current = this.C;
+    current.i = 0;
+    var result = unroll(this);
+    current = prev;
+    return result;
   };
 
   exports.render = render;

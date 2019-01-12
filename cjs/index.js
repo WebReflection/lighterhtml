@@ -18,7 +18,7 @@ function render(node, callback) {
 
   if (result.nodeType === templateType) {
     const template = result._[0];
-    const content = result.valueOf(true);
+    const content = unroll(result);
     if (current.template !== template) {
       if (current.template)
         current.stack.splice(0);
@@ -104,6 +104,7 @@ function wireContent(node) {
 }
 
 function Template($, _) {
+  this.C = current;
   this.$ = $;
   this._ = _;
 }
@@ -111,5 +112,10 @@ function Template($, _) {
 const TP = Template.prototype;
 TP.nodeType = templateType;
 TP.valueOf = function () {
-  return unroll(this);
+  const prev = current;
+  current = this.C;
+  current.i = 0;
+  const result = unroll(this);
+  current = prev;
+  return result;
 };
