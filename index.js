@@ -1248,16 +1248,18 @@ var lighterhtml = (function (document,exports) {
   var wm = new WeakMap();
   var templateType = 0;
   var current = null;
-  function hook(reference, callback) {
-    var ret = {
-      reference: reference,
-      content: null
-    };
+  function render(node, callback) {
+    var content = update(node, callback);
+    if (content !== null) appendClean(node, content);
+    return node;
+  }
+  function update(reference, callback) {
     var prev = current;
     current = wm.get(reference) || set$1(reference);
     current.i = 0; // TODO: perf measurement about guarding this
 
     var result = callback();
+    var ret = null;
 
     if (result.nodeType === templateType) {
       var template = result._[0]; // TODO: perf measurement about guarding this
@@ -1265,30 +1267,21 @@ var lighterhtml = (function (document,exports) {
       var content = unroll(result);
 
       if (current.template !== template) {
-        if (current.template) current.stack.splice(0);
-        current.i = 0;
-        current.template = template;
-        ret.content = asNode$1(content);
-        appendClean(reference, asNode$1(content));
+        setTemplate(template);
+        ret = asNode$1(content);
       }
-    } else ret.content = asNode$1(result);
+    } else {
+      setTemplate(null);
+      ret = asNode$1(result);
+    }
 
     current = prev;
     return ret;
-  }
-  function render(node, callback) {
-    var _hook = hook(node, callback),
-        reference = _hook.reference,
-        content = _hook.content;
-
-    if (content !== null) appendClean(reference, content);
-    return reference;
   }
   var html = outer$1('html');
   var svg = outer$1('svg');
 
   function appendClean(node, fragment) {
-    current.template = null;
     node.textContent = '';
     node.appendChild(fragment);
   }
@@ -1341,6 +1334,11 @@ var lighterhtml = (function (document,exports) {
     return info;
   }
 
+  function setTemplate(template) {
+    if (current.template) current.stack.splice(0);
+    current.template = template;
+  }
+
   function unroll(template) {
     var $ = template.$,
         _ = template._;
@@ -1377,8 +1375,8 @@ var lighterhtml = (function (document,exports) {
     return unroll(this);
   };
 
-  exports.hook = hook;
   exports.render = render;
+  exports.update = update;
   exports.html = html;
   exports.svg = svg;
 

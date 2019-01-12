@@ -7,8 +7,14 @@ const templateType = 0;
 
 let current = null;
 
-export function hook(reference, callback) {
-  const ret = {reference, content: null};
+export function render(node, callback) {
+  const content = update(node, callback);
+  if (content !== null)
+    appendClean(node, content);
+  return node;
+}
+
+export function update(reference, callback) {
   const prev = current;
   current = wm.get(reference) || set(reference);
   current.i = 0;
@@ -16,38 +22,29 @@ export function hook(reference, callback) {
   // TODO: perf measurement about guarding this
   const result = callback();
 
+  let ret = null;
   if (result.nodeType === templateType) {
     const template = result._[0];
     // TODO: perf measurement about guarding this
     const content = unroll(result);
     if (current.template !== template) {
-      if (current.template)
-        current.stack.splice(0);
-      current.i = 0;
-      current.template = template;
-      ret.content = asNode(content);
-      appendClean(reference, asNode(content));
+      setTemplate(template);
+      ret = asNode(content);
     }
   }
-  else
-    ret.content = asNode(result);
+  else {
+    setTemplate(null);
+    ret = asNode(result);
+  }
 
   current = prev;
   return ret;
-}
-
-export function render(node, callback) {
-  const {reference, content} = hook(node, callback);
-  if (content !== null)
-    appendClean(reference, content);
-  return reference;
 }
 
 export const html = outer('html');
 export const svg = outer('svg');
 
 function appendClean(node, fragment) {
-  current.template = null;
   node.textContent = '';
   node.appendChild(fragment);
 }
@@ -85,6 +82,12 @@ function set(node) {
   const info = {i: 0, stack: [], template: null};
   wm.set(node, info);
   return info;
+}
+
+function setTemplate(template) {
+  if (current.template)
+    current.stack.splice(0);
+  current.template = template;
 }
 
 function unroll(template) {
