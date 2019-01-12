@@ -1,10 +1,10 @@
 'use strict';
-const Wire = (m => m.__esModule ? m.default : m)(require('hyperhtml-wire'));
-
 const createContent = (m => m.__esModule ? m.default : m)(require('@ungap/create-content'));
 const domdiff = (m => m.__esModule ? m.default : m)(require('domdiff'));
 const domtagger = (m => m.__esModule ? m.default : m)(require('domtagger'));
 const hyperStyle = (m => m.__esModule ? m.default : m)(require('hyperhtml-style'));
+
+const {Wire, isArray} = require('./shared.js');
 
 const OWNER_SVG_ELEMENT = 'ownerSVGElement';
 
@@ -79,9 +79,6 @@ const hyperProperty = (node, name) => {
     }
   };
 };
-
-// checks inside any content
-const {isArray} = Array;
 
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;

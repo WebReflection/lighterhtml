@@ -1,9 +1,6 @@
-import Wire from 'hyperhtml-wire';
 import tta from '@ungap/template-tag-arguments';
-
+import {Wire, isArray} from './shared.js';
 import Tagger from './tagger.js';
-
-const {isArray} = Array;
 
 const wm = new WeakMap;
 
@@ -16,27 +13,25 @@ export function render(node, callback) {
   // TODO: perf measurement about guarding this via try/catch/finally
   const result = callback();
 
-  if (result.constructor === Template) {
-    const template = result._[0];
-    const diff = current.template !== template;
-    if (diff && current.template)
-      current.stack.splice(0);
-    current.i = 0;
-    const dom = result.valueOf();
-    if (diff) {
-      current.template = template;
-      node.textContent = '';
-      node.appendChild(dom.valueOf(true));
-    }
-  }
-  else {
-    const {nodeType} = result;
-    if (nodeType === 1 && node.firstChild !== result) {
-      node.textContent = '';
-      node.appendChild(result);
-    }
-    else
-      node.appendChild(result.valueOf());
+  switch (result.constructor) {
+    case Template:
+      const template = result._[0];
+      const diff = current.template !== template;
+      if (diff && current.template)
+        current.stack.splice(0);
+      current.i = 0;
+      if (diff) {
+        current.template = template;
+        appendChild(node, result.valueOf(true));
+      }
+      break;
+    case Wire:
+      if (node.firstChild !== result.firstChild)
+        appendChild(node, result.valueOf(true));
+      break;
+    default:
+      appendChild(node, result);
+      break;
   }
 
   current = prev;
@@ -61,6 +56,11 @@ TP.nodeType = 0;
 TP.valueOf = function () {
   return unroll(this);
 };
+
+function appendChild(node, fragment) {
+  node.textContent = '';
+  node.appendChild(fragment);
+}
 
 function getWire(type, args) {
   const {i, stack} = current;

@@ -6,9 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>lighterHTML</title>
   <script src="../index.js"></script>
-  <script>
-  const {render, html, svg} = lighterhtml;
-  </script>
 </head>
-<body></body>
+<body>
+    <script async>
+      const {render, html, svg} = lighterhtml;
+      function repeater(i) {
+        render(document.body, () => html`<div>Hello ${
+          [
+            html`[${i}] first <strong>world</strong> [${i}]`,
+            html`[${i}] second <strong>world</strong> [${i}]`
+          ]
+        }!</div>`);
+      }
+      var i = 0; setInterval(() => repeater(++i), 1000);
+      </script>
+</body>
 </html>

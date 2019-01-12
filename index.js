@@ -1,54 +1,6 @@
 var lighterhtml = (function (document,exports) {
   'use strict';
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var Wire = function (slice, proto) {
-    proto = Wire.prototype;
-    proto.nodeType = 11;
-
-    proto.remove = function (keepFirst) {
-      var childNodes = this.childNodes;
-      var first = this.firstChild;
-      var last = this.lastChild;
-      this._ = null;
-
-      if (keepFirst && childNodes.length === 2) {
-        last.parentNode.removeChild(last);
-      } else {
-        var range = this.ownerDocument.createRange();
-        range.setStartBefore(keepFirst ? childNodes[1] : first);
-        range.setEndAfter(last);
-        range.deleteContents();
-      }
-
-      return first;
-    };
-
-    proto.valueOf = function (forceAppend) {
-      var fragment = this._;
-      var noFragment = fragment == null;
-      if (noFragment) fragment = this._ = this.ownerDocument.createDocumentFragment();
-
-      if (noFragment || forceAppend) {
-        for (var n = this.childNodes, i = 0, l = n.length; i < l; i++) {
-          fragment.appendChild(n[i]);
-        }
-      }
-
-      return fragment;
-    };
-
-    return Wire;
-
-    function Wire(childNodes) {
-      var nodes = this.childNodes = slice.call(childNodes, 0);
-      this.firstChild = nodes[0];
-      this.lastChild = nodes[nodes.length - 1];
-      this.ownerDocument = nodes[0].ownerDocument;
-      this._ = null;
-    }
-  }([].slice);
-
   
 
   /*! (c) Andrea Giammarchi - ISC */
@@ -97,6 +49,56 @@ var lighterhtml = (function (document,exports) {
 
     return args;
   }
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var Wire = function (slice, proto) {
+    proto = Wire.prototype;
+    proto.nodeType = 11;
+
+    proto.remove = function (keepFirst) {
+      var childNodes = this.childNodes;
+      var first = this.firstChild;
+      var last = this.lastChild;
+      this._ = null;
+
+      if (keepFirst && childNodes.length === 2) {
+        last.parentNode.removeChild(last);
+      } else {
+        var range = this.ownerDocument.createRange();
+        range.setStartBefore(keepFirst ? childNodes[1] : first);
+        range.setEndAfter(last);
+        range.deleteContents();
+      }
+
+      return first;
+    };
+
+    proto.valueOf = function (forceAppend) {
+      var fragment = this._;
+      var noFragment = fragment == null;
+      if (noFragment) fragment = this._ = this.ownerDocument.createDocumentFragment();
+
+      if (noFragment || forceAppend) {
+        for (var n = this.childNodes, i = 0, l = n.length; i < l; i++) {
+          fragment.appendChild(n[i]);
+        }
+      }
+
+      return fragment;
+    };
+
+    return Wire;
+
+    function Wire(childNodes) {
+      var nodes = this.childNodes = slice.call(childNodes, 0);
+      this.firstChild = nodes[0];
+      this.lastChild = nodes[nodes.length - 1];
+      this.ownerDocument = nodes[0].ownerDocument;
+      this._ = null;
+    }
+  }([].slice);
+
+  var isArray = Array.isArray;
 
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
@@ -1070,10 +1072,8 @@ var lighterhtml = (function (document,exports) {
         }
       }
     };
-  }; // checks inside any content
+  }; // list of attributes that should not be directly assigned
 
-
-  var isArray = Array.isArray; // list of attributes that should not be directly assigned
 
   var readOnly = /^(?:form|list)$/i; // reused every slice time
 
@@ -1243,7 +1243,6 @@ var lighterhtml = (function (document,exports) {
     }
   };
 
-  var isArray$1 = Array.isArray;
   var wm = new WeakMap();
   var current = null;
   function render(node, callback) {
@@ -1252,25 +1251,27 @@ var lighterhtml = (function (document,exports) {
 
     var result = callback();
 
-    if (result.constructor === Template) {
-      var template = result._[0];
-      var diff = current.template !== template;
-      if (diff && current.template) current.stack.splice(0);
-      current.i = 0;
-      var dom = result.valueOf();
+    switch (result.constructor) {
+      case Template:
+        var template = result._[0];
+        var diff = current.template !== template;
+        if (diff && current.template) current.stack.splice(0);
+        current.i = 0;
 
-      if (diff) {
-        current.template = template;
-        node.textContent = '';
-        node.appendChild(dom.valueOf(true));
-      }
-    } else {
-      var nodeType = result.nodeType;
+        if (diff) {
+          current.template = template;
+          appendChild(node, result.valueOf(true));
+        }
 
-      if (nodeType === 1 && node.firstChild !== result) {
-        node.textContent = '';
-        node.appendChild(result);
-      } else node.appendChild(result.valueOf());
+        break;
+
+      case Wire:
+        if (node.firstChild !== result.firstChild) appendChild(node, result.valueOf(true));
+        break;
+
+      default:
+        appendChild(node, result);
+        break;
     }
 
     current = prev;
@@ -1291,6 +1292,11 @@ var lighterhtml = (function (document,exports) {
   TP.valueOf = function () {
     return unroll(this);
   };
+
+  function appendChild(node, fragment) {
+    node.textContent = '';
+    node.appendChild(fragment);
+  }
 
   function getWire(type, args) {
     var _current = current,
@@ -1350,7 +1356,7 @@ var lighterhtml = (function (document,exports) {
 
   function unrollDeep(value, i, array) {
     if (value) {
-      if (value.constructor === Template) array[i] = unroll(value);else if (isArray$1(value)) value.forEach(unrollDeep);
+      if (value.constructor === Template) array[i] = unroll(value);else if (isArray(value)) value.forEach(unrollDeep);
     }
   }
 

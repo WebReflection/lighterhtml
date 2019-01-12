@@ -1,9 +1,9 @@
-import Wire from 'hyperhtml-wire';
-
 import createContent from '@ungap/create-content';
 import domdiff from 'domdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
+
+import {Wire, isArray} from './shared.js';
 
 const OWNER_SVG_ELEMENT = 'ownerSVGElement';
 
@@ -78,9 +78,6 @@ const hyperProperty = (node, name) => {
     }
   };
 };
-
-// checks inside any content
-const {isArray} = Array;
 
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
