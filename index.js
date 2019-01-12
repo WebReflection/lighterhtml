@@ -1252,8 +1252,8 @@ var lighterhtml = (function (document,exports) {
 
   var hook = function hook(useRef) {
     return {
-      html: craeteHook(useRef, html),
-      svg: craeteHook(useRef, svg)
+      html: createHook(useRef, html),
+      svg: createHook(useRef, svg)
     };
   }; // generic render
 
@@ -1274,7 +1274,7 @@ var lighterhtml = (function (document,exports) {
     return result.nodeType === wireType ? result.valueOf(true) : result;
   }
 
-  function craeteHook(useRef, view) {
+  function createHook(useRef, view) {
     return function () {
       var ref = useRef(null);
       if (ref.current === null) ref.current = content.bind(ref);
