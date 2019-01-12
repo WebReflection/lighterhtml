@@ -1,6 +1,6 @@
 {
   "name": "lighterhtml",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "coming soon",
   "main": "cjs/index.js",
   "module": "esm/index.js",
