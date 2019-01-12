@@ -1256,13 +1256,13 @@ var lighterhtml = (function (document,exports) {
     var result = callback();
 
     if (result.nodeType === templateType) {
-      var template = result._[0];
+      var template = result._[0]; // TODO: perf measurement about guarding this
+
       var content = unroll(result);
 
       if (current.template !== template) {
         if (current.template) current.stack.splice(0);
-        current.i = 0; // TODO: perf measurement about guarding this
-
+        current.i = 0;
         appendClean(node, content);
         current.template = template;
       }
@@ -1360,7 +1360,8 @@ var lighterhtml = (function (document,exports) {
   TP.valueOf = function () {
     var prev = current;
     current = this.C;
-    current.i = 0;
+    current.i = 0; // TODO: perf measurement about guarding this
+
     var result = unroll(this);
     current = prev;
     return result;

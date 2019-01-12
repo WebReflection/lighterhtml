@@ -18,12 +18,12 @@ function render(node, callback) {
 
   if (result.nodeType === templateType) {
     const template = result._[0];
+    // TODO: perf measurement about guarding this
     const content = unroll(result);
     if (current.template !== template) {
       if (current.template)
         current.stack.splice(0);
       current.i = 0;
-      // TODO: perf measurement about guarding this
       appendClean(node, content);
       current.template = template;
     }
@@ -115,6 +115,7 @@ TP.valueOf = function () {
   const prev = current;
   current = this.C;
   current.i = 0;
+  // TODO: perf measurement about guarding this
   const result = unroll(this);
   current = prev;
   return result;
