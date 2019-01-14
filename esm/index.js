@@ -10,11 +10,11 @@ let current = null;
 // can be used with any useRef hook
 // returns an `html` and `svg` function
 export const hook = useRef => ({
-  html: craeteHook(useRef, html),
-  svg: craeteHook(useRef, svg)
+  html: createHook(useRef, html),
+  svg: createHook(useRef, svg)
 });
 
-// generic render
+// generic content render
 export function render(node, callback) {
   const content = update(node, callback);
   if (content !== null)
@@ -22,8 +22,12 @@ export function render(node, callback) {
   return node;
 }
 
+// keyed render via render(node, () => html`...`)
+// non keyed renders in the wild via html`...`
 export const html = outer('html');
 export const svg = outer('svg');
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 function appendClean(node, fragment) {
   node.textContent = '';
@@ -34,15 +38,13 @@ function asNode(result) {
   return result.nodeType === wireType ? result.valueOf(true) : result;
 }
 
-function craeteHook(useRef, view) {
-
+function createHook(useRef, view) {
   return function () {
     const ref = useRef(null);
     if (ref.current === null)
       ref.current = content.bind(ref);
     return ref.current.apply(null, arguments);
   };
-
   function content() {
     const args = [];
     for (let i = 0, {length} = arguments; i < length; i++)
@@ -55,20 +57,19 @@ function craeteHook(useRef, view) {
 }
 
 function getWire(type, args) {
-  const {i, stack} = current;
+  const {i, length, stack} = current;
   current.i++;
-  // TODO:  a conditional SVG instead of HTML will cause
-  //        surely problems, even if extremely edge case.
-  //        Remember to explain this is a current caveat.
-  if (i === stack.length) {
-    const tagger = new Tagger(type);
-    const wire = wireContent(tagger.apply(null, args));
-    stack.push({tagger, wire});
-    return wire;
-  } else {
+  if (i < length) {
     const {tagger, wire} = stack[i];
-    tagger.apply(null, args);
+    tagger.apply(null, unrollArray(args, 1));
     return wire;
+  }
+  else {
+    const tagger = new Tagger(type);
+    const stacked = {tagger, wire: null};
+    current.length = stack.push(stacked);
+    stacked.wire = wireContent(tagger.apply(null, unrollArray(args, 1)));
+    return stacked.wire;
   }
 }
 
@@ -80,15 +81,35 @@ function outer(type) {
 }
 
 function set(node) {
-  const info = {i: 0, stack: [], template: null};
+  const info = {i: 0, length: 0, stack: [], template: null};
   wm.set(node, info);
   return info;
 }
 
 function setTemplate(template) {
-  if (current.template)
+  if (current.template) {
+    current.length = 0;
     current.stack.splice(0);
+  }
   current.template = template;
+}
+
+function unroll(template) {
+  const {$, _} = template;
+  return getWire($, _);
+}
+
+function unrollArray(array, i) {
+  for (let i = 0, {length} = array; i < length; i++) {
+    const value = array[i];
+    if (value) {
+      if (value.nodeType === 0)
+        array[i] = unroll(value);
+      else if (isArray(value))
+        array[i] = unrollArray(value, 0);
+    }
+  }
+  return array;
 }
 
 function update(reference, callback) {
@@ -102,8 +123,15 @@ function update(reference, callback) {
   let ret = null;
   if (result.nodeType === templateType) {
     const template = result._[0];
+
     // TODO: perf measurement about guarding this
     const content = unroll(result);
+
+    const {i} = current;
+    if (i < current.length) {
+      current.length = i;
+      current.stack.splice(i);
+    }
     if (current.template !== template) {
       setTemplate(template);
       ret = asNode(content);
@@ -116,23 +144,6 @@ function update(reference, callback) {
 
   current = prev;
   return ret;
-}
-
-function unroll(template) {
-  const {$, _} = template;
-  const {length} = _;
-  for (let i = 1; i < length; i++)
-    unrollDeep(_[i], i, _);
-  return getWire($, _);
-}
-
-function unrollDeep(value, i, array) {
-  if (value) {
-    if (value.nodeType === 0)
-      array[i] = unroll(value);
-    else if (isArray(value))
-      value.forEach(unrollDeep);
-  }
 }
 
 function wireContent(node) {
@@ -151,5 +162,8 @@ function Template($, _) {
 const TP = Template.prototype;
 TP.nodeType = templateType;
 TP.valueOf = function () {
+
+  // TODO: perf measurement about guarding this
   return unroll(this);
+
 };
