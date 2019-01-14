@@ -28,7 +28,7 @@ In _lit-html_, the `html` function tag is worthless, if used without its `render
 
 In _lighterhtml_ though, the `html` tag can be used in the wild to create any, one-off, real DOM.
 
-Strawberry on top, when used through its `render`, it automatically creates all the keyed performance you'd expect from _hyperHTML_ wires, without needing to manually address any reference: pain point 100% gone 🍾
+Strawberry on top, when used through its `render`, it automatically creates all the keyed performance you'd expect from _hyperHTML_ wires, without needing to manually address any reference: pain point defeated 🍾
 
 "_but ... how?_", if you're asking, the answer is simple: _lighterhtml_ is based on the same [augmentor](https://github.com/WebReflection/augmentor#augmentor)'s hooks concept, followed by automatically addressed [hyperhtml-wire](https://github.com/WebReflection/hyperhtml-wire#hyperhtml-wire)s, which in turns brings a battle tested solution for the [O(ND) Eugene W. Myers' Algorithm](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.4.6927&rep=rep1&type=pdf) based [domdiff](https://github.com/WebReflection/domdiff#domdiff), and its extra variations.
 
