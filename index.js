@@ -1324,10 +1324,16 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
-  function outer$1(type) {
+  function outer$1($) {
     return function () {
-      var $ = tta.apply(null, arguments);
-      return current ? new Template(type, $) : new Tagger(type).apply(null, $);
+      var _ = tta.apply(null, arguments);
+
+      return current ? {
+        nodeType: 0,
+        valueOf: valueOf,
+        $: $,
+        _: _
+      } : new Tagger(type).apply(null, _);
     };
   }
 
@@ -1407,19 +1413,6 @@ var lighterhtml = (function (document,exports) {
     var length = childNodes.length;
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   }
-
-  function Template($, _) {
-    this.$ = $;
-    this._ = _;
-  }
-
-  var TP = Template.prototype;
-  TP.nodeType = templateType;
-
-  TP.valueOf = function () {
-    // TODO: perf measurement about guarding this
-    return unroll(this);
-  };
 
   exports.hook = hook;
   exports.render = render;

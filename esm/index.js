@@ -73,10 +73,12 @@ function getWire(type, args) {
   }
 }
 
-function outer(type) {
+function outer($) {
   return function () {
-    const $ = tta.apply(null, arguments);
-    return current ? new Template(type, $) : new Tagger(type).apply(null, $);
+    const _ = tta.apply(null, arguments);
+    return current ?
+      {nodeType: 0, valueOf, $, _} :
+      new Tagger(type).apply(null, _);
   };
 }
 
@@ -153,17 +155,3 @@ function wireContent(node) {
     childNodes[0] :
     (length ? new Wire(childNodes) : node);
 }
-
-function Template($, _) {
-  this.$ = $;
-  this._ = _;
-}
-
-const TP = Template.prototype;
-TP.nodeType = templateType;
-TP.valueOf = function () {
-
-  // TODO: perf measurement about guarding this
-  return unroll(this);
-
-};
