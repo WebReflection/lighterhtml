@@ -8,7 +8,7 @@ The _hyperHTML_ strength without its complexity 🎉
   * simpler than [lit-html](https://github.com/polymer/lit-html)
 
 
-#### faster than hyperHTML
+### faster than hyperHTML
 
 Even if sharing 90% of _hyperHTML_'s code, this utility removed all the not strictly necessary parts from it, including:
 
@@ -22,7 +22,7 @@ Accordingly, _lighterhtml_ delivers raw [domdiff](https://github.com/WebReflecti
 If you don't believe itm, check the [DBMonster](https://webreflection.github.io/lighterhtml/test/dbmonster.html) benchmark 😉
 
 
-#### simpler than lit-html
+### simpler than lit-html
 
 In _lit-html_, the `html` function tag is worthless, if used without its `render`.
 
