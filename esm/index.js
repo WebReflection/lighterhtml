@@ -78,7 +78,7 @@ function outer($) {
     const _ = tta.apply(null, arguments);
     return current ?
       {nodeType: 0, valueOf, $, _} :
-      new Tagger(type).apply(null, _);
+      new Tagger($).apply(null, _);
   };
 }
 

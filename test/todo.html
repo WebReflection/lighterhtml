@@ -10,30 +10,29 @@
   <script>
 const {render, html} = lighterhtml;
 
-const todo = (where, items) => render(where, () => html`
-  <ul>${items.map((text, i) => html`
-    <li>
-      <button
-        data-i=${i}
-        onclick=${event => {
-          const i = +event.currentTarget.dataset.i;
-          items.splice(i, 1);
-          todo(where, items);
-        }}>𝘅</button>
-      ${text}
-    </li>`)}
-  </ul>
-  <button onclick=${() => {
-    const value = prompt('what to do?').trim();
-    if (value) {
-      items.push(value);
-      todo(where, items);
-    }
-  }}> add </button>
-`);
+document.body.appendChild(
+  // as unkeyed one-off content, right away 🎉
+  html`<strong>any</strong> one-off content!<div/>`
+);
 
-todo(document.body, []);
-
+// as automatically rendered wired content 🤯
+todo(document.body.lastChild);
+function todo(node, items = []) {
+  render(node, () => html`
+  <ul>${items.map((what, i) => html`
+    <li data-i=${i} onclick=${remove}> ${what} </li>
+  `)}
+    <button onclick=${add}> add </button>
+  </uL>`);
+  function add() {
+    items.push(prompt('do'));
+    todo(node, items);
+  }
+  function remove(e) {
+    items.splice(e.currentTarget.dataset.i, 1);
+    todo(node, items);
+  }
+}
   </script>
 </body>
 </html>

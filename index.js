@@ -1333,7 +1333,7 @@ var lighterhtml = (function (document,exports) {
         valueOf: valueOf,
         $: $,
         _: _
-      } : new Tagger(type).apply(null, _);
+      } : new Tagger($).apply(null, _);
     };
   }
 
