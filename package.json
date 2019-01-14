@@ -1,7 +1,7 @@
 {
   "name": "lighterhtml",
   "version": "0.3.0",
-  "description": "coming soon",
+  "description": "The hyperHTML strength & experience without its complexity",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "unpkg": "min.js",
