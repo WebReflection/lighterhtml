@@ -6,6 +6,7 @@ The _hyperHTML_ strength & experience without its complexity 🎉
 
   * **faster** than [hyperHTML](https://github.com/WebReflection/hyperHTML)
   * **simpler** than [lit-html](https://github.com/polymer/lit-html)
+  * fueling the [neverland](https://github.com/WebReflection/neverland/#neverland-) magic 🦄
 
 
 ### faster than hyperHTML
