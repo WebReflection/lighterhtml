@@ -23,6 +23,11 @@ Accordingly, _lighterhtml_ delivers raw [domdiff](https://github.com/WebReflecti
 If you don't believe it, check the [DBMonster](https://webreflection.github.io/lighterhtml/test/dbmonster.html) benchmark 😉
 
 
+### Documentation
+
+Excluding the already mentioned removed parts, everything else within the template literal works as described in [hyperHTML documentation](https://viperhtml.js.org/hyperhtml/documentation/#essentials-3-1).
+
+
 ### simpler than lit-html
 
 In _lit-html_, the `html` function tag is worthless, if used without its `render`.
@@ -100,6 +105,53 @@ function todo(node, items = []) {
     todo(node, items);
   }
 }
+```
+
+
+### What about Custom Elements ?
+
+**[You got 'em](https://codepen.io/WebReflection/pen/MZxYVm?editors=0010)**, just bind `render` arguments once and update the element content whenever you feel like.
+
+Compatible with the node itself, or its shadow root, either opened or closed.
+
+```js
+const {render, html} = lighterhtml;
+
+customElements.define('my-ce', class extends HTMLElement {
+  constructor() {
+    super();
+    this.state = {yup: 0, nope: 0};
+    this.render = render.bind(
+      // used as update callback context
+      this,
+      // used as target node
+      // it could either be the node itself
+      // or its shadow root, even a closed one
+      this.attachShadow({mode: 'closed'}),
+      // the update callback
+      this.render
+    );
+    // first render
+    this.render();
+  }
+  render() {
+    const {yup, nope} = this.state;
+    return html`
+    Isn't this <strong>awesome</strong>?
+    <hr>
+    <button data-key=yup onclick=${this}>yup ${yup}</button>
+    <button data-key=nope onclick=${this}>nope ${nope}</button>`;
+  }
+  handleEvent(event) {
+    this[`on${event.type}`](event);
+  }
+  onclick(event) {
+    event.preventDefault();
+    const {key} = event.currentTarget.dataset;
+    this.state[key]++;
+    this.render();
+  }
+});
 ```
 
 
