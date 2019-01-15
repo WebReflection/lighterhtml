@@ -44,6 +44,18 @@ Following, the usual multi import pattern behind every project of mine:
   * via CJS module: `const {render, html, svg} = require('lighterhtml')`
 
 
+### What's the API ? What's in the export ?
+
+The module exports the following:
+
+  * `html` tag function, create as one-off any sort of html content, or wired content when used within a `render` call
+  * `svg` tag function, create as one-off any sort of SVG content, or wired content when used within a `render` call
+  * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
+  * `hook(useRef)` to provide hopoks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide keyed updated per each component
+
+You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
+
+
 ### A basic example
 
 Live on [Code Pen](https://codepen.io/WebReflection/pen/jXdBLV?editors=0010).
