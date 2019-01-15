@@ -27,9 +27,23 @@ If you don't believe it, check the [DBMonster](https://webreflection.github.io/l
 
 In _lit-html_, the `html` function tag is worthless, if used without its `render`.
 
-In _lighterhtml_ though, the `html` tag can be used in the wild to create any, one-off, real DOM.
+In _lighterhtml_ though, the `html` tag can be used in the wild to create any, one-off, real DOM, [as shown in this pen](https://codepen.io/WebReflection/pen/jXdJBR?editors=0010).
 
-Strawberry on top, when used through its `render`, it automatically creates all the keyed performance you'd expect from _hyperHTML_ wires, without needing to manually address any reference: pain point defeated 🍾
+```js
+// lighterhtml: import the `html` tag and use it right away
+import {html} from '//unpkg.com/lighterhtml?module';
+
+// a one off, safe, runtime list 👍
+const list = ['some', '<b>nasty</b>', 'list'];
+document.body.appendChild(html`
+  <ul>${list.map(text => html`
+    <li>${text}</li>
+  `)}
+  </ul>
+`);
+```
+
+Strawberry on top, when the `html` or `svg` tag is used through _lighterhtml_ `render`, it automatically creates all the keyed performance you'd expect from _hyperHTML_ wires, without needing to manually address any reference: pain point? defeated! 🍾
 
 "_but ... how?_", if you're asking, the answer is simple: _lighterhtml_ is based on the same [augmentor](https://github.com/WebReflection/augmentor#augmentor)'s hooks concept, followed by automatically addressed [hyperhtml-wire](https://github.com/WebReflection/hyperhtml-wire#hyperhtml-wire)s, which in turns brings a battle tested solution for the [O(ND) Eugene W. Myers' Algorithm](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.4.6927&rep=rep1&type=pdf) based [domdiff](https://github.com/WebReflection/domdiff#domdiff), and its extra variations.
 
@@ -51,7 +65,7 @@ The module exports the following:
   * `html` tag function, create as one-off any sort of html content, or wired content when used within a `render` call
   * `svg` tag function, create as one-off any sort of SVG content, or wired content when used within a `render` call
   * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
-  * `hook(useRef)` to provide hopoks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide keyed updated per each component
+  * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide keyed updated per each component
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 
@@ -61,7 +75,7 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
 Live on [Code Pen](https://codepen.io/WebReflection/pen/jXdBLV?editors=0010).
 
 ```js
-import {render, html} from 'https://unpkg.com/lighterhtml?module';
+import {render, html} from '//unpkg.com/lighterhtml?module';
 
 document.body.appendChild(
   // as unkeyed one-off content, right away 🎉
