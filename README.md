@@ -88,3 +88,17 @@ function todo(node, items = []) {
 }
 ```
 
+
+### Should I ditch hyperHTML ?
+
+Born [at the beginning of 2017](https://medium.com/@WebReflection/hyperhtml-a-virtual-dom-alternative-279db455ee0e), _hyperHTML_ matured so much that no crucial bugs have appeared for a very long time.
+
+It has also been used in production to deliver [HyperHTMLElement](https://github.com/WebReflection/hyperHTML-Element#hyperhtml-element) components to ~100M users, or to show [W3C specifications](https://github.com/w3c/respec), so that in case of bugs, _hyperHTML_ will most likely be on the fast lane for bugs fix, and _lighterhtml_ will eventually follow, whenever it's needed.
+
+On top of this, all modules used in _lighterhtml_ are part of _hyperHTML_ core, and the `./tagger.js` file is mostly a copy and paste of the _hyperHTML_ `./objects/Update.js` one.
+
+However, as tech and software evolve, I wanted to see if squashing together everything I know about template literals, thanks to _hyperHTML_ development, and everything I've recently learned about hooks, could've been merged together to deliver the easiest way ever to declare any non-virtual DOM view on the Web.
+
+And this is what _lighterhtml_ is about, an attempt to simplify to the extreme the `.bind(...)` and `.wire(...)` concept of _hyperHTML_, through a package that requires pretty much zero knowledge about those internals.
+
+_lighterhtml_ is also relatively new, so that some disabled functionality might come back, or slightly change, but if you like the idea, and you have tested it works for your project, feel free to ditch _hyperHTML_ in favor of _lighterhtml_, so that you can also help maturing this project.
