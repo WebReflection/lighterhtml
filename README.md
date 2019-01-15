@@ -23,11 +23,6 @@ Accordingly, _lighterhtml_ delivers raw [domdiff](https://github.com/WebReflecti
 If you don't believe it, check the [DBMonster](https://webreflection.github.io/lighterhtml/test/dbmonster.html) benchmark 😉
 
 
-### Documentation
-
-Excluding the already mentioned removed parts, everything else within the template literal works as described in [hyperHTML documentation](https://viperhtml.js.org/hyperhtml/documentation/#essentials-3-1).
-
-
 ### simpler than lit-html
 
 In _lit-html_, the `html` function tag is worthless, if used without its `render`.
@@ -73,6 +68,11 @@ The module exports the following:
   * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide keyed updated per each component
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
+
+
+### Documentation
+
+Excluding the already mentioned removed parts, everything else within the template literal works as described in [hyperHTML documentation](https://viperhtml.js.org/hyperhtml/documentation/#essentials-3-1).
 
 
 ### A basic example
