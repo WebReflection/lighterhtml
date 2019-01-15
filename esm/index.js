@@ -16,7 +16,7 @@ export const hook = useRef => ({
 
 // generic content render
 export function render(node, callback) {
-  const content = update(node, callback);
+  const content = update.call(this, node, callback);
   if (content !== null)
     appendClean(node, content);
   return node;
@@ -120,7 +120,7 @@ function update(reference, callback) {
   current.i = 0;
 
   // TODO: perf measurement about guarding this
-  const result = callback();
+  const result = callback.call(this);
 
   let ret = null;
   if (result.nodeType === templateType) {

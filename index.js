@@ -1258,7 +1258,7 @@ var lighterhtml = (function (document,exports) {
   }; // generic content render
 
   function render(node, callback) {
-    var content = update(node, callback);
+    var content = update.call(this, node, callback);
     if (content !== null) appendClean(node, content);
     return node;
   } // keyed render via render(node, () => html`...`)
@@ -1380,7 +1380,7 @@ var lighterhtml = (function (document,exports) {
     current = wm.get(reference) || set$1(reference);
     current.i = 0; // TODO: perf measurement about guarding this
 
-    var result = callback();
+    var result = callback.call(this);
     var ret = null;
 
     if (result.nodeType === templateType) {
