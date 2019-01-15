@@ -95,7 +95,7 @@ function todo(node, items = []) {
     <li data-i=${i} onclick=${remove}> ${what} </li>
   `)}
     <button onclick=${add}> add </button>
-  </uL>`);
+  </ul>`);
   function add() {
     items.push(prompt('do'));
     todo(node, items);
