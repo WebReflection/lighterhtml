@@ -93,7 +93,7 @@ function todo(node, items = []) {
 
 Born [at the beginning of 2017](https://medium.com/@WebReflection/hyperhtml-a-virtual-dom-alternative-279db455ee0e), _hyperHTML_ matured so much that no crucial bugs have appeared for a very long time.
 
-It has also been used in production to deliver [HyperHTMLElement](https://github.com/WebReflection/hyperHTML-Element#hyperhtml-element) components to ~100M users, or to show [W3C specifications](https://github.com/w3c/respec), so that in case of bugs, _hyperHTML_ will most likely be on the fast lane for bugs fix, and _lighterhtml_ will eventually follow, whenever it's needed.
+It has also been used in production to deliver [HyperHTMLElement](https://github.com/WebReflection/hyperHTML-Element#hyperhtml-element) components to ~100M users, or to show [W3C specifications](https://github.com/w3c/respec), so that in case of bugs, _hyperHTML_ will most likely be on the fast lane for bug fixes, and _lighterhtml_ will eventually follow, whenever it's needed.
 
 On top of this, all modules used in _lighterhtml_ are part of _hyperHTML_ core, and the [./tagger.js](https://github.com/WebReflection/lighterhtml/blob/master/esm/tagger.js) file is mostly a copy and paste of the _hyperHTML_ [./objects/Update.js](https://github.com/WebReflection/hyperHTML/blob/master/esm/objects/Updates.js) one.
 
