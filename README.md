@@ -70,6 +70,37 @@ The module exports the following:
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 
 
+### What's different from hyperHTML ?
+
+  * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If you'll pass `{set current(node) { ... }}` that'll be invoked per each update, in case you need the node outside `useRef`.
+  * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
+  * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates. Promises might be supported again in the future to align with isomorphic SSR, but right now these are not handled at all.
+  * the `onconnected` and `ondisconnected` special events are gone. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
+  * the `Component` can be easily replaced with hooks or automatic keyed renders
+
+```js
+const {render, html} = lighterhtml;
+
+// all it takes to have components with lighterhtml
+const Comp = (name) => html`<p>Hello ${name}!</p>`;
+
+// for demo purpose, check in console keyed updates
+// meaning you won't see a single change per second
+setInterval(
+  greetings,
+  1000,
+  [
+    'Arianna',
+    'Luca',
+    'Isa'
+  ]
+);
+
+function greetings(users) {
+  render(document.body, () => html`${users.map(Comp)}`);
+}
+```
+
 ### Documentation
 
 Excluding the already mentioned removed parts, everything else within the template literal works as described in [hyperHTML documentation](https://viperhtml.js.org/hyperhtml/documentation/#essentials-3-1).
