@@ -1,7 +1,7 @@
 'use strict';
-const tta = (m => m.__esModule ? m.default : m)(require('@ungap/template-tag-arguments'));
+const tta = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/template-tag-arguments'));
 const {Wire, wireType, isArray} = require('./shared.js');
-const Tagger = (m => m.__esModule ? m.default : m)(require('./tagger.js'));
+const Tagger = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('./tagger.js'));
 
 const wm = new WeakMap;
 const templateType = 0;

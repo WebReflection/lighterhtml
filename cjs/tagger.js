@@ -1,8 +1,8 @@
 'use strict';
-const createContent = (m => m.__esModule ? m.default : m)(require('@ungap/create-content'));
-const domdiff = (m => m.__esModule ? m.default : m)(require('domdiff'));
-const domtagger = (m => m.__esModule ? m.default : m)(require('domtagger'));
-const hyperStyle = (m => m.__esModule ? m.default : m)(require('hyperhtml-style'));
+const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/create-content'));
+const domdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domdiff'));
+const domtagger = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domtagger'));
+const hyperStyle = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('hyperhtml-style'));
 
 const {wireType, isArray} = require('./shared.js');
 
