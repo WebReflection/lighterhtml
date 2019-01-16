@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>lighterhtml hooks</title>
+  <script src="https://unpkg.com/augmentor"></script>
+  <script src="../index.js"></script>
+</head>
+<body>
+  <script>
+
+const { useRef } = augmentor;
+const { hook } = lighterhtml;
+const { html } = hook(useRef);
+
+var TextInputWithFocusButton = (function () {
+  return function () {
+    return augmentor(TextInputWithFocusButton).apply(this, arguments);
+  };
+  function TextInputWithFocusButton(value = '') {
+    const inputEl = useRef(null);
+    const onButtonClick = () => {
+      // `current` points to the mounted text input element
+      inputEl.current.focus();
+    };
+    return html`
+      <div>
+        <input ref=${inputEl} value=${value} />
+        <button onClick=${onButtonClick}>Focus the input</button>
+      </div>
+    `;
+  }
+}());
+
+document.body.appendChild(TextInputWithFocusButton(1));
+document.body.appendChild(TextInputWithFocusButton(2));
+
+  </script>
+</body>
+</html>

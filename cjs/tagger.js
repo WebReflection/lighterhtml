@@ -80,6 +80,13 @@ const hyperProperty = (node, name) => {
   };
 };
 
+// special hooks helpers
+const hyperRef = node => {
+  return ref => {
+    ref.current = node;
+  };
+};
+
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
 
@@ -107,10 +114,12 @@ Tagger.prototype = {
   attribute(node, name, original) {
     const isSVG = OWNER_SVG_ELEMENT in node;
     switch (true) {
-      case name === 'style':
-        return hyperStyle(node, original, isSVG);
       case /^on/.test(name):
         return hyperEvent(node, name);
+      case name === 'style':
+        return hyperStyle(node, original, isSVG);
+      case name === 'ref':
+        return hyperRef(node, original, isSVG);
       case /^(?:data|props)$/.test(name) ||
             (!isSVG && name in node && !readOnly.test(name)):
         return hyperProperty(node, name);

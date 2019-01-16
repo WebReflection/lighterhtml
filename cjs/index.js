@@ -61,23 +61,6 @@ function createHook(useRef, view) {
   }
 }
 
-function getWire(type, args) {
-  const {i, length, stack} = current;
-  current.i++;
-  if (i < length) {
-    const {tagger, wire} = stack[i];
-    tagger.apply(null, unrollArray(args, 1));
-    return wire;
-  }
-  else {
-    const tagger = new Tagger(type);
-    const stacked = {tagger, wire: null};
-    current.length = stack.push(stacked);
-    stacked.wire = wireContent(tagger.apply(null, unrollArray(args, 1)));
-    return stacked.wire;
-  }
-}
-
 function outer($) {
   return function () {
     const _ = tta.apply(null, arguments);
@@ -103,7 +86,20 @@ function setTemplate(template) {
 
 function unroll(template) {
   const {$, _} = template;
-  return getWire($, _);
+  const {i, length, stack} = current;
+  current.i++;
+  if (i < length) {
+    const {tagger, wire} = stack[i];
+    tagger.apply(null, unrollArray(_, 1));
+    return wire;
+  }
+  else {
+    const tagger = new Tagger($);
+    const stacked = {tagger, wire: null};
+    current.length = stack.push(stacked);
+    stacked.wire = wireContent(tagger.apply(null, unrollArray(_, 1)));
+    return stacked.wire;
+  }
 }
 
 function unrollArray(array, i) {

@@ -1074,6 +1074,13 @@ var lighterhtml = (function (document,exports) {
         }
       }
     };
+  }; // special hooks helpers
+
+
+  var hyperRef = function hyperRef(node) {
+    return function (ref) {
+      ref.current = node;
+    };
   }; // list of attributes that should not be directly assigned
 
 
@@ -1101,11 +1108,14 @@ var lighterhtml = (function (document,exports) {
       var isSVG = OWNER_SVG_ELEMENT in node;
 
       switch (true) {
+        case /^on/.test(name):
+          return hyperEvent(node, name);
+
         case name === 'style':
           return hyperStyle(node, original, isSVG);
 
-        case /^on/.test(name):
-          return hyperEvent(node, name);
+        case name === 'ref':
+          return hyperRef(node, original, isSVG);
 
         case /^(?:data|props)$/.test(name) || !isSVG && name in node && !readOnly.test(name):
           return hyperProperty(node, name);
@@ -1298,32 +1308,6 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
-  function getWire(type, args) {
-    var _current = current,
-        i = _current.i,
-        length = _current.length,
-        stack = _current.stack;
-    current.i++;
-
-    if (i < length) {
-      var _stack$i = stack[i],
-          tagger = _stack$i.tagger,
-          wire = _stack$i.wire;
-      tagger.apply(null, unrollArray(args, 1));
-      return wire;
-    } else {
-      var _tagger = new Tagger(type);
-
-      var stacked = {
-        tagger: _tagger,
-        wire: null
-      };
-      current.length = stack.push(stacked);
-      stacked.wire = wireContent(_tagger.apply(null, unrollArray(args, 1)));
-      return stacked.wire;
-    }
-  }
-
   function outer$1($) {
     return function () {
       var _ = tta.apply(null, arguments);
@@ -1360,7 +1344,29 @@ var lighterhtml = (function (document,exports) {
   function unroll(template) {
     var $ = template.$,
         _ = template._;
-    return getWire($, _);
+    var _current = current,
+        i = _current.i,
+        length = _current.length,
+        stack = _current.stack;
+    current.i++;
+
+    if (i < length) {
+      var _stack$i = stack[i],
+          tagger = _stack$i.tagger,
+          wire = _stack$i.wire;
+      tagger.apply(null, unrollArray(_, 1));
+      return wire;
+    } else {
+      var _tagger = new Tagger($);
+
+      var stacked = {
+        tagger: _tagger,
+        wire: null
+      };
+      current.length = stack.push(stacked);
+      stacked.wire = wireContent(_tagger.apply(null, unrollArray(_, 1)));
+      return stacked.wire;
+    }
   }
 
   function unrollArray(array, i) {
