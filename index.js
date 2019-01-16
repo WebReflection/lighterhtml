@@ -1108,7 +1108,7 @@ var lighterhtml = (function (document,exports) {
       var isSVG = OWNER_SVG_ELEMENT in node;
 
       switch (true) {
-        case /^on/.test(name):
+        case name.slice(0, 2) === 'on':
           return hyperEvent(node, name);
 
         case name === 'style':
@@ -1117,7 +1117,9 @@ var lighterhtml = (function (document,exports) {
         case name === 'ref':
           return hyperRef(node, original, isSVG);
 
-        case /^(?:data|props)$/.test(name) || !isSVG && name in node && !readOnly.test(name):
+        case name === 'data':
+        case name === 'props':
+        case !isSVG && name in node && !readOnly.test(name):
           return hyperProperty(node, name);
 
         default:
