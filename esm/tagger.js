@@ -194,7 +194,10 @@ Tagger.prototype = {
                 case 'string':
                 case 'number':
                 case 'boolean':
-                  anyContent({text: value});
+                  anyContent(String(value));
+                  break;
+                case 'function':
+                  anyContent(value.map(invoke, node));
                   break;
                 case 'object':
                   if (isArray(value[0])) {
@@ -274,3 +277,7 @@ Tagger.prototype = {
     return textContent;
   }
 };
+
+function invoke(callback) {
+  return callback(this);
+}
