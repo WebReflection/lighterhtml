@@ -76,6 +76,7 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
   * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates. Promises might be supported again in the future to align with isomorphic SSR, but right now these are not handled at all.
   * the `onconnected` and `ondisconnected` special events are gone. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
+  * an array of functions will be called automatically, like functions are already called when found in the wild
   * the `Component` can be easily replaced with hooks or automatic keyed renders
 
 ```js
