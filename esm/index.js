@@ -1,3 +1,4 @@
+import WeakMap from '@ungap/weakmap';
 import tta from '@ungap/template-tag-arguments';
 import {Wire, wireType, isArray} from './shared.js';
 import Tagger from './tagger.js';

@@ -35,11 +35,8 @@
   },
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
-    "@ungap/custom-event": "^0.2.0",
     "@ungap/template-tag-arguments": "^0.1.1",
     "@ungap/weakmap": "^0.1.4",
-    "@ungap/weakset": "^0.1.5",
-    "disconnected": "^0.1.6",
     "domdiff": "^2.0.3",
     "domtagger": "^0.2.3",
     "hyperhtml-style": "^0.1.2",

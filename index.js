@@ -1,6 +1,59 @@
 var lighterhtml = (function (document,exports) {
   'use strict';
 
+  /*! (c) Andrea Giammarchi - ISC */
+  var self = null ||
+  /* istanbul ignore next */
+  {};
+
+  try {
+    self.WeakMap = WeakMap;
+  } catch (WeakMap) {
+    // this could be better but 90% of the time
+    // it's everything developers need as fallback
+    self.WeakMap = function (id, Object) {
+
+      var dP = Object.defineProperty;
+      var hOP = Object.hasOwnProperty;
+      var proto = WeakMap.prototype;
+
+      proto.delete = function (key) {
+        return this.has(key) && delete key[this._];
+      };
+
+      proto.get = function (key) {
+        return this.has(key) ? key[this._] : void 0;
+      };
+
+      proto.has = function (key) {
+        return hOP.call(key, this._);
+      };
+
+      proto.set = function (key, value) {
+        dP(key, this._, {
+          configurable: true,
+          value: value
+        });
+        return this;
+      };
+
+      return WeakMap;
+
+      function WeakMap(iterable) {
+        dP(this, '_', {
+          value: '_@ungap/weakmap' + id++
+        });
+        if (iterable) iterable.forEach(add, this);
+      }
+
+      function add(pair) {
+        this.set(pair[0], pair[1]);
+      }
+    }(Math.random(), Object);
+  }
+
+  var WeakMap$1 = self.WeakMap;
+
   
 
   /*! (c) Andrea Giammarchi - ISC */
@@ -158,14 +211,14 @@ var lighterhtml = (function (document,exports) {
   }(document);
 
   /*! (c) Andrea Giammarchi - ISC */
-  var self = null ||
+  var self$1 = null ||
   /* istanbul ignore next */
   {};
 
   try {
-    self.Map = Map;
+    self$1.Map = Map;
   } catch (Map) {
-    self.Map = function Map() {
+    self$1.Map = function Map() {
       var i = 0;
       var k = [];
       var v = [];
@@ -199,7 +252,7 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
-  var Map$1 = self.Map;
+  var Map$1 = self$1.Map;
 
   var append = function append(get, parent, children, start, end, before) {
     if (end - start < 2) parent.insertBefore(get(children[start], 1), before);else {
@@ -572,59 +625,6 @@ var lighterhtml = (function (document,exports) {
     smartDiff(get, parentNode, futureNodes, futureStart, futureEnd, futureChanges, currentNodes, currentStart, currentEnd, currentChanges, currentLength, compare, before);
     return futureNodes;
   };
-
-  /*! (c) Andrea Giammarchi - ISC */
-  var self$1 = null ||
-  /* istanbul ignore next */
-  {};
-
-  try {
-    self$1.WeakMap = WeakMap;
-  } catch (WeakMap) {
-    // this could be better but 90% of the time
-    // it's everything developers need as fallback
-    self$1.WeakMap = function (id, Object) {
-
-      var dP = Object.defineProperty;
-      var hOP = Object.hasOwnProperty;
-      var proto = WeakMap.prototype;
-
-      proto.delete = function (key) {
-        return this.has(key) && delete key[this._];
-      };
-
-      proto.get = function (key) {
-        return this.has(key) ? key[this._] : void 0;
-      };
-
-      proto.has = function (key) {
-        return hOP.call(key, this._);
-      };
-
-      proto.set = function (key, value) {
-        dP(key, this._, {
-          configurable: true,
-          value: value
-        });
-        return this;
-      };
-
-      return WeakMap;
-
-      function WeakMap(iterable) {
-        dP(this, '_', {
-          value: '_@ungap/weakmap' + id++
-        });
-        if (iterable) iterable.forEach(add, this);
-      }
-
-      function add(pair) {
-        this.set(pair[0], pair[1]);
-      }
-    }(Math.random(), Object);
-  }
-
-  var WeakMap$1 = self$1.WeakMap;
 
   /*! (c) Andrea Giammarchi - ISC */
   var importNode = function (document, appendChild, cloneNode, createTextNode, importNode) {
@@ -1263,7 +1263,7 @@ var lighterhtml = (function (document,exports) {
     return callback(this);
   }
 
-  var wm = new WeakMap();
+  var wm = new WeakMap$1();
   var templateType = 0;
   var current = null; // can be used with any useRef hook
   // returns an `html` and `svg` function
