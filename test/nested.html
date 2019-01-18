@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="../index.js"></script>
+</head>
+<body>
+  <script>
+const {render, html} = lighterhtml;
+
+setInterval((...LIs) => {
+  render(
+    document.body,
+    () => html`<ul>${
+      LIs.map((li, i) => render(li, () => html`content ${i}`))
+    }</ul>`);
+  },
+  1000,
+  document.createElement('li'),
+  document.createElement('li'),
+  document.createElement('li')
+);
+  </script>
+</body>
+</html>
