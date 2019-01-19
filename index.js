@@ -1378,11 +1378,11 @@ var lighterhtml = (function (document,exports) {
   }
 
   function unrollArray(array, i) {
-    for (var _i = 0, length = array.length; _i < length; _i++) {
-      var value = array[_i];
+    for (var length = array.length; i < length; i++) {
+      var value = array[i];
 
       if (value) {
-        if (value.nodeType === 0) array[_i] = unroll(value);else if (isArray(value)) array[_i] = unrollArray(value, 0);
+        if (value.nodeType === 0) array[i] = unroll(value);else if (isArray(value)) array[i] = unrollArray(value, 0);
       }
     }
 

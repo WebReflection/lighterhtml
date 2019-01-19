@@ -104,7 +104,7 @@ function unroll(template) {
 }
 
 function unrollArray(array, i) {
-  for (let i = 0, {length} = array; i < length; i++) {
+  for (const {length} = array; i < length; i++) {
     const value = array[i];
     if (value) {
       if (value.nodeType === 0)
