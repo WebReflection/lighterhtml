@@ -1264,7 +1264,6 @@ var lighterhtml = (function (document,exports) {
   }
 
   var wm = new WeakMap$1();
-  var templateType = 0;
   var current = null; // can be used with any useRef hook
   // returns an `html` and `svg` function
 
@@ -1303,8 +1302,9 @@ var lighterhtml = (function (document,exports) {
 
     function content() {
       var args = [];
+      var length = arguments.length;
 
-      for (var i = 0, length = arguments.length; i < length; i++) {
+      for (var i = 0; i < length; i++) {
         args[i] = arguments[i];
       }
 
@@ -1316,17 +1316,45 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
-  function outer$1($) {
+  function outer$1(type) {
     return function () {
-      var _ = tta.apply(null, arguments);
-
-      return current ? {
-        nodeType: 0,
-        valueOf: valueOf,
-        $: $,
-        _: _
-      } : new Tagger($).apply(null, _);
+      var args = tta.apply(null, arguments);
+      return current ? wired(type, args) : new Tagger(type).apply(null, args);
     };
+  }
+
+  function wired(type, args) {
+    var _current = current,
+        i = _current.i,
+        length = _current.length,
+        stack = _current.stack;
+    var stacked = i < length;
+    current.i++;
+
+    if (stacked) {
+      var _stack$i = stack[i],
+          kind = _stack$i.kind,
+          _tagger = _stack$i.tagger,
+          template = _stack$i.template,
+          wire = _stack$i.wire;
+
+      if (kind === type && template === args[0]) {
+        _tagger.apply(null, args);
+
+        return wire;
+      }
+    }
+
+    var tagger = new Tagger(type);
+    var info = {
+      kind: type,
+      tagger: tagger,
+      template: args[0],
+      wire: wireContent(tagger.apply(null, args))
+    };
+    if (stacked) stack[i] = info;else current.length = stack.push(info);
+    current.update = true;
+    return info.wire;
   }
 
   function set$1(node) {
@@ -1334,87 +1362,31 @@ var lighterhtml = (function (document,exports) {
       i: 0,
       length: 0,
       stack: [],
-      template: null
+      update: false
     };
     wm.set(node, info);
     return info;
   }
 
-  function setTemplate(template) {
-    if (current.template) {
-      current.length = 0;
-      current.stack.splice(0);
-    }
-
-    current.template = template;
-  }
-
-  function unroll(template) {
-    var $ = template.$,
-        _ = template._;
-    var _current = current,
-        i = _current.i,
-        length = _current.length,
-        stack = _current.stack;
-    current.i++;
-
-    if (i < length) {
-      var _stack$i = stack[i],
-          tagger = _stack$i.tagger,
-          wire = _stack$i.wire;
-      tagger.apply(null, unrollArray(_, 1));
-      return wire;
-    } else {
-      var _tagger = new Tagger($);
-
-      var stacked = {
-        tagger: _tagger,
-        wire: null
-      };
-      current.length = stack.push(stacked);
-      stacked.wire = wireContent(_tagger.apply(null, unrollArray(_, 1)));
-      return stacked.wire;
-    }
-  }
-
-  function unrollArray(array, i) {
-    for (var length = array.length; i < length; i++) {
-      var value = array[i];
-
-      if (value) {
-        if (value.nodeType === 0) array[i] = unroll(value);else if (isArray(value)) array[i] = unrollArray(value, 0);
-      }
-    }
-
-    return array;
-  }
-
   function update(reference, callback) {
     var prev = current;
     current = wm.get(reference) || set$1(reference);
-    current.i = 0; // TODO: perf measurement about guarding this
-
+    current.i = 0;
     var result = callback.call(this);
+    var _current2 = current,
+        i = _current2.i,
+        length = _current2.length,
+        stack = _current2.stack;
+
+    if (i < length) {
+      current.length = i;
+      stack.splice(i);
+    }
+
     var ret = null;
 
-    if (result.nodeType === templateType) {
-      var template = result._[0]; // TODO: perf measurement about guarding this
-
-      var content = unroll(result);
-      var _current2 = current,
-          i = _current2.i;
-
-      if (i < current.length) {
-        current.length = i;
-        current.stack.splice(i);
-      }
-
-      if (current.template !== template) {
-        setTemplate(template);
-        ret = asNode$1(content);
-      }
-    } else {
-      setTemplate(null);
+    if (current.update) {
+      current.update = false;
       ret = asNode$1(result);
     }
 
