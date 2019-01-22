@@ -4,7 +4,6 @@ import {Wire, wireType, isArray} from './shared.js';
 import Tagger from './tagger.js';
 
 const wm = new WeakMap;
-const templateType = 0;
 
 let current = null;
 
@@ -48,7 +47,8 @@ function createHook(useRef, view) {
   };
   function content() {
     const args = [];
-    for (let i = 0, {length} = arguments; i < length; i++)
+    const {length} = arguments;
+    for (let i = 0; i < length; i++)
       args[i] = arguments[i];
     const content = update(this, () => view.apply(null, args));
     if (content)
@@ -57,90 +57,66 @@ function createHook(useRef, view) {
   }
 }
 
-function outer($) {
+function outer(type) {
   return function () {
-    const _ = tta.apply(null, arguments);
+    const args = tta.apply(null, arguments);
     return current ?
-      {nodeType: 0, valueOf, $, _} :
-      new Tagger($).apply(null, _);
+      wired(type, args) :
+      new Tagger(type).apply(null, args);
   };
 }
 
-function set(node) {
-  const info = {i: 0, length: 0, stack: [], template: null};
-  wm.set(node, info);
-  return info;
-}
-
-function setTemplate(template) {
-  if (current.template) {
-    current.length = 0;
-    current.stack.splice(0);
-  }
-  current.template = template;
-}
-
-function unroll(template) {
-  const {$, _} = template;
+function wired(type, args) {
   const {i, length, stack} = current;
+  const stacked = i < length;
   current.i++;
-  if (i < length) {
-    const {tagger, wire} = stack[i];
-    tagger.apply(null, unrollArray(_, 1));
-    return wire;
-  }
-  else {
-    const tagger = new Tagger($);
-    const stacked = {tagger, wire: null};
-    current.length = stack.push(stacked);
-    stacked.wire = wireContent(tagger.apply(null, unrollArray(_, 1)));
-    return stacked.wire;
-  }
-}
-
-function unrollArray(array, i) {
-  for (const {length} = array; i < length; i++) {
-    const value = array[i];
-    if (value) {
-      if (value.nodeType === 0)
-        array[i] = unroll(value);
-      else if (isArray(value))
-        array[i] = unrollArray(value, 0);
+  if (stacked) {
+    const {kind, tagger, template, wire} = stack[i];
+    if (kind === type && template === args[0]) {
+      tagger.apply(null, args);
+      return wire;
     }
   }
-  return array;
+  const tagger = new Tagger(type);
+  const info = {
+    kind: type,
+    tagger,
+    template: args[0],
+    wire: wireContent(tagger.apply(null, args))
+  };
+  if (stacked)
+    stack[i] = info;
+  else
+    current.length = stack.push(info);
+  current.update = true;
+  return info.wire;
+}
+
+function set(node) {
+  const info = {
+    i: 0, length: 0,
+    stack: [],
+    update: false
+  };
+  wm.set(node, info);
+  return info;
 }
 
 function update(reference, callback) {
   const prev = current;
   current = wm.get(reference) || set(reference);
   current.i = 0;
-
-  // TODO: perf measurement about guarding this
   const result = callback.call(this);
-
-  let ret = null;
-  if (result.nodeType === templateType) {
-    const template = result._[0];
-
-    // TODO: perf measurement about guarding this
-    const content = unroll(result);
-
-    const {i} = current;
-    if (i < current.length) {
-      current.length = i;
-      current.stack.splice(i);
-    }
-    if (current.template !== template) {
-      setTemplate(template);
-      ret = asNode(content);
-    }
+  const {i, length, stack} = current;
+  if (i < length) {
+    current.length = i;
+    stack.splice(i);
   }
-  else {
-    setTemplate(null);
+  let ret = null;
+  if (current.update) {
+    current.update = false;
     ret = asNode(result);
   }
-
   current = prev;
   return ret;
 }
