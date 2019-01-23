@@ -1353,7 +1353,7 @@ var lighterhtml = (function (document,exports) {
       wire: wireContent(tagger.apply(null, args))
     };
     if (stacked) stack[i] = info;else current.length = stack.push(info);
-    current.update = true;
+    current.update = i;
     return info.wire;
   }
 
@@ -1362,7 +1362,7 @@ var lighterhtml = (function (document,exports) {
       i: 0,
       length: 0,
       stack: [],
-      update: false
+      update: -1
     };
     wm.set(node, info);
     return info;
@@ -1385,8 +1385,8 @@ var lighterhtml = (function (document,exports) {
 
     var ret = null;
 
-    if (current.update) {
-      current.update = false;
+    if (current.update === length - 1) {
+      current.update = -1;
       ret = asNode$1(result);
     }
 

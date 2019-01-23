@@ -88,7 +88,7 @@ function wired(type, args) {
     stack[i] = info;
   else
     current.length = stack.push(info);
-  current.update = true;
+  current.update = i;
   return info.wire;
 }
 
@@ -96,7 +96,7 @@ function set(node) {
   const info = {
     i: 0, length: 0,
     stack: [],
-    update: false
+    update: -1
   };
   wm.set(node, info);
   return info;
@@ -113,8 +113,8 @@ function update(reference, callback) {
     stack.splice(i);
   }
   let ret = null;
-  if (current.update) {
-    current.update = false;
+  if (current.update === (length - 1)) {
+    current.update = -1;
     ret = asNode(result);
   }
   current = prev;

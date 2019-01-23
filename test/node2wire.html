@@ -26,6 +26,12 @@ const renderDivs = (firstRow, secondRow) => html`
 render(document.body, () => renderDivs([1], ['a']));
 console.log('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
 render(document.body, () => renderDivs([1, 2, 3], ['a', 'b']));
+setTimeout(
+  () => {
+    render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+  },
+  3000
+);
 
   </script>
 </body>
