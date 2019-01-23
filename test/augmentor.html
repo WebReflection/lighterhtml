@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>DOM Augmentor - basic demo</title>
+  <script src="https://unpkg.com/dom-augmentor"></script>
+  <script src="../index.js"></script>
+</head>
+<body>
+  <script>
+const {default: $, useEffect, useRef, useState} = augmentor;
+const {render, hook} = lighterhtml;
+const {html, svg} = hook(useRef);
+
+const Button = (text) => $(() => {
+  useEffect(
+    () => {
+      console.log('connected');
+      return () => console.log('disconnected');
+    },
+    []
+  );
+  const [i, increment] = useState(0);
+  return html`
+  <button onclick=${() => increment(i + 1)}>
+    ${text} ${i}
+  </button>`;
+});
+
+const button = Button('hello');
+
+// document.body.appendChild(button());
+// alternatively
+render(document.body, button);
+
+
+  </script>
+</body>
+</html>
