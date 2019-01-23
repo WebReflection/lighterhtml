@@ -1319,42 +1319,8 @@ var lighterhtml = (function (document,exports) {
   function outer$1(type) {
     return function () {
       var args = tta.apply(null, arguments);
-      return current ? wired(type, args) : new Tagger(type).apply(null, args);
+      return current ? new Hole(type, args) : new Tagger(type).apply(null, args);
     };
-  }
-
-  function wired(type, args) {
-    var _current = current,
-        i = _current.i,
-        length = _current.length,
-        stack = _current.stack;
-    var stacked = i < length;
-    current.i++;
-
-    if (stacked) {
-      var _stack$i = stack[i],
-          kind = _stack$i.kind,
-          _tagger = _stack$i.tagger,
-          template = _stack$i.template,
-          wire = _stack$i.wire;
-
-      if (kind === type && template === args[0]) {
-        _tagger.apply(null, args);
-
-        return wire;
-      }
-    }
-
-    var tagger = new Tagger(type);
-    var info = {
-      kind: type,
-      tagger: tagger,
-      template: args[0],
-      wire: wireContent(tagger.apply(null, args))
-    };
-    if (stacked) stack[i] = info;else current.length = stack.push(info);
-    current.update = i;
-    return info.wire;
   }
 
   function set$1(node) {
@@ -1362,7 +1328,7 @@ var lighterhtml = (function (document,exports) {
       i: 0,
       length: 0,
       stack: [],
-      update: -1
+      update: false
     };
     wm.set(node, info);
     return info;
@@ -1373,20 +1339,25 @@ var lighterhtml = (function (document,exports) {
     current = wm.get(reference) || set$1(reference);
     current.i = 0;
     var result = callback.call(this);
-    var _current2 = current,
-        i = _current2.i,
-        length = _current2.length,
-        stack = _current2.stack;
-
-    if (i < length) {
-      current.length = i;
-      stack.splice(i);
-    }
-
     var ret = null;
 
-    if (current.update === length - 1) {
-      current.update = -1;
+    if (result instanceof Hole) {
+      var value = unroll(result);
+      var _current = current,
+          i = _current.i,
+          length = _current.length,
+          stack = _current.stack;
+
+      if (i < length) {
+        current.length = i;
+        stack.splice(i);
+      }
+
+      if (current.update) {
+        current.update = false;
+        ret = asNode$1(value);
+      }
+    } else {
       ret = asNode$1(result);
     }
 
@@ -1394,10 +1365,68 @@ var lighterhtml = (function (document,exports) {
     return ret;
   }
 
-  function wireContent(node) {
+  function unroll(hole) {
+    var _current2 = current,
+        i = _current2.i,
+        length = _current2.length,
+        stack = _current2.stack;
+    var type = hole.type,
+        args = hole.args;
+    var stacked = i < length;
+    current.i++;
+    unrollArray(args, 1);
+
+    if (stacked) {
+      var _stack$i = stack[i],
+          _tagger = _stack$i.tagger,
+          tpl = _stack$i.tpl,
+          kind = _stack$i.kind,
+          wire = _stack$i.wire;
+
+      if (type === kind && tpl === args[0]) {
+        _tagger.apply(null, args);
+
+        return wire;
+      }
+    }
+
+    var tagger = new Tagger(type);
+    var info = {
+      tagger: tagger,
+      tpl: args[0],
+      kind: type,
+      wire: wiredContent(tagger.apply(null, args))
+    };
+    if (stacked) stack[i] = info;else current.length = stack.push(info);
+    if (i < 1) current.update = true;
+    return info.wire;
+  }
+
+  function unrollArray(arr, i) {
+    for (var length = arr.length; i < length; i++) {
+      var value = arr[i];
+
+      if (value) {
+        if (value instanceof Hole) {
+          arr[i] = unroll(value);
+        } else if (isArray(value)) {
+          arr[i] = unrollArray(value, 0);
+        }
+      }
+    }
+
+    return arr;
+  }
+
+  function wiredContent(node) {
     var childNodes = node.childNodes;
     var length = childNodes.length;
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
+  }
+
+  function Hole(type, args) {
+    this.type = type;
+    this.args = args;
   }
 
   exports.hook = hook;
