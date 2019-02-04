@@ -47,28 +47,39 @@ function createHook(useRef, view) {
   return function () {
     const ref = useRef(null);
     if (ref.current === null)
-      ref.current = content.bind(ref);
+      ref.current = view.for(ref);
     return ref.current.apply(null, arguments);
   };
-  function content() {
-    const args = [];
-    const {length} = arguments;
-    for (let i = 0; i < length; i++)
-      args[i] = arguments[i];
-    const content = update(this, () => view.apply(null, args));
-    if (content)
-      this.content = content;
-    return this.content;
-  }
 }
 
 function outer(type) {
-  return function () {
+  const wm = new WeakMap;
+  tag.for = (identity, id) => {
+    const ref = wm.get(identity) || set(identity);
+    if (id == null)
+      id = '$';
+    return ref[id] || (ref[id] = create(ref, id));
+  };
+  return tag;
+  function create(ref, id) {
+    let wire = null;
+    const $ = new Tagger(type);
+    return (ref[id] = function () {
+      const result = $.apply(null, tta.apply(null, arguments));
+      return wire || (wire = wiredContent(result));
+    });
+  }
+  function set(identity) {
+    const ref = {};
+    wm.set(identity, ref);
+    return ref;
+  }
+  function tag() {
     const args = tta.apply(null, arguments);
     return current ?
       new Hole(type, args) :
       new Tagger(type).apply(null, args);
-  };
+  }
 }
 
 function set(node) {
