@@ -65,13 +65,14 @@ The module exports the following:
   * `html` tag function, create as one-off any sort of html content, or wired content when used within a `render` call
   * `svg` tag function, create as one-off any sort of SVG content, or wired content when used within a `render` call
   * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
-  * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide keyed updated per each component
+  * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide a keyed updated per each component
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 
 
 ### What's different from hyperHTML ?
 
+  * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly as for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique, and it's the string `default` when not specified. This makes content hard wired whenever it's needed.
   * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If you'll pass `{set current(node) { ... }}` that'll be invoked per each update, in case you need the node outside `useRef`.
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
   * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates. Promises might be supported again in the future to align with isomorphic SSR, but right now these are not handled at all.
