@@ -53,15 +53,18 @@ function outer(type) {
     const ref = wm.get(identity) || set(identity);
     if (id == null)
       id = '$';
-    return ref[id] || (ref[id] = create(ref, id));
+    return ref[id] || create(ref, id);
   };
   return tag;
   function create(ref, id) {
-    let wire = null;
-    const $ = new Tagger(type);
     return (ref[id] = function () {
-      const result = $.apply(null, tta.apply(null, arguments));
-      return wire || (wire = wiredContent(result));
+      const $ = new Tagger(type);
+      const wire = wiredContent($.apply(null, tta.apply(null, arguments)));
+      ref[id] = function () {
+        $.apply(null, tta.apply(null, arguments));
+        return wire;
+      };
+      return wire;
     });
   }
   function set(identity) {

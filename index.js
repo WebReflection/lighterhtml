@@ -1307,17 +1307,22 @@ var lighterhtml = (function (document,exports) {
     tag.for = function (identity, id) {
       var ref = wm.get(identity) || set(identity);
       if (id == null) id = '$';
-      return ref[id] || (ref[id] = create(ref, id));
+      return ref[id] || create(ref, id);
     };
 
     return tag;
 
     function create(ref, id) {
-      var wire = null;
-      var $ = new Tagger(type);
       return ref[id] = function () {
-        var result = $.apply(null, tta.apply(null, arguments));
-        return wire || (wire = wiredContent(result));
+        var $ = new Tagger(type);
+        var wire = wiredContent($.apply(null, tta.apply(null, arguments)));
+
+        ref[id] = function () {
+          $.apply(null, tta.apply(null, arguments));
+          return wire;
+        };
+
+        return wire;
       };
     }
 
