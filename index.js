@@ -1264,6 +1264,7 @@ var lighterhtml = (function (document,exports) {
   }
 
   var wm = new WeakMap$1();
+  var container = new WeakMap$1();
   var current = null; // can be used with any useRef hook
   // returns an `html` and `svg` function
 
@@ -1276,7 +1277,13 @@ var lighterhtml = (function (document,exports) {
 
   function render(node, callback) {
     var content = update.call(this, node, callback);
-    if (content !== null) appendClean(node, content);
+    var previously = container.get(node);
+
+    if (content !== previously) {
+      container.set(node, content);
+      appendClean(node, asNode$1(content, true));
+    }
+
     return node;
   } // keyed render via render(node, () => html`...`)
   // non keyed renders in the wild via html`...`
@@ -1368,7 +1375,7 @@ var lighterhtml = (function (document,exports) {
         ret = asNode$1(value, true);
       }
     } else {
-      ret = asNode$1(result, true);
+      ret = result;
     }
 
     current = prev;

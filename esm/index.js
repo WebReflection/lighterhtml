@@ -4,6 +4,7 @@ import {Wire, wireType, isArray} from './shared.js';
 import Tagger from './tagger.js';
 
 const wm = new WeakMap;
+const container = new WeakMap;
 
 let current = null;
 
@@ -17,8 +18,11 @@ export const hook = useRef => ({
 // generic content render
 export function render(node, callback) {
   const content = update.call(this, node, callback);
-  if (content !== null)
-    appendClean(node, content);
+  const previously = container.get(node);
+  if (content !== previously) {
+    container.set(node, content);
+    appendClean(node, asNode(content, true));
+  }
   return node;
 }
 
@@ -107,7 +111,7 @@ function update(reference, callback) {
       ret = asNode(value, true);
     }
   } else {
-    ret = asNode(result, true);
+    ret = result;
   }
   current = prev;
   return ret;
