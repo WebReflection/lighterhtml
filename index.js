@@ -1297,7 +1297,7 @@ var lighterhtml = (function (document,exports) {
     return function () {
       var ref = useRef(null);
       if (ref.current === null) ref.current = view.for(ref);
-      return ref.current.apply(null, arguments);
+      return asNode$1(ref.current.apply(null, arguments));
     };
   }
 

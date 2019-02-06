@@ -48,7 +48,7 @@ function createHook(useRef, view) {
     const ref = useRef(null);
     if (ref.current === null)
       ref.current = view.for(ref);
-    return ref.current.apply(null, arguments);
+    return asNode(ref.current.apply(null, arguments));
   };
 }
 
