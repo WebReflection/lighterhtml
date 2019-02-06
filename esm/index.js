@@ -57,14 +57,11 @@ function outer(type) {
   };
   return tag;
   function create(ref, id) {
+    let wire = null;
+    const $ = new Tagger(type);
     return (ref[id] = function () {
-      const $ = new Tagger(type);
-      const wire = wiredContent($.apply(null, tta.apply(null, arguments)));
-      ref[id] = function () {
-        $.apply(null, tta.apply(null, arguments));
-        return wire;
-      };
-      return wire;
+      const result = $.apply(null, tta.apply(null, arguments));
+      return wire || (wire = wiredContent(result));
     });
   }
   function set(identity) {

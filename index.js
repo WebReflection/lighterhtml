@@ -1313,16 +1313,11 @@ var lighterhtml = (function (document,exports) {
     return tag;
 
     function create(ref, id) {
+      var wire = null;
+      var $ = new Tagger(type);
       return ref[id] = function () {
-        var $ = new Tagger(type);
-        var wire = wiredContent($.apply(null, tta.apply(null, arguments)));
-
-        ref[id] = function () {
-          $.apply(null, tta.apply(null, arguments));
-          return wire;
-        };
-
-        return wire;
+        var result = $.apply(null, tta.apply(null, arguments));
+        return wire || (wire = wiredContent(result));
       };
     }
 
@@ -1373,6 +1368,7 @@ var lighterhtml = (function (document,exports) {
         ret = asNode$1(value);
       }
     } else {
+      console.log('right away');
       ret = asNode$1(result);
     }
 
