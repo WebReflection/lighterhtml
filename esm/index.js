@@ -17,11 +17,11 @@ export const hook = useRef => ({
 
 // generic content render
 export function render(node, callback) {
-  const content = update.call(this, node, callback);
-  const previously = container.get(node);
-  if (content !== previously) {
-    container.set(node, content);
-    appendClean(node, asNode(content, true));
+  const {forced, value} = update.call(this, node, callback);
+  const prev = container.get(node);
+  if (forced || prev !== value) {
+    container.set(node, value);
+    appendClean(node, asNode(value, true));
   }
   return node;
 }
@@ -97,10 +97,9 @@ function update(reference, callback) {
   const prev = current;
   current = wm.get(reference) || set(reference);
   current.i = 0;
-  const result = callback.call(this);
-  let ret = null;
-  if (result instanceof Hole) {
-    const value = unroll(result);
+  let ret = {forced: false, value: callback.call(this)};
+  if (ret.value instanceof Hole) {
+    ret.value = unroll(ret.value);
     const {i, length, stack} = current;
     if (i < length) {
       current.length = i;
@@ -108,10 +107,8 @@ function update(reference, callback) {
     }
     if (current.update) {
       current.update = false;
-      ret = asNode(value, true);
+      ret.forced = true;
     }
-  } else {
-    ret = result;
   }
   current = prev;
   return ret;
