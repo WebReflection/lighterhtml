@@ -110,7 +110,6 @@ function update(reference, callback) {
       ret = asNode(value);
     }
   } else {
-    console.log('right away');
     ret = asNode(result);
   }
   current = prev;

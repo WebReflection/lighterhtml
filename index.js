@@ -1368,7 +1368,6 @@ var lighterhtml = (function (document,exports) {
         ret = asNode$1(value);
       }
     } else {
-      console.log('right away');
       ret = asNode$1(result);
     }
 
