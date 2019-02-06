@@ -34,8 +34,10 @@ function appendClean(node, fragment) {
   node.appendChild(fragment);
 }
 
-function asNode(result) {
-  return result.nodeType === wireType ? result.valueOf(true) : result;
+function asNode(result, forceFragment) {
+  return result.nodeType === wireType ?
+    result.valueOf(forceFragment) :
+    result;
 }
 
 function createHook(useRef, view) {
@@ -43,7 +45,7 @@ function createHook(useRef, view) {
     const ref = useRef(null);
     if (ref.current === null)
       ref.current = view.for(ref);
-    return asNode(ref.current.apply(null, arguments));
+    return asNode(ref.current.apply(null, arguments), false);
   };
 }
 
@@ -102,10 +104,10 @@ function update(reference, callback) {
     }
     if (current.update) {
       current.update = false;
-      ret = asNode(value);
+      ret = asNode(value, true);
     }
   } else {
-    ret = asNode(result);
+    ret = asNode(result, true);
   }
   current = prev;
   return ret;

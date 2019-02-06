@@ -1289,15 +1289,15 @@ var lighterhtml = (function (document,exports) {
     node.appendChild(fragment);
   }
 
-  function asNode$1(result) {
-    return result.nodeType === wireType ? result.valueOf(true) : result;
+  function asNode$1(result, forceFragment) {
+    return result.nodeType === wireType ? result.valueOf(forceFragment) : result;
   }
 
   function createHook(useRef, view) {
     return function () {
       var ref = useRef(null);
       if (ref.current === null) ref.current = view.for(ref);
-      return asNode$1(ref.current.apply(null, arguments));
+      return asNode$1(ref.current.apply(null, arguments), false);
     };
   }
 
@@ -1365,10 +1365,10 @@ var lighterhtml = (function (document,exports) {
 
       if (current.update) {
         current.update = false;
-        ret = asNode$1(value);
+        ret = asNode$1(value, true);
       }
     } else {
-      ret = asNode$1(result);
+      ret = asNode$1(result, true);
     }
 
     current = prev;
