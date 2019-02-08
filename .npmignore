@@ -8,3 +8,4 @@ _config.yml
 .travis.yml
 package-lock.json
 rollup.config.js
+es.config.js
