@@ -1,9 +1,16 @@
-import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
+import replace from 'rollup-plugin-replace';
+import babel from 'rollup-plugin-babel';
+import { terser } from 'rollup-plugin-terser';
+
 export default {
   input: 'esm/index.js',
   plugins: [
     resolve(),
+    replace({
+      'tta.apply(null, arguments)': 'arguments',
+      delimiters: ['', '']
+    }),
     babel({
       plugins: [
         ['remove-ungap', {
@@ -12,13 +19,13 @@ export default {
           ]
         }]
       ],
-    })
+    }),
+    terser()
   ],
   context: 'null',
   moduleContext: 'null',
   output: {
-    exports: 'named',
-    file: 'es.max.js',
+    file: 'es.js',
     format: 'iife',
     name: 'lighterhtml'
   }
