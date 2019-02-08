@@ -71,7 +71,7 @@ function outer(type) {
     });
   }
   function set(identity) {
-    const ref = {};
+    const ref = {'$': null};
     wm.set(identity, ref);
     return ref;
   }

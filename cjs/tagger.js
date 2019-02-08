@@ -112,20 +112,25 @@ Tagger.prototype = {
   //    so that you can style=${{width: 120}}. In this case, the behavior has been
   //    fully inspired by Preact library and its simplicity.
   attribute(node, name, original) {
-    const isSVG = OWNER_SVG_ELEMENT in node;
-    switch (true) {
-      case name.slice(0, 2) === 'on':
-        return hyperEvent(node, name);
-      case name === 'style':
-        return hyperStyle(node, original, isSVG);
-      case name === 'ref':
-        return hyperRef(node, original, isSVG);
-      case name === 'data':
-      case name === 'props':
-      case !isSVG && name in node && !readOnly.test(name):
+    switch (name) {
+      case 'class':
+        name = 'className';
+      case 'data':
+      case 'props':
         return hyperProperty(node, name);
+      case 'style':
+        return hyperStyle(node, original, OWNER_SVG_ELEMENT in node);
+      case 'ref':
+        return hyperRef(node);
       default:
+        if (name.slice(0, 2) === 'on')
+          return hyperEvent(node, name);
+        if (name in node && !(
+          OWNER_SVG_ELEMENT in node || readOnly.test(name)
+        ))
+          return hyperProperty(node, name);
         return hyperAttribute(node, original.cloneNode(true));
+
     }
   },
 
