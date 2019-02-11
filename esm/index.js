@@ -99,7 +99,7 @@ function update(reference, callback) {
   const ret = callback.call(this);
   let value;
   if (ret instanceof Hole) {
-    value = asNode(unroll(ret), current.update);
+    value = asNode(unroll(ret, 0), current.update);
     const {i, length, stack, update} = current;
     if (i < length)
       stack.splice(current.length = i);
@@ -112,46 +112,48 @@ function update(reference, callback) {
   return value;
 }
 
-function unroll(hole) {
+function unroll(hole, level) {
   const {i, length, stack} = current;
   const {type, args} = hole;
   const stacked = i < length;
   current.i++;
   if (!stacked)
-    current.length = stack.push(crateInfo(tagger, args[0], type, null));
-  unrollArray(args, 1);
+    current.length = stack.push({
+      l: level,
+      kind: type,
+      tag: null,
+      tpl: args[0],
+      wire: null
+    });
+  unrollArray(args, 1, level + 1);
+  const info = stack[i];
   if (stacked) {
-    const {tagger, tpl, kind, wire} = stack[i];
-    if (type === kind && tpl === args[0]) {
-      try {
-        tagger.apply(null, args);
-        return wire;
-      } catch(nonKeyedGotcha) {
-        console.error(nonKeyedGotcha);
-        // for the time being this can be ignored
-      }
+    const {l:control, kind, tag, tpl, wire} = info;
+    if (control === level && type === kind && tpl === args[0]) {
+      tag.apply(null, args);
+      return wire;
     }
   }
-  const tagger = new Tagger(type);
-  const wire = wiredContent(tagger.apply(null, args));
-  stack[i] = crateInfo(tagger, args[0], type, wire);
+  const tag = new Tagger(type);
+  const wire = wiredContent(tag.apply(null, args));
+  info.l = level;
+  info.kind = type;
+  info.tag = tag;
+  info.tpl = args[0];
+  info.wire = wire;
   if (i < 1)
     current.update = true;
   return wire;
 }
 
-function crateInfo(tagger, tpl, kind, wire) {
-  return {tagger, tpl, kind, wire};
-}
-
-function unrollArray(arr, i) {
+function unrollArray(arr, i, level) {
   for (const {length} = arr; i < length; i++) {
     const value = arr[i];
     if (typeof value === 'object' && value) {
       if (value instanceof Hole) {
-        arr[i] = unroll(value);
+        arr[i] = unroll(value, level - 1);
       } else if (isArray(value)) {
-        arr[i] = unrollArray(value, 0);
+        arr[i] = unrollArray(value, 0, level++);
       }
     }
   }

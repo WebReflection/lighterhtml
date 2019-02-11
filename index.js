@@ -1359,7 +1359,7 @@ var lighterhtml = (function (document,exports) {
     var value;
 
     if (ret instanceof Hole) {
-      value = asNode$1(unroll(ret), current.update);
+      value = asNode$1(unroll(ret, 0), current.update);
       var _current = current,
           i = _current.i,
           length = _current.length,
@@ -1375,7 +1375,7 @@ var lighterhtml = (function (document,exports) {
     return value;
   }
 
-  function unroll(hole) {
+  function unroll(hole, level) {
     var _current2 = current,
         i = _current2.i,
         length = _current2.length,
@@ -1384,52 +1384,50 @@ var lighterhtml = (function (document,exports) {
         args = hole.args;
     var stacked = i < length;
     current.i++;
-    if (!stacked) current.length = stack.push(crateInfo(tagger, args[0], type, null));
-    unrollArray(args, 1);
+    if (!stacked) current.length = stack.push({
+      l: level,
+      kind: type,
+      tag: null,
+      tpl: args[0],
+      wire: null
+    });
+    unrollArray(args, 1, level + 1);
+    var info = stack[i];
 
     if (stacked) {
-      var _stack$i = stack[i],
-          _tagger = _stack$i.tagger,
-          tpl = _stack$i.tpl,
-          kind = _stack$i.kind,
-          _wire = _stack$i.wire;
+      var control = info.l,
+          kind = info.kind,
+          _tag = info.tag,
+          tpl = info.tpl,
+          _wire = info.wire;
 
-      if (type === kind && tpl === args[0]) {
-        try {
-          _tagger.apply(null, args);
+      if (control === level && type === kind && tpl === args[0]) {
+        _tag.apply(null, args);
 
-          return _wire;
-        } catch (nonKeyedGotcha) {
-          console.error(nonKeyedGotcha); // for the time being this can be ignored
-        }
+        return _wire;
       }
     }
 
-    var tagger = new Tagger(type);
-    var wire = wiredContent(tagger.apply(null, args));
-    stack[i] = crateInfo(tagger, args[0], type, wire);
+    var tag = new Tagger(type);
+    var wire = wiredContent(tag.apply(null, args));
+    info.l = level;
+    info.kind = type;
+    info.tag = tag;
+    info.tpl = args[0];
+    info.wire = wire;
     if (i < 1) current.update = true;
     return wire;
   }
 
-  function crateInfo(tagger, tpl, kind, wire) {
-    return {
-      tagger: tagger,
-      tpl: tpl,
-      kind: kind,
-      wire: wire
-    };
-  }
-
-  function unrollArray(arr, i) {
+  function unrollArray(arr, i, level) {
     for (var length = arr.length; i < length; i++) {
       var value = arr[i];
 
       if (typeof(value) === 'object' && value) {
         if (value instanceof Hole) {
-          arr[i] = unroll(value);
+          arr[i] = unroll(value, level - 1);
         } else if (isArray(value)) {
-          arr[i] = unrollArray(value, 0);
+          arr[i] = unrollArray(value, 0, level++);
         }
       }
     }
