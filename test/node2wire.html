@@ -12,29 +12,48 @@
 
 const {render, html} = lighterhtml;
 
-const span = (x) => html`<span class="a">${'!'} ${x}</span>`;
+const span = (x, i, arr) => html`<span class="a">${'!'} ${x}</span>`;
 
+let first = 0;
 const renderDivs = (firstRow, secondRow) => html`
   <div>
-    ${firstRow.map(span)}
+    ${/*2 === first++ ? html`<span>nope</span>` : */firstRow.map(span)}
   </div>
   <div>
-    ${secondRow.map(span)}
+    ${/*7 === first++ ? html`<span>nope</span>` : */secondRow.map(span)}
   </div>
 `;
 
 render(document.body, () => renderDivs([], ['a']));
 setTimeout(
   () => {
-    render(document.body, () => renderDivs([1, 2, 3], ['a', 'b']));
+    render(document.body, () => renderDivs(['a'], []));
     setTimeout(
       () => {
-        render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+        render(document.body, () => renderDivs([1, 2, 3], ['a', 'b']));
+        setTimeout(
+          () => {
+            render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+            setTimeout(
+              () => {
+                render(document.body, () => renderDivs([1], ['b']));
+                setTimeout(
+                  () => {
+                    render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+                  },
+                  1000
+                );
+              },
+              1000
+            );
+          },
+          1000
+        );
       },
-      3000
+      1000
     );
   },
-  3000
+  1000
 );
 
   </script>
