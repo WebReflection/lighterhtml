@@ -12,7 +12,7 @@
 
 const {render, html} = lighterhtml;
 
-const span = (x) => html`<span class="a">${'!'} ${x}</span>`;
+const span = (x, i, arr) => html`<span class="a">${'!'} ${x}</span>`;
 
 const renderDivs = (firstRow, secondRow) => html`
   <div>
@@ -30,6 +30,18 @@ setTimeout(
     setTimeout(
       () => {
         render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+        setTimeout(
+          () => {
+            render(document.body, () => renderDivs([1], ['b']));
+            setTimeout(
+              () => {
+                render(document.body, () => renderDivs([1, 2], ['a', 'b', 'c']));
+              },
+              3000
+            );
+          },
+          3000
+        );
       },
       3000
     );

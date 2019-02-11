@@ -1,6 +1,8 @@
 var lighterhtml = (function (document,exports) {
   'use strict';
 
+  
+
   /*! (c) Andrea Giammarchi - ISC */
   var self = null ||
   /* istanbul ignore next */
@@ -53,8 +55,6 @@ var lighterhtml = (function (document,exports) {
   }
 
   var WeakMap$1 = self.WeakMap;
-
-  
 
   /*! (c) Andrea Giammarchi - ISC */
   var templateLiteral = function () {
@@ -1275,15 +1275,11 @@ var lighterhtml = (function (document,exports) {
   }; // generic content render
 
   function render(node, callback) {
-    var _update$call = update.call(this, node, callback),
-        forced = _update$call.forced,
-        value = _update$call.value;
+    var value = update.call(this, node, callback);
 
-    var prev = container.get(node);
-
-    if (forced || prev !== value) {
+    if (container.get(node) !== value) {
       container.set(node, value);
-      appendClean(node, asNode$1(value, true));
+      appendClean(node, value);
     }
 
     return node;
@@ -1359,31 +1355,24 @@ var lighterhtml = (function (document,exports) {
     var prev = current;
     current = wm.get(reference) || set$1(reference);
     current.i = 0;
-    var ret = {
-      forced: false,
-      value: callback.call(this)
-    };
+    var ret = callback.call(this);
+    var value;
 
-    if (ret.value instanceof Hole) {
-      ret.value = unroll(ret.value);
+    if (ret instanceof Hole) {
+      value = asNode$1(unroll(ret), current.update);
       var _current = current,
           i = _current.i,
           length = _current.length,
-          stack = _current.stack;
-
-      if (i < length) {
-        current.length = i;
-        stack.splice(i);
-      }
-
-      if (current.update) {
-        current.update = false;
-        ret.forced = true;
-      }
+          stack = _current.stack,
+          _update = _current.update;
+      if (i < length) stack.splice(current.length = i);
+      if (_update) current.update = false;
+    } else {
+      value = asNode$1(ret, false);
     }
 
     current = prev;
-    return ret;
+    return value;
   }
 
   function unroll(hole) {
@@ -1395,6 +1384,7 @@ var lighterhtml = (function (document,exports) {
         args = hole.args;
     var stacked = i < length;
     current.i++;
+    if (!stacked) current.length = stack.push(crateInfo(tagger, args[0], type, null));
     unrollArray(args, 1);
 
     if (stacked) {
@@ -1402,32 +1392,40 @@ var lighterhtml = (function (document,exports) {
           _tagger = _stack$i.tagger,
           tpl = _stack$i.tpl,
           kind = _stack$i.kind,
-          wire = _stack$i.wire;
+          _wire = _stack$i.wire;
 
       if (type === kind && tpl === args[0]) {
-        _tagger.apply(null, args);
+        try {
+          _tagger.apply(null, args);
 
-        return wire;
+          return _wire;
+        } catch (nonKeyedGotcha) {
+          console.error(nonKeyedGotcha); // for the time being this can be ignored
+        }
       }
     }
 
     var tagger = new Tagger(type);
-    var info = {
-      tagger: tagger,
-      tpl: args[0],
-      kind: type,
-      wire: wiredContent(tagger.apply(null, args))
-    };
-    if (stacked) stack[i] = info;else current.length = stack.push(info);
+    var wire = wiredContent(tagger.apply(null, args));
+    stack[i] = crateInfo(tagger, args[0], type, wire);
     if (i < 1) current.update = true;
-    return info.wire;
+    return wire;
+  }
+
+  function crateInfo(tagger, tpl, kind, wire) {
+    return {
+      tagger: tagger,
+      tpl: tpl,
+      kind: kind,
+      wire: wire
+    };
   }
 
   function unrollArray(arr, i) {
     for (var length = arr.length; i < length; i++) {
       var value = arr[i];
 
-      if (value) {
+      if (typeof(value) === 'object' && value) {
         if (value instanceof Hole) {
           arr[i] = unroll(value);
         } else if (isArray(value)) {

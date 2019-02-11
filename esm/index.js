@@ -17,11 +17,10 @@ export const hook = useRef => ({
 
 // generic content render
 export function render(node, callback) {
-  const {forced, value} = update.call(this, node, callback);
-  const prev = container.get(node);
-  if (forced || prev !== value) {
+  const value = update.call(this, node, callback);
+  if (container.get(node) !== value) {
     container.set(node, value);
-    appendClean(node, asNode(value, true));
+    appendClean(node, value);
   }
   return node;
 }
@@ -97,21 +96,20 @@ function update(reference, callback) {
   const prev = current;
   current = wm.get(reference) || set(reference);
   current.i = 0;
-  let ret = {forced: false, value: callback.call(this)};
-  if (ret.value instanceof Hole) {
-    ret.value = unroll(ret.value);
-    const {i, length, stack} = current;
-    if (i < length) {
-      current.length = i;
-      stack.splice(i);
-    }
-    if (current.update) {
+  const ret = callback.call(this);
+  let value;
+  if (ret instanceof Hole) {
+    value = asNode(unroll(ret), current.update);
+    const {i, length, stack, update} = current;
+    if (i < length)
+      stack.splice(current.length = i);
+    if (update)
       current.update = false;
-      ret.forced = true;
-    }
+  } else {
+    value = asNode(ret, false);
   }
   current = prev;
-  return ret;
+  return value;
 }
 
 function unroll(hole) {
@@ -119,34 +117,37 @@ function unroll(hole) {
   const {type, args} = hole;
   const stacked = i < length;
   current.i++;
+  if (!stacked)
+    current.length = stack.push(crateInfo(tagger, args[0], type, null));
   unrollArray(args, 1);
   if (stacked) {
     const {tagger, tpl, kind, wire} = stack[i];
     if (type === kind && tpl === args[0]) {
-      tagger.apply(null, args);
-      return wire;
+      try {
+        tagger.apply(null, args);
+        return wire;
+      } catch(nonKeyedGotcha) {
+        console.error(nonKeyedGotcha);
+        // for the time being this can be ignored
+      }
     }
   }
   const tagger = new Tagger(type);
-  const info = {
-    tagger,
-    tpl: args[0],
-    kind: type,
-    wire: wiredContent(tagger.apply(null, args))
-  };
-  if (stacked)
-    stack[i] = info;
-  else
-    current.length = stack.push(info);
+  const wire = wiredContent(tagger.apply(null, args));
+  stack[i] = crateInfo(tagger, args[0], type, wire);
   if (i < 1)
     current.update = true;
-  return info.wire;
+  return wire;
+}
+
+function crateInfo(tagger, tpl, kind, wire) {
+  return {tagger, tpl, kind, wire};
 }
 
 function unrollArray(arr, i) {
   for (const {length} = arr; i < length; i++) {
     const value = arr[i];
-    if (value) {
+    if (typeof value === 'object' && value) {
       if (value instanceof Hole) {
         arr[i] = unroll(value);
       } else if (isArray(value)) {

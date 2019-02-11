@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>lighterhtml</title>
+  <script src="../index.js"></script>
+</head>
+<body><script>
+const LENGTH = 1000;
+const RANGE_START = Math.round(LENGTH / 4);
+const RANGE_END = RANGE_START * 2;
+
+const {render, html} = lighterhtml;
+const $ = (where, what) => {
+  render(where, what);
+};
+
+// benchmark 
+let list = [];
+for (let id = 0; id < LENGTH; id++)
+  list[id] = {id, text: `R${Math.random()}`};
+
+[
+  create,
+  changeStart,
+  changeMiddle,
+  changeEnd,
+  reverse,
+  addStart,
+  addMiddle,
+  addEnd,
+  removeStart,
+  removeMiddle,
+  removeEnd,
+  replaceOneToMany,
+  replaceManyToOne,
+  shuffle,
+  shuffle,
+  shuffle,
+  done
+].reduce(
+  (p, fn) => p.then(() => new Promise($ => {
+    setTimeout(fn, 500, $);
+  })),
+  Promise.resolve()
+);
+
+function create(next) {
+  console.time('create');
+  $(document.body, ul);
+  console.timeEnd('create');
+  next();
+}
+
+function changeStart(next) {
+  for (let id = 0; id < RANGE_START; id++)
+    list[id] = {id, text: `R${Math.random()}`};
+  console.time('change-start');
+  $(document.body, ul);
+  console.timeEnd('change-start');
+  next();
+}
+
+function changeMiddle(next) {
+  for (let id = RANGE_START; id < RANGE_END; id++)
+    list[id] = {id, text: `R${Math.random()}`};
+  console.time('change-middle');
+  $(document.body, ul);
+  console.timeEnd('change-middle');
+  next();
+}
+
+function changeEnd(next) {
+  for (let id = RANGE_END; id < LENGTH; id++)
+    list[id] = {id, text: `R${Math.random()}`};
+  console.time('change-end');
+  $(document.body, ul);
+  console.timeEnd('change-end');
+  next();
+}
+
+function reverse(next) {
+  list = list.reverse();
+  console.time('reverse');
+  $(document.body, ul);
+  console.timeEnd('reverse');
+  next();
+}
+
+function addStart(next) {
+  for (let id = 0; id < RANGE_START; id++)
+    list.unshift({id, text: `R${Math.random()}`});
+  console.time('add-start');
+  $(document.body, ul);
+  console.timeEnd('add-start');
+  next();
+}
+
+function addMiddle(next) {
+  const middle = [];
+  for (let id = 0; id < RANGE_START; id++)
+    middle.push({id, text: `R${Math.random()}`});
+  list.splice(RANGE_START, 0, ...middle);
+  console.time('add-middle');
+  $(document.body, ul);
+  console.timeEnd('add-middle');
+  next();
+}
+
+function addEnd(next) {
+  for (let id = 0; id < RANGE_START; id++)
+    list.push({id, text: `R${Math.random()}`});
+  console.time('add-end');
+  $(document.body, ul);
+  console.timeEnd('add-end');
+  next();
+}
+
+function removeStart(next) {
+  list.splice(0, RANGE_START);
+  console.time('remove-start');
+  $(document.body, ul);
+  console.timeEnd('remove-start');
+  next();
+}
+
+function removeMiddle(next) {
+  list.splice(RANGE_START, RANGE_START);
+  console.time('remove-middle');
+  $(document.body, ul);
+  console.timeEnd('remove-middle');
+  next();
+}
+
+function removeEnd(next) {
+  list.splice(RANGE_END);
+  console.time('remove-end');
+  $(document.body, ul);
+  console.timeEnd('remove-end');
+  next();
+}
+
+function replaceOneToMany(next) {
+  const many = [list[RANGE_START]];
+  for (let id = 0; id < RANGE_START; id++)
+    many.push({id, text: `R${Math.random()}`});
+  list.splice(RANGE_START, 1, ...many);
+  console.time('replace-one-to-many');
+  $(document.body, ul);
+  console.timeEnd('replace-one-to-many');
+  next();
+}
+
+function replaceManyToOne(next) {
+  const li = list[RANGE_START];
+  list.splice(RANGE_START, RANGE_START + 1, li);
+  console.time('replace-many-to-one');
+  $(document.body, ul);
+  console.timeEnd('replace-many-to-one');
+  next();
+}
+
+function shuffle(next) {
+  list.sort(() => (Math.random() < 0.5 ? -1 : 1));
+  console.time('shuffle');
+  $(document.body, ul);
+  console.timeEnd('shuffle');
+  next();
+}
+
+function done(next) {
+  list.splice(0);
+  list.push({id: 0, text: 'Done: results in console.'});
+  $(document.body, ul);
+  next();
+}
+
+function ul() {
+  return html`<ul>${
+    list.map(item => html`
+    <li id=${item.id}>${item.text}</li>`)
+  }</ul>`;
+}
+
+</script></body>
+</html>
