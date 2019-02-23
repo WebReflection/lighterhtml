@@ -1107,6 +1107,7 @@ var lighterhtml = (function (document,exports) {
     attribute: function attribute(node, name, original) {
       switch (name) {
         case 'class':
+          if (OWNER_SVG_ELEMENT in node) return hyperAttribute(node, original);
           name = 'className';
 
         case 'data':
