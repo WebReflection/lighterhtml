@@ -1016,9 +1016,10 @@ var lighterhtml = (function (document,exports) {
   }; // generic attributes helpers
 
 
-  var hyperAttribute = function hyperAttribute(node, attribute) {
+  var hyperAttribute = function hyperAttribute(node, original) {
     var oldValue;
     var owner = false;
+    var attribute = original.cloneNode(true);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
@@ -1123,7 +1124,7 @@ var lighterhtml = (function (document,exports) {
         default:
           if (name.slice(0, 2) === 'on') return hyperEvent(node, name);
           if (name in node && !(OWNER_SVG_ELEMENT in node || readOnly.test(name))) return hyperProperty(node, name);
-          return hyperAttribute(node, original.cloneNode(true));
+          return hyperAttribute(node, original);
       }
     },
     // in a hyper(node)`<div>${content}</div>` case

@@ -22,9 +22,10 @@ const asNode = (item, i) => item.nodeType === wireType ?
 const canDiff = value => 'ELEMENT_NODE' in value;
 
 // generic attributes helpers
-const hyperAttribute = (node, attribute) => {
+const hyperAttribute = (node, original) => {
   let oldValue;
   let owner = false;
+  const attribute = original.cloneNode(true);
   return newValue => {
     if (oldValue !== newValue) {
       oldValue = newValue;
@@ -131,7 +132,7 @@ Tagger.prototype = {
           OWNER_SVG_ELEMENT in node || readOnly.test(name)
         ))
           return hyperProperty(node, name);
-        return hyperAttribute(node, original.cloneNode(true));
+        return hyperAttribute(node, original);
 
     }
   },
