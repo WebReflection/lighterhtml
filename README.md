@@ -72,7 +72,7 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
 
 ### What's different from hyperHTML ?
 
-  * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly as for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique, and it's the string `default` when not specified. This makes content hard wired whenever it's needed.
+  * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly ask for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique, and it's the string `default` when not specified. This makes content hard wired whenever it's needed.
   * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If you'll pass `{set current(node) { ... }}` that'll be invoked per each update, in case you need the node outside `useRef`.
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
   * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates. Promises might be supported again in the future to align with isomorphic SSR, but right now these are not handled at all.
