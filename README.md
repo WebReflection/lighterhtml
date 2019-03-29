@@ -54,7 +54,7 @@ Born just as own fork of this project, `lighterhtml-plus` enhances the HTML5 exp
 
   * `onconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have Custom Elements like callbacks
   * `ondisconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have counter events when nodes get disconnected
-  * `onattributechnged` callback, as in [wickedElements](https://github.com/WebReflection/wicked-elements#wickedelements), to have attributes change notifications, Custom Elements like
+  * `onattributechanged` callback, as in [wickedElements](https://github.com/WebReflection/wicked-elements#wickedelements), to have attributes change notifications, Custom Elements like
 
 
 ### How to import lighterhtml/-plus
