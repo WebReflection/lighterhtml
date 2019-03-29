@@ -48,7 +48,16 @@ Strawberry on top, when the `html` or `svg` tag is used through _lighterhtml_ `r
 "_but ... how?_", if you're asking, the answer is simple: _lighterhtml_ is based on the same [augmentor](https://github.com/WebReflection/augmentor#augmentor)'s hooks concept, followed by automatically addressed [hyperhtml-wire](https://github.com/WebReflection/hyperhtml-wire#hyperhtml-wire)s, which in turns brings a battle tested solution for the [O(ND) Eugene W. Myers' Algorithm](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.4.6927&rep=rep1&type=pdf) based [domdiff](https://github.com/WebReflection/domdiff#domdiff), and its extra variations.
 
 
-### How to import lighterhtml
+### Available as lighterhtml-plus too!
+
+Born just as own fork of this project, `lighterhtml-plus` enhances the HTML5 experience through these extras:
+
+  * `onconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have Custom Elements like callbacks
+  * `ondisconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have counter events when nodes get disconnected
+  * `onattributechnged` callback, as in [wickedElements](https://github.com/WebReflection/wicked-elements#wickedelements), to have attributes change notifications, Custom Elements like
+
+
+### How to import lighterhtml/-plus
 
 Following, the usual multi import pattern behind every project of mine:
 
