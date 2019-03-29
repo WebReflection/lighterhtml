@@ -1288,8 +1288,8 @@ var lighterhtml = (function (document,exports) {
   } // keyed render via render(node, () => html`...`)
   // non keyed renders in the wild via html`...`
 
-  var html = outer$1('html');
-  var svg = outer$1('svg'); // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var html = outer('html');
+  var svg = outer('svg'); // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   function appendClean(node, fragment) {
     node.textContent = '';
@@ -1308,7 +1308,7 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
-  function outer$1(type) {
+  function outer(type) {
     var wm = new WeakMap$1();
 
     tag.for = function (identity, id) {
@@ -1342,7 +1342,7 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
-  function set$1(node) {
+  function set(node) {
     var info = {
       i: 0,
       length: 0,
@@ -1355,7 +1355,7 @@ var lighterhtml = (function (document,exports) {
 
   function update(reference, callback) {
     var prev = current;
-    current = wm.get(reference) || set$1(reference);
+    current = wm.get(reference) || set(reference);
     current.i = 0;
     var ret = callback.call(this);
     var value;
@@ -1449,8 +1449,8 @@ var lighterhtml = (function (document,exports) {
   }
 
   exports.hook = hook;
-  exports.render = render;
   exports.html = html;
+  exports.render = render;
   exports.svg = svg;
 
   return exports;
