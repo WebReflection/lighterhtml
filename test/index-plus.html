@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>lighterHTML</title>
+  <script src="../index.js"></script>
+</head>
+<body>
+    <script async>
+      const {render, html} = lighterhtml;
+      render(document.body, () => html`
+      <div
+        onconnected=${e => {
+          console.log(e.type);
+          e.currentTarget.textContent += '.2';
+        }}
+        ondisconnected=${e => {
+          console.log(e.type);
+          e.currentTarget.textContent += '.3';
+        }}
+        onattributechanged=${e => {
+          console.log(e.type, e.attributeName, e.oldValue, e.newValue);
+          e.currentTarget.textContent += '.4';
+        }}
+      >1</div>`);
+      const el = document.body.lastElementChild;
+      el.setAttribute('test', 'value');
+      document.body.removeChild(el);
+      setTimeout(function () {
+        console.assert(el.textContent.split('.').sort().join('') === '1234');
+      });
+    </script>
+</body>
+</html>

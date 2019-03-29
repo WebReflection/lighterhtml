@@ -154,6 +154,32 @@ var lighterhtml = (function (document,exports) {
 
   var isArray = Array.isArray;
   var wireType = Wire.prototype.nodeType;
+  var WS = (typeof WeakSet === "undefined" ? "undefined" : typeof(WeakSet)) === '' + void 0 ? function () {
+    var ws = new WeakMap$1();
+    ws.add = add;
+    return ws;
+  } : WeakSet;
+
+  function add(key) {
+    return this.set(key, true);
+  }
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var self$1 = null ||
+  /* istanbul ignore next */
+  {};
+  self$1.CustomEvent = typeof CustomEvent === 'function' ? CustomEvent : function (__p__) {
+    CustomEvent[__p__] = new CustomEvent('').constructor[__p__];
+    return CustomEvent;
+
+    function CustomEvent(type, init) {
+      if (!init) init = {};
+      var e = document.createEvent('CustomEvent');
+      e.initCustomEvent(type, !!init.bubbles, !!init.cancelable, init.detail);
+      return e;
+    }
+  }('prototype');
+  var CustomEvent$1 = self$1.CustomEvent;
 
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
@@ -211,14 +237,14 @@ var lighterhtml = (function (document,exports) {
   }(document);
 
   /*! (c) Andrea Giammarchi - ISC */
-  var self$1 = null ||
+  var self$2 = null ||
   /* istanbul ignore next */
   {};
 
   try {
-    self$1.Map = Map;
+    self$2.Map = Map;
   } catch (Map) {
-    self$1.Map = function Map() {
+    self$2.Map = function Map() {
       var i = 0;
       var k = [];
       var v = [];
@@ -252,7 +278,7 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
-  var Map$1 = self$1.Map;
+  var Map$1 = self$2.Map;
 
   var append = function append(get, parent, children, start, end, before) {
     if (end - start < 2) parent.insertBefore(get(children[start], 1), before);else {
@@ -1009,7 +1035,164 @@ var lighterhtml = (function (document,exports) {
     }
   }();
 
-  var OWNER_SVG_ELEMENT = 'ownerSVGElement'; // returns nodes from wires and components
+  /*! (c) Andrea Giammarchi */
+  function attributechanged(poly) {
+
+    var Event = poly.Event;
+    return function observe(node, attributeFilter) {
+      var options = {
+        attributes: true,
+        attributeOldValue: true
+      };
+      var filtered = attributeFilter instanceof Array && attributeFilter.length;
+      if (filtered) options.attributeFilter = attributeFilter.slice(0);
+
+      try {
+        new MutationObserver(changes).observe(node, options);
+      } catch (o_O) {
+        options.handleEvent = filtered ? handleEvent : attrModified;
+        node.addEventListener('DOMAttrModified', options, true);
+      }
+
+      return node;
+    };
+
+    function attrModified(event) {
+      dispatchEvent(event.target, event.attrName, event.prevValue);
+    }
+
+    function dispatchEvent(node, attributeName, oldValue) {
+      var event = new Event('attributechanged');
+      event.attributeName = attributeName;
+      event.oldValue = oldValue;
+      event.newValue = node.getAttribute(attributeName);
+      node.dispatchEvent(event);
+    }
+
+    function changes(records) {
+      for (var record, i = 0, length = records.length; i < length; i++) {
+        record = records[i];
+        dispatchEvent(record.target, record.attributeName, record.oldValue);
+      }
+    }
+
+    function handleEvent(event) {
+      if (-1 < this.attributeFilter.indexOf(event.attrName)) attrModified(event);
+    }
+  }
+
+  /*! (c) Andrea Giammarchi */
+  function disconnected(poly) {
+
+    var CONNECTED = 'connected';
+    var DISCONNECTED = 'dis' + CONNECTED;
+    var Event = poly.Event;
+    var WeakSet = poly.WeakSet;
+    var notObserving = true;
+    var observer = new WeakSet();
+    return function observe(node) {
+      if (notObserving) {
+        notObserving = !notObserving;
+        startObserving(node.ownerDocument);
+      }
+
+      observer.add(node);
+      return node;
+    };
+
+    function startObserving(document) {
+      var dispatched = null;
+
+      try {
+        new MutationObserver(changes).observe(document, {
+          subtree: true,
+          childList: true
+        });
+      } catch (o_O) {
+        var timer = 0;
+        var records = [];
+
+        var reschedule = function reschedule(record) {
+          records.push(record);
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            changes(records.splice(timer = 0, records.length));
+          }, 0);
+        };
+
+        document.addEventListener('DOMNodeRemoved', function (event) {
+          reschedule({
+            addedNodes: [],
+            removedNodes: [event.target]
+          });
+        }, true);
+        document.addEventListener('DOMNodeInserted', function (event) {
+          reschedule({
+            addedNodes: [event.target],
+            removedNodes: []
+          });
+        }, true);
+      }
+
+      function changes(records) {
+        dispatched = new Tracker();
+
+        for (var record, length = records.length, i = 0; i < length; i++) {
+          record = records[i];
+          dispatchAll(record.removedNodes, DISCONNECTED, CONNECTED);
+          dispatchAll(record.addedNodes, CONNECTED, DISCONNECTED);
+        }
+
+        dispatched = null;
+      }
+
+      function dispatchAll(nodes, type, counter) {
+        for (var node, event = new Event(type), length = nodes.length, i = 0; i < length; (node = nodes[i++]).nodeType === 1 && dispatchTarget(node, event, type, counter)) {
+        }
+      }
+
+      function dispatchTarget(node, event, type, counter) {
+        if (observer.has(node) && !dispatched[type].has(node)) {
+          dispatched[counter].delete(node);
+          dispatched[type].add(node);
+          node.dispatchEvent(event);
+          /*
+          // The event is not bubbling (perf reason: should it?),
+          // hence there's no way to know if
+          // stop/Immediate/Propagation() was called.
+          // Should DOM Level 0 work at all?
+          // I say it's a YAGNI case for the time being,
+          // and easy to implement in user-land.
+          if (!event.cancelBubble) {
+            var fn = node['on' + type];
+            if (fn)
+              fn.call(node, event);
+          }
+          */
+        }
+
+        for (var // apparently is node.children || IE11 ... ^_^;;
+        // https://github.com/WebReflection/disconnected/issues/1
+        children = node.children || [], length = children.length, i = 0; i < length; dispatchTarget(children[i++], event, type, counter)) {
+        }
+      }
+
+      function Tracker() {
+        this[CONNECTED] = new WeakSet();
+        this[DISCONNECTED] = new WeakSet();
+      }
+    }
+  }
+
+  var CONNECTED = 'connected';
+  var DISCONNECTED = 'dis' + CONNECTED;
+  var OWNER_SVG_ELEMENT = 'ownerSVGElement';
+  var poly = {
+    Event: CustomEvent$1,
+    WeakSet: WS
+  };
+  var observe = disconnected(poly);
+  var attribute = attributechanged(poly); // returns nodes from wires and components
 
   var asNode = function asNode(item, i) {
     return item.nodeType === wireType ? 1 / i < 0 ? i ? item.remove(true) : item.lastChild : i ? item.valueOf(true) : item.firstChild : item;
@@ -1054,7 +1237,7 @@ var lighterhtml = (function (document,exports) {
   var hyperEvent = function hyperEvent(node, name) {
     var oldValue;
     var type = name.slice(2);
-    if (name.toLowerCase() in node) type = type.toLowerCase();
+    if (type === CONNECTED || type === DISCONNECTED) observe(node);else if (type === 'attributechanged') attribute(node);else if (name.toLowerCase() in node) type = type.toLowerCase();
     return function (newValue) {
       if (oldValue !== newValue) {
         if (oldValue) node.removeEventListener(type, oldValue, false);
