@@ -1,11 +1,23 @@
+import CustomEvent from '@ungap/custom-event';
 import createContent from '@ungap/create-content';
 import domdiff from 'domdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
+import {WS, wireType, isArray} from './shared.js';
+import attributechanged from 'attributechanged';
+import disconnected from 'disconnected';
 
-import {wireType, isArray} from './shared.js';
-
+const CONNECTED = 'connected';
+const DISCONNECTED = 'dis' + CONNECTED;
 const OWNER_SVG_ELEMENT = 'ownerSVGElement';
+
+const poly = {
+  Event: CustomEvent,
+  WeakSet: WS
+};
+
+const observe = disconnected(poly);
+const attribute = attributechanged(poly);
 
 // returns nodes from wires and components
 const asNode = (item, i) => item.nodeType === wireType ?
@@ -51,7 +63,11 @@ const hyperAttribute = (node, original) => {
 const hyperEvent = (node, name) => {
   let oldValue;
   let type = name.slice(2);
-  if (name.toLowerCase() in node)
+  if (type === CONNECTED || type === DISCONNECTED)
+    observe(node);
+  else if (type === 'attributechanged')
+    attribute(node);
+  else if (name.toLowerCase() in node)
     type = type.toLowerCase();
   return newValue => {
     if (oldValue !== newValue) {
