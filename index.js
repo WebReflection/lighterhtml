@@ -19,7 +19,7 @@ var lighterhtml = (function (document,exports) {
       var hOP = Object.hasOwnProperty;
       var proto = WeakMap.prototype;
 
-      proto.delete = function (key) {
+      proto["delete"] = function (key) {
         return this.has(key) && delete key[this._];
       };
 
@@ -223,7 +223,7 @@ var lighterhtml = (function (document,exports) {
       var k = [];
       var v = [];
       return {
-        delete: function _delete(key) {
+        "delete": function _delete(key) {
           var had = contains(key);
 
           if (had) {
@@ -628,13 +628,14 @@ var lighterhtml = (function (document,exports) {
 
   /*! (c) Andrea Giammarchi - ISC */
   var importNode = function (document, appendChild, cloneNode, createTextNode, importNode) {
-    var native = importNode in document; // IE 11 has problems with cloning templates:
+    var _native = importNode in document; // IE 11 has problems with cloning templates:
     // it "forgets" empty childNodes. This feature-detects that.
+
 
     var fragment = document.createDocumentFragment();
     fragment[appendChild](document[createTextNode]('g'));
     fragment[appendChild](document[createTextNode](''));
-    var content = native ? document[importNode](fragment, true) : fragment[cloneNode](true);
+    var content = _native ? document[importNode](fragment, true) : fragment[cloneNode](true);
     return content.childNodes.length < 2 ? function importNode(node, deep) {
       var clone = node[cloneNode]();
 
@@ -643,7 +644,7 @@ var lighterhtml = (function (document,exports) {
       }
 
       return clone;
-    } : native ? document[importNode] : function (node, deep) {
+    } : _native ? document[importNode] : function (node, deep) {
       return node[cloneNode](!!deep);
     };
   }(document, 'appendChild', 'cloneNode', 'createTextNode', 'importNode');
@@ -1303,7 +1304,7 @@ var lighterhtml = (function (document,exports) {
   function createHook(useRef, view) {
     return function () {
       var ref = useRef(null);
-      if (ref.current === null) ref.current = view.for(ref);
+      if (ref.current === null) ref.current = view["for"](ref);
       return asNode$1(ref.current.apply(null, arguments), false);
     };
   }
@@ -1311,7 +1312,7 @@ var lighterhtml = (function (document,exports) {
   function outer(type) {
     var wm = new WeakMap$1();
 
-    tag.for = function (identity, id) {
+    tag["for"] = function (identity, id) {
       var ref = wm.get(identity) || set(identity);
       if (id == null) id = '$';
       return ref[id] || create(ref, id);
