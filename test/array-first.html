@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../index.js"></script>
+  <script>
+  this.onload = () => {
+    const {html, render} = lighterhtml;
+
+    const counter = (count, i, array) => {
+      return html`
+        <div>${count}</div>
+        <button onclick=${
+          () => {
+            array[i]++;
+            update(array);
+          }
+        }>up</button>
+      `;
+    };
+
+    const app = (counters) => {
+      return html`
+        ${counters.map(counter)}
+        <button onclick=${() => update(counters.concat(0))}>add counter</button>
+      `;
+    };
+
+    function update(counters) {
+      render(document.body, () => app(counters));
+    }
+
+    update([]);
+
+  };
+  </script>
+  <title>Array first</title>
+</head>
+<body>
+  
+</body>
+</html>
