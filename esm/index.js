@@ -30,6 +30,15 @@ export function render(node, callback) {
 export const html = outer('html');
 export const svg = outer('svg');
 
+// an indirect exposure of a domtagger capability
+// usable to transform once per template any layout
+export const transform = callback => {
+  const {transform} = Tagger.prototype;
+  Tagger.prototype.transform = transform ?
+    markup => callback(transform(markup)) :
+    callback;
+};
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 function appendClean(node, fragment) {

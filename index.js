@@ -1290,7 +1290,15 @@ var lighterhtml = (function (document,exports) {
   // non keyed renders in the wild via html`...`
 
   var html = outer('html');
-  var svg = outer('svg'); // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var svg = outer('svg'); // an indirect exposure of a domtagger capability
+  // usable to transform once per template any layout
+
+  var transform = function transform(callback) {
+    var transform = Tagger.prototype.transform;
+    Tagger.prototype.transform = transform ? function (markup) {
+      return callback(transform(markup));
+    } : callback;
+  }; // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   function appendClean(node, fragment) {
     node.textContent = '';
@@ -1453,6 +1461,7 @@ var lighterhtml = (function (document,exports) {
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
+  exports.transform = transform;
 
   return exports;
 
