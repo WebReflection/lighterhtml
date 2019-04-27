@@ -1153,7 +1153,7 @@ var lighterhtml = (function (document,exports) {
 
       function dispatchTarget(node, event, type, counter) {
         if (observer.has(node) && !dispatched[type].has(node)) {
-          dispatched[counter].delete(node);
+          dispatched[counter]["delete"](node);
           dispatched[type].add(node);
           node.dispatchEvent(event);
           /*
