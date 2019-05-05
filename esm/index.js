@@ -177,7 +177,8 @@ function wiredContent(node) {
     (length ? new Wire(childNodes) : node);
 }
 
-function Hole(type, args) {
+Object.freeze(Hole);
+export function Hole(type, args) {
   this.type = type;
   this.args = args;
 }

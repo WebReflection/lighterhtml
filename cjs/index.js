@@ -183,7 +183,9 @@ function wiredContent(node) {
     (length ? new Wire(childNodes) : node);
 }
 
+Object.freeze(Hole);
 function Hole(type, args) {
   this.type = type;
   this.args = args;
 }
+exports.Hole = Hole

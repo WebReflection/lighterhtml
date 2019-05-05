@@ -20,10 +20,9 @@ todo(document.body.lastChild);
 function todo(node, items = []) {
   render(node, () => html`
   <ul>${items.map((what, i) => html`
-    <li data-i=${i} onclick=${remove}> ${what} </li>
-  `)}
-    <button onclick=${add}> add </button>
-  </uL>`);
+    <li data-i=${i} onclick=${remove}> ${what} </li>`)}
+  </ul>
+  <button onclick=${add}> add </button>`);
   function add() {
     items.push(prompt('do'));
     todo(node, items);

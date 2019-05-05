@@ -1452,11 +1452,13 @@ var lighterhtml = (function (document,exports) {
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   }
 
+  Object.freeze(Hole);
   function Hole(type, args) {
     this.type = type;
     this.args = args;
   }
 
+  exports.Hole = Hole;
   exports.hook = hook;
   exports.html = html;
   exports.render = render;

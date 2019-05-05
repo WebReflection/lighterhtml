@@ -75,6 +75,7 @@ The module exports the following:
   * `svg` tag function, create as one-off any sort of SVG content, or wired content when used within a `render` call
   * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
   * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide a keyed updated per each component
+  * `Hole` class for 3rd parts (internal use)
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 
