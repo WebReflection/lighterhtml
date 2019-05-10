@@ -71,10 +71,12 @@ const hyperProperty = (node, name) => {
     if (oldValue !== newValue) {
       oldValue = newValue;
       if (node[name] !== newValue) {
-        node[name] = newValue;
         if (newValue == null) {
+          // cleanup before dropping the attribute to fix IE/Edge gotcha
+          node[name] = '';
           node.removeAttribute(name);
-        }
+        } else
+          node[name] = newValue;
       }
     }
   };
