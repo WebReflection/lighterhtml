@@ -43,7 +43,7 @@
     "@ungap/template-tag-arguments": "^0.1.1",
     "@ungap/weakmap": "^0.1.4",
     "attributechanged": "^0.2.0",
-    "disconnected": "^0.1.6",
+    "disconnected": "^0.2.0",
     "domdiff": "^2.0.3",
     "domtagger": "^0.3.1",
     "hyperhtml-style": "^0.1.2",
