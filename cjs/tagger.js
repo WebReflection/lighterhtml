@@ -66,14 +66,21 @@ const hyperEvent = (node, name) => {
 };
 
 // special attributes helpers
-const hyperProperty = (node, name) => value => {
-  if (value == null) {
-    // cleanup before dropping the attribute to fix IE/Edge gotcha
-    node[name] = '';
-    node.removeAttribute(name);
-  }
-  else
-    node[name] = value;
+const hyperProperty = (node, name) => {
+  let oldValue;
+  return newValue => {
+    if (oldValue !== newValue) {
+      oldValue = newValue;
+      if (node[name] !== newValue) {
+        if (newValue == null) {
+          // cleanup before dropping the attribute to fix IE/Edge gotcha
+          node[name] = '';
+          node.removeAttribute(name);
+        } else
+          node[name] = newValue;
+      }
+    }
+  };
 };
 
 // special hooks helpers
@@ -81,6 +88,10 @@ const hyperRef = node => {
   return ref => {
     ref.current = node;
   };
+};
+
+const hyperSetter = (node, name) => value => {
+  node[name] = value;
 };
 
 // list of attributes that should not be directly assigned
@@ -121,6 +132,8 @@ Tagger.prototype = {
       case 'ref':
         return hyperRef(node);
       default:
+        if (name.slice(0, 1) === '.')
+          return hyperSetter(node, name.slice(1));
         if (name.slice(0, 2) === 'on')
           return hyperEvent(node, name);
         if (name in node && !(
