@@ -65,21 +65,14 @@ const hyperEvent = (node, name) => {
 };
 
 // special attributes helpers
-const hyperProperty = (node, name) => {
-  let oldValue;
-  return newValue => {
-    if (oldValue !== newValue) {
-      oldValue = newValue;
-      if (node[name] !== newValue) {
-        if (newValue == null) {
-          // cleanup before dropping the attribute to fix IE/Edge gotcha
-          node[name] = '';
-          node.removeAttribute(name);
-        } else
-          node[name] = newValue;
-      }
-    }
-  };
+const hyperProperty = (node, name) => value => {
+  if (value == null) {
+    // cleanup before dropping the attribute to fix IE/Edge gotcha
+    node[name] = '';
+    node.removeAttribute(name);
+  }
+  else
+    node[name] = value;
 };
 
 // special hooks helpers

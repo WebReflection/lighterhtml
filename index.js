@@ -1066,19 +1066,12 @@ var lighterhtml = (function (document,exports) {
 
 
   var hyperProperty = function hyperProperty(node, name) {
-    var oldValue;
-    return function (newValue) {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-
-        if (node[name] !== newValue) {
-          if (newValue == null) {
-            // cleanup before dropping the attribute to fix IE/Edge gotcha
-            node[name] = '';
-            node.removeAttribute(name);
-          } else node[name] = newValue;
-        }
-      }
+    return function (value) {
+      if (value == null) {
+        // cleanup before dropping the attribute to fix IE/Edge gotcha
+        node[name] = '';
+        node.removeAttribute(name);
+      } else node[name] = value;
     };
   }; // special hooks helpers
 
