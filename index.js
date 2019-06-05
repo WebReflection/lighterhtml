@@ -760,12 +760,25 @@ var lighterhtml = (function (document,exports) {
           break;
 
         case COMMENT_NODE:
-          if (child.textContent === UID) {
+          var textContent = child.textContent;
+
+          if (textContent === UID) {
             parts.shift();
             holes.push( // basicHTML or other non standard engines
             // might end up having comments in nodes
             // where they shouldn't, hence this check.
             SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? create('text', node, path) : create('any', child, path.concat(i)));
+          } else {
+            switch (textContent.slice(0, 2)) {
+              case '/*':
+                if (textContent.slice(-2) !== '*/') break;
+
+              case "\uD83D\uDC7B":
+                // ghost
+                node.removeChild(child);
+                i--;
+                length--;
+            }
           }
 
           break;
@@ -1084,8 +1097,6 @@ var lighterhtml = (function (document,exports) {
   /*! (c) Andrea Giammarchi */
   function disconnected(poly) {
 
-    var CONNECTED = 'connected';
-    var DISCONNECTED = 'dis' + CONNECTED;
     var Event = poly.Event;
     var WeakSet = poly.WeakSet;
     var notObserving = true;
@@ -1102,9 +1113,8 @@ var lighterhtml = (function (document,exports) {
     };
 
     function startObserving(document) {
-      var dispatched = {};
-      dispatched[CONNECTED] = new WeakSet();
-      dispatched[DISCONNECTED] = new WeakSet();
+      var connected = new WeakSet();
+      var disconnected = new WeakSet();
 
       try {
         new MutationObserver(changes).observe(document, {
@@ -1140,20 +1150,20 @@ var lighterhtml = (function (document,exports) {
       function changes(records) {
         for (var record, length = records.length, i = 0; i < length; i++) {
           record = records[i];
-          dispatchAll(record.removedNodes, DISCONNECTED, CONNECTED);
-          dispatchAll(record.addedNodes, CONNECTED, DISCONNECTED);
+          dispatchAll(record.removedNodes, 'disconnected', disconnected, connected);
+          dispatchAll(record.addedNodes, 'connected', connected, disconnected);
         }
       }
 
-      function dispatchAll(nodes, type, counter) {
-        for (var node, event = new Event(type), length = nodes.length, i = 0; i < length; (node = nodes[i++]).nodeType === 1 && dispatchTarget(node, event, type, counter)) {
+      function dispatchAll(nodes, type, wsin, wsout) {
+        for (var node, event = new Event(type), length = nodes.length, i = 0; i < length; (node = nodes[i++]).nodeType === 1 && dispatchTarget(node, event, type, wsin, wsout)) {
         }
       }
 
-      function dispatchTarget(node, event, type, counter) {
-        if (observer.has(node) && !dispatched[type].has(node)) {
-          dispatched[counter]["delete"](node);
-          dispatched[type].add(node);
+      function dispatchTarget(node, event, type, wsin, wsout) {
+        if (observer.has(node) && !wsin.has(node)) {
+          wsout["delete"](node);
+          wsin.add(node);
           node.dispatchEvent(event);
           /*
           // The event is not bubbling (perf reason: should it?),
@@ -1172,7 +1182,7 @@ var lighterhtml = (function (document,exports) {
 
         for (var // apparently is node.children || IE11 ... ^_^;;
         // https://github.com/WebReflection/disconnected/issues/1
-        children = node.children || [], length = children.length, i = 0; i < length; dispatchTarget(children[i++], event, type, counter)) {
+        children = node.children || [], length = children.length, i = 0; i < length; dispatchTarget(children[i++], event, type, wsin, wsout)) {
         }
       }
     }
@@ -1264,6 +1274,12 @@ var lighterhtml = (function (document,exports) {
     return function (ref) {
       ref.current = node;
     };
+  };
+
+  var hyperSetter = function hyperSetter(node, name) {
+    return function (value) {
+      node[name] = value;
+    };
   }; // list of attributes that should not be directly assigned
 
 
@@ -1304,6 +1320,7 @@ var lighterhtml = (function (document,exports) {
           return hyperRef(node);
 
         default:
+          if (name.slice(0, 1) === '.') return hyperSetter(node, name.slice(1));
           if (name.slice(0, 2) === 'on') return hyperEvent(node, name);
           if (name in node && !(OWNER_SVG_ELEMENT in node || readOnly.test(name))) return hyperProperty(node, name);
           return hyperAttribute(node, original);

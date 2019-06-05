@@ -105,6 +105,10 @@ const hyperRef = node => {
   };
 };
 
+const hyperSetter = (node, name) => value => {
+  node[name] = value;
+};
+
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
 
@@ -142,6 +146,8 @@ Tagger.prototype = {
       case 'ref':
         return hyperRef(node);
       default:
+        if (name.slice(0, 1) === '.')
+          return hyperSetter(node, name.slice(1));
         if (name.slice(0, 2) === 'on')
           return hyperEvent(node, name);
         if (name in node && !(
