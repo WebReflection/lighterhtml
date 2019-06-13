@@ -80,7 +80,8 @@ function outer(type) {
     let wire = null;
     const $ = new Tagger(type);
     return (ref[id] = function () {
-      const result = $.apply(null, tta.apply(null, arguments));
+      const args = tta.apply(null, arguments);
+      const result = $.apply(null, unrollArray(args, 1, 1));
       return wire || (wire = wiredContent(result));
     });
   }

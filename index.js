@@ -734,12 +734,25 @@ var lighterhtml = (function (document,exports) {
           break;
 
         case COMMENT_NODE:
-          if (child.textContent === UID) {
+          var textContent = child.textContent;
+
+          if (textContent === UID) {
             parts.shift();
             holes.push( // basicHTML or other non standard engines
             // might end up having comments in nodes
             // where they shouldn't, hence this check.
             SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? create('text', node, path) : create('any', child, path.concat(i)));
+          } else {
+            switch (textContent.slice(0, 2)) {
+              case '/*':
+                if (textContent.slice(-2) !== '*/') break;
+
+              case "\uD83D\uDC7B":
+                // ghost
+                node.removeChild(child);
+                i--;
+                length--;
+            }
           }
 
           break;
@@ -1343,7 +1356,8 @@ var lighterhtml = (function (document,exports) {
       var wire = null;
       var $ = new Tagger(type);
       return ref[id] = function () {
-        var result = $.apply(null, tta.apply(null, arguments));
+        var args = tta.apply(null, arguments);
+        var result = $.apply(null, unrollArray(args, 1, 1));
         return wire || (wire = wiredContent(result));
       };
     }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<script src="../index.js"></script>
+<script>
+this.onload = () => {
+  const {render, html} = lighterhtml;
+
+  const list = [
+    {id: 1, desc: 'some'},
+    {id: 2, desc: 'text'}
+  ];
+
+  const Button = (text) => html`
+    <button>
+      ${text}
+    </button>
+  `
+
+  const ListItem = (item) => html.for(item, ':li1')`
+    <li>${item.desc}</li>
+  `
+  const ListButtonItem = (item) => html`
+    <li>${Button(item.desc)}</li>
+  `
+  const ListButtonForItem = (item) => html.for(item, ':li2')`
+    <li>${Button(item.desc)}</li>
+  `
+
+  const Lists = () => html`
+    <ul>
+      ${list.map(ListItem)}
+    </ul>
+    <ul>
+      ${list.map(ListButtonItem)}
+    </ul>
+    <ul>
+      ${list.map(ListButtonForItem)}
+    </ul>
+  `
+
+  render(document.body, Lists);
+};
+</script>
