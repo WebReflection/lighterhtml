@@ -62,12 +62,21 @@ var lighterhtml = (function (document,exports) {
     var RAW = 'raw';
     var isNoOp = false;
 
+    var isBroken = function isBroken(UA) {
+      var broken = /(Firefox|Safari)\/(\d+)/.exec(UA);
+      return !!broken && !/(Chrom|Android)\/(\d+)/.test(UA);
+      /* && (
+        (broken[1] === 'Firefox' && (broken[2] < 55) || (broken[2] > 65)) ||
+        (broken[1] === 'Safari' && broken[2] > 539)
+      ); */
+    };
+
     var _templateLiteral = function templateLiteral(tl) {
       if ( // for badly transpiled literals
       !(RAW in tl) || // for some version of TypeScript
       tl.propertyIsEnumerable(RAW) || // and some other version of TypeScript
-      !Object.isFrozen(tl[RAW]) || // or for Firefox < 55
-      /Firefox\/(\d+)/.test((document.defaultView.navigator || {}).userAgent) && parseFloat(RegExp.$1) < 55) {
+      !Object.isFrozen(tl[RAW]) || // check some messed up browser or version
+      isBroken((document.defaultView.navigator || {}).userAgent)) {
         var forever = {};
 
         _templateLiteral = function templateLiteral(tl) {
