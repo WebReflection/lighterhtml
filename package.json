@@ -40,7 +40,7 @@
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
     "@ungap/custom-event": "^0.2.0",
-    "@ungap/template-tag-arguments": "^0.1.1",
+    "@ungap/template-tag-arguments": "^0.3.0",
     "@ungap/weakmap": "^0.1.4",
     "attributechanged": "^0.2.0",
     "disconnected": "^0.2.1",

@@ -56,44 +56,61 @@ var lighterhtml = (function (document,exports) {
 
   var WeakMap$1 = self.WeakMap;
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var templateLiteral = function () {
+  var isNoOp = false;
 
+  var _templateLiteral = function templateLiteral(tl) {
     var RAW = 'raw';
-    var isNoOp = false;
 
-    var _templateLiteral = function templateLiteral(tl) {
-      if ( // for badly transpiled literals
-      !(RAW in tl) || // for some version of TypeScript
-      tl.propertyIsEnumerable(RAW) || // and some other version of TypeScript
-      !Object.isFrozen(tl[RAW]) || // or for Firefox < 55
-      /Firefox\/(\d+)/.test((document.defaultView.navigator || {}).userAgent) && parseFloat(RegExp.$1) < 55) {
-        var forever = {};
-
-        _templateLiteral = function templateLiteral(tl) {
-          for (var key = '.', i = 0; i < tl.length; i++) {
-            key += tl[i].length + '.' + tl[i];
-          }
-
-          return forever[key] || (forever[key] = tl);
-        };
-      } else {
-        isNoOp = true;
-      }
-
-      return TL(tl);
+    var isBroken = function isBroken(UA) {
+      return /(Firefox|Safari)\/(\d+)/.test(UA) && !/(Chrom|Android)\/(\d+)/.test(UA);
     };
 
-    return TL;
+    var broken = isBroken((document.defaultView.navigator || {}).userAgent);
+    var FTS = !(RAW in tl) || tl.propertyIsEnumerable(RAW) || !Object.isFrozen(tl[RAW]);
 
-    function TL(tl) {
-      return isNoOp ? tl : _templateLiteral(tl);
+    if (broken || FTS) {
+      var forever = {};
+
+      var foreverCache = function foreverCache(tl) {
+        for (var key = '.', i = 0; i < tl.length; i++) {
+          key += tl[i].length + '.' + tl[i];
+        }
+
+        return forever[key] || (forever[key] = tl);
+      }; // Fallback TypeScript shenanigans
+
+
+      if (FTS) _templateLiteral = foreverCache; // try fast path for other browsers:
+      // store the template as WeakMap key
+      // and forever cache it only when it's not there.
+      // this way performance is still optimal,
+      // penalized only when there are GC issues
+      else {
+          var wm = new WeakMap$1();
+
+          var set = function set(tl, unique) {
+            wm.set(tl, unique);
+            return unique;
+          };
+
+          _templateLiteral = function templateLiteral(tl) {
+            return wm.get(tl) || set(tl, foreverCache(tl));
+          };
+        }
+    } else {
+      isNoOp = true;
     }
-  }();
+
+    return TL(tl);
+  };
+
+  function TL(tl) {
+    return isNoOp ? tl : _templateLiteral(tl);
+  }
 
   function tta (template) {
     var length = arguments.length;
-    var args = [templateLiteral(template)];
+    var args = [TL(template)];
     var i = 1;
 
     while (i < length) {
