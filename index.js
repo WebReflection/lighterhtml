@@ -56,53 +56,61 @@ var lighterhtml = (function (document,exports) {
 
   var WeakMap$1 = self.WeakMap;
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var templateLiteral = function () {
+  var isNoOp = false;
 
+  var _templateLiteral = function templateLiteral(tl) {
     var RAW = 'raw';
-    var isNoOp = false;
 
     var isBroken = function isBroken(UA) {
-      var broken = /(Firefox|Safari)\/(\d+)/.exec(UA);
-      return !!broken && !/(Chrom|Android)\/(\d+)/.test(UA);
-      /* && (
-        (broken[1] === 'Firefox' && (broken[2] < 55) || (broken[2] > 65)) ||
-        (broken[1] === 'Safari' && broken[2] > 539)
-      ); */
+      return /(Firefox|Safari)\/(\d+)/.test(UA) && !/(Chrom|Android)\/(\d+)/.test(UA);
     };
 
-    var _templateLiteral = function templateLiteral(tl) {
-      if ( // for badly transpiled literals
-      !(RAW in tl) || // for some version of TypeScript
-      tl.propertyIsEnumerable(RAW) || // and some other version of TypeScript
-      !Object.isFrozen(tl[RAW]) || // check some messed up browser or version
-      isBroken((document.defaultView.navigator || {}).userAgent)) {
-        var forever = {};
+    var broken = isBroken((document.defaultView.navigator || {}).userAgent);
+    var FTS = !(RAW in tl) || tl.propertyIsEnumerable(RAW) || !Object.isFrozen(tl[RAW]);
 
-        _templateLiteral = function templateLiteral(tl) {
-          for (var key = '.', i = 0; i < tl.length; i++) {
-            key += tl[i].length + '.' + tl[i];
-          }
+    if (broken || FTS) {
+      var forever = {};
 
-          return forever[key] || (forever[key] = tl);
-        };
-      } else {
-        isNoOp = true;
-      }
+      var foreverCache = function foreverCache(tl) {
+        for (var key = '.', i = 0; i < tl.length; i++) {
+          key += tl[i].length + '.' + tl[i];
+        }
 
-      return TL(tl);
-    };
+        return forever[key] || (forever[key] = tl);
+      }; // Fallback TypeScript shenanigans
 
-    return TL;
 
-    function TL(tl) {
-      return isNoOp ? tl : _templateLiteral(tl);
+      if (FTS) _templateLiteral = foreverCache; // try fast path for other browsers:
+      // store the template as WeakMap key
+      // and forever cache it only when it's not there.
+      // this way performance is still optimal,
+      // penalized only when there are GC issues
+      else {
+          var wm = new WeakMap$1();
+
+          var set = function set(tl, unique) {
+            wm.set(tl, unique);
+            return unique;
+          };
+
+          _templateLiteral = function templateLiteral(tl) {
+            return wm.get(tl) || set(tl, foreverCache(tl));
+          };
+        }
+    } else {
+      isNoOp = true;
     }
-  }();
+
+    return TL(tl);
+  };
+
+  function TL(tl) {
+    return isNoOp ? tl : _templateLiteral(tl);
+  }
 
   function tta (template) {
     var length = arguments.length;
-    var args = [templateLiteral(template)];
+    var args = [TL(template)];
     var i = 1;
 
     while (i < length) {
