@@ -1544,10 +1544,17 @@ var lighterhtml = (function (document,exports) {
     return tag;
 
     function create(ref, id) {
+      var args = [];
       var wire = null;
-      var $ = new Tagger(type);
+      var tagger = new Tagger(type);
+
+      var callback = function callback() {
+        return tagger.apply(null, unrollArray(args, 1, 1));
+      };
+
       return ref[id] = function () {
-        var result = $.apply(null, tta.apply(null, arguments));
+        args = tta.apply(null, arguments);
+        var result = update(tagger, callback);
         return wire || (wire = wiredContent(result));
       };
     }
