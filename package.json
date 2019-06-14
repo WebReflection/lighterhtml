@@ -32,7 +32,7 @@
     "drop-babel-typeof": "^1.0.3",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-node-resolve": "^4.2.2",
+    "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-terser": "^4.0.4",
     "uglify-es": "^3.3.9"
