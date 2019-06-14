@@ -71,11 +71,13 @@ function outer(type) {
   };
   return tag;
   function create(ref, id) {
+    let args = [];
     let wire = null;
-    const $ = new Tagger(type);
+    const tagger = new Tagger(type);
+    const callback = () => tagger.apply(null, unrollArray(args, 1, 1));
     return (ref[id] = function () {
-      const args = tta.apply(null, arguments);
-      const result = $.apply(null, unrollArray(args, 1, 1));
+      args = tta.apply(null, arguments);
+      const result = update(tagger, callback);
       return wire || (wire = wiredContent(result));
     });
   }

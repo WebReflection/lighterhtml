@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<script src="../index.js"></script>
+<script>
+this.onload = () => {
+  const {render, html} = lighterhtml
+
+  const list1 = [
+    {id: 1, desc: 'apple', priority: 1},
+    {id: 2, desc: 'banana', priority: 2},
+    {id: 3, desc: 'orange', priority: 3},
+  ];
+
+  const list2 = [
+    {id: 1, desc: 'apple', priority: 1},
+    {id: 2, desc: 'banana', priority: 2},
+    {id: 3, desc: 'orange', priority: 3},
+  ];
+
+  const byPriority = (a, b) => b.priority - a.priority;
+
+  list1.sort(byPriority);
+  list2.sort(byPriority);
+
+  const increase = (list, item) => () => {
+    item.priority += 1
+    list.sort(byPriority)
+    update()
+  };
+
+  const decrease = (list, item) => () => {
+    item.priority -= 1
+    list.sort(byPriority)
+    update()
+  };
+
+
+  const Button = (text, onClick) => html`
+    <button onclick=${onClick}>
+      ${text}
+    </button>
+  `;
+
+  const ListItem = (item, i, list) => html`
+    <li>
+      ${Button('▲', increase(list, item))}
+      P:${item.priority}
+      ${Button('▼', decrease(list, item))}
+      ${item.desc}
+    </li>
+  `;
+
+  const ListForItem = (item, i, list) => html.for(item, ':li')`
+    <li>
+      ${Button('▲', increase(list, item))}
+      P:${item.priority}
+      ${Button('▼', decrease(list, item))}
+      ${item.desc}
+    </li>
+  `;
+
+  const Lists = () => html`
+    <ul>
+      ${list1.map(ListItem)}
+    </ul>
+    <ul>
+      ${list2.map(ListForItem)}
+    </ul>
+  `;
+
+  const update = () => {
+    render(document.body, Lists)
+  };
+
+  update();
+};
+</script>
