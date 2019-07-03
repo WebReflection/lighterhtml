@@ -7,7 +7,35 @@
 </head>
 <body>
   <script>
+/*
 const { render, html } = lighterhtml
+
+const state = {
+    items: [
+        { id: 1, text: "foo" },
+        { id: 2, text: "bar" },
+        { id: 3, text: "baz" }
+    ],
+    selectedItem: 2
+};
+
+class Foo {
+    static init() {
+        render(document.body, () => html`
+            <select>${
+                state.items.map(item => html`
+                    <option value="${item.id}" selected="${state.selectedItem === item.id}">
+                        ${item.text}
+                    </option>`)
+            }</select>
+        `);
+    }
+}
+
+setInterval(Foo.init, 100);
+// */
+
+//*
 
 const Option = ({label, value, selected}) => html`
   <option value=${value} selected="${selected}" >
@@ -67,7 +95,7 @@ const App = () => html`
 const update = () => render(document.body, App)
 
 update()
-
+// */
   </script>
 </body>
 </html>
