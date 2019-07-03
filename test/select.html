@@ -7,58 +7,67 @@
 </head>
 <body>
   <script>
-const { render, html } = lighterhtml;
+const { render, html } = lighterhtml
 
-const Option = ({label, value, selected}) =>
-  html`<option value=${value} selected="${selected}">${label}</option>`;
+const Option = ({label, value, selected}) => html`
+  <option value=${value} selected="${selected}" >
+    ${label}
+  </option>
+`
 
-const Select = (options, onChange) =>
-  html`<select onchange=${onChange}>${options.map(Option)}</select>`;
+const Select = (options, onChange) => html`
+  <select onchange=${(e) => onChange(e.target.value)}>
+    ${options.map(Option)}
+  </select>
+`
 
-let showNumbers = true;
-let activeNumber = '2';
-let activeLetter = 'a';
+let showNumbers = true
+let activeNumber = '2'
+let activeLetter = 'a'
 
-const numbers = ['1', '2'];
-const letters = ['a'];
+const numbers = ['1', '2', '3', '4']
+const letters = ['a', 'b']
 
 const toggle = () => {
-  showNumbers = !showNumbers;
-  update();
-};
-
-const setNumber = (e) => {
-  activeNumber = e.target.value;
-  update();
-};
-
+  showNumbers = !showNumbers
+  update()
+}
+const setNumber = (num) => {
+  activeNumber = num
+  update()
+}
 const setLetter = (letter) => {
-  activeLetter = e.target.value;
-  update();
-};
+  activeLetter = letter
+  update()
+}
 
 const getOptions = (arr, active) => arr.map(item => ({
   label: item,
   value: item,
-  selected: item === active
-}));
+  selected: item === active,
+}))
 
 const SelectNumber = () => {
   const options = getOptions(numbers, activeNumber)
   return Select(options, setNumber)
-};
-
+}
 const SelectLetter = () => {
-  const options = getOptions(letters, activeLetter);
-  // return Select(options, setLetter)
-  return html`<span>${Select(options, setLetter)}</span>`;
-};
+  const options = getOptions(letters, activeLetter)
+  // return  Select(options, setLetter)
+  return html`<span>${Select(options, setLetter)}</span>`
+}
 
-const App = () => html`<button onclick=${toggle}>toggle</button>${(showNumbers) ? SelectNumber() : SelectLetter()}`;
+const App = () => html`
+  <button onclick=${toggle}>
+    toggle
+  </button>
+  ${(showNumbers) ? SelectNumber() : SelectLetter()}
+`
 
-const update = () => render(document.body, App);
+const update = () => render(document.body, App)
 
-update();
+update()
+
   </script>
 </body>
 </html>
