@@ -746,15 +746,6 @@ var lighterhtml = (function (document,exports) {
     return VOID_ELEMENTS.test($1) ? $0 : '<' + $1 + $2 + '></' + $1 + '>';
   }
 
-  function create(type, node, path, name) {
-    return {
-      name: name,
-      node: node,
-      path: path,
-      type: type
-    };
-  }
-
   function find(node, path) {
     var length = path.length;
     var i = 0;
@@ -789,7 +780,7 @@ var lighterhtml = (function (document,exports) {
             holes.push( // basicHTML or other non standard engines
             // might end up having comments in nodes
             // where they shouldn't, hence this check.
-            SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? create('text', node, path) : create('any', child, path.concat(i)));
+            SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? Text(node, path) : Any(child, path.concat(i)));
           } else {
             switch (textContent.slice(0, 2)) {
               case '/*':
@@ -814,7 +805,7 @@ var lighterhtml = (function (document,exports) {
           /* istanbul ignore if */
           if (SHOULD_USE_TEXT_CONTENT.test(node.nodeName) && trim.call(child.textContent) === UIDC) {
             parts.shift();
-            holes.push(create('text', node, path));
+            holes.push(Text(node, path));
           }
 
           break;
@@ -844,21 +835,21 @@ var lighterhtml = (function (document,exports) {
         /* istanbul ignore else */
 
         if (!cache.has(name)) {
-          var realName = parts.shift().replace(/^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?[^\2]*$/, '$1');
+          var realName = parts.shift().replace(direct ? /^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?$/ : new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")', 'i'), '$1');
           var value = attributes[realName] || // the following ignore is covered by browsers
           // while basicHTML is already case-sensitive
 
           /* istanbul ignore next */
           attributes[realName.toLowerCase()];
           cache.set(name, value);
-          if (direct) holes.push(create('attr', null, path, realName));else {
+          if (direct) holes.push(Attr(value, path, realName, null));else {
             var skip = sparse.length - 2;
 
             while (skip--) {
               parts.shift();
             }
 
-            holes.push(create('attr', sparse, path, realName));
+            holes.push(Attr(value, path, realName, sparse));
           }
         }
 
@@ -903,6 +894,32 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
+  function Any(node, path) {
+    return {
+      type: 'any',
+      node: node,
+      path: path
+    };
+  }
+
+  function Attr(node, path, name, sparse) {
+    return {
+      type: 'attr',
+      node: node,
+      path: path,
+      name: name,
+      sparse: sparse
+    };
+  }
+
+  function Text(node, path) {
+    return {
+      type: 'text',
+      node: node,
+      path: path
+    };
+  }
+
   // globals
   var parsed = new WeakMap$1();
   var referenced = new WeakMap$1();
@@ -936,8 +953,8 @@ var lighterhtml = (function (document,exports) {
               break;
 
             case 'attr':
-              var sparse = info.node;
-              var fn = options.attribute(node, info.name, sparse);
+              var sparse = info.sparse;
+              var fn = options.attribute(node, info.name, info.node);
               if (sparse === null) updates.push({
                 fn: fn,
                 sparse: false
