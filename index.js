@@ -702,7 +702,7 @@ var lighterhtml = (function (document,exports) {
   var spaces = ' \\f\\n\\r\\t';
   var almostEverything = '[^' + spaces + '\\/>"\'=]+';
   var attrName = '[' + spaces + ']+' + almostEverything;
-  var tagName = '<([A-Za-z]+[A-Za-z0-9:_-]*)((?:';
+  var tagName = '<([A-Za-z]+[A-Za-z0-9:._-]*)((?:';
   var attrPartials = '(?:\\s*=\\s*(?:\'[^\']*?\'|"[^"]*?"|<[^>]*?>|' + almostEverything.replace('\\/', '') + '))?)';
   var attrSeeker = new RegExp(tagName + attrName + attrPartials + '+)([' + spaces + ']*/?>)', 'g');
   var selfClosing = new RegExp(tagName + attrName + attrPartials + '*)([' + spaces + ']*/>)', 'g');
@@ -808,22 +808,32 @@ var lighterhtml = (function (document,exports) {
 
     while (i < length) {
       var attribute = array[i++];
+      var direct = attribute.value === UID;
+      var sparse;
 
-      if (attribute.value === UID) {
+      if (direct || 1 < (sparse = attribute.value.split(UIDC)).length) {
         var name = attribute.name; // the following ignore is covered by IE
         // and the IE9 double viewBox test
 
         /* istanbul ignore else */
 
         if (!cache.has(name)) {
-          var realName = parts.shift().replace(/^(?:|[\S\s]*?\s)(\S+?)\s*=\s*['"]?$/, '$1');
+          var realName = parts.shift().replace(/^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?[^\2]*$/, '$1');
           var value = attributes[realName] || // the following ignore is covered by browsers
           // while basicHTML is already case-sensitive
 
           /* istanbul ignore next */
           attributes[realName.toLowerCase()];
           cache.set(name, value);
-          holes.push(create('attr', value, path, realName));
+          if (direct) holes.push(create('attr', null, path, realName));else {
+            var skip = sparse.length - 2;
+
+            while (skip--) {
+              parts.shift();
+            }
+
+            holes.push(create('attr', sparse, path, realName));
+          }
         }
 
         remove.push(attribute);
@@ -882,9 +892,10 @@ var lighterhtml = (function (document,exports) {
     var info = {
       content: content,
       updates: function updates(content) {
-        var callbacks = [];
+        var updates = [];
         var len = holes.length;
         var i = 0;
+        var off = 0;
 
         while (i < len) {
           var info = holes[i++];
@@ -892,31 +903,65 @@ var lighterhtml = (function (document,exports) {
 
           switch (info.type) {
             case 'any':
-              callbacks.push(options.any(node, []));
+              updates.push({
+                fn: options.any(node, []),
+                sparse: false
+              });
               break;
 
             case 'attr':
-              callbacks.push(options.attribute(node, info.name, info.node));
+              var sparse = info.node;
+              var fn = options.attribute(node, info.name, sparse);
+              if (sparse === null) updates.push({
+                fn: fn,
+                sparse: false
+              });else {
+                off += sparse.length - 2;
+                updates.push({
+                  fn: fn,
+                  sparse: true,
+                  values: sparse
+                });
+              }
               break;
 
             case 'text':
-              callbacks.push(options.text(node));
+              updates.push({
+                fn: options.text(node),
+                sparse: false
+              });
               node.textContent = '';
               break;
           }
         }
 
+        len += off;
         return function () {
           var length = arguments.length;
-          var values = length - 1;
-          var i = 1;
 
-          if (len !== values) {
-            throw new Error(values + ' values instead of ' + len + '\n' + template.join(', '));
+          if (len !== length - 1) {
+            throw new Error(length - 1 + ' values instead of ' + len + '\n' + template.join('${value}'));
           }
 
+          var i = 1;
+          var off = 1;
+
           while (i < length) {
-            callbacks[i - 1](arguments[i++]);
+            var update = updates[i - off];
+
+            if (update.sparse) {
+              var values = update.values;
+              var value = values[0];
+              var j = 1;
+              var l = values.length;
+              off += l - 2;
+
+              while (j < l) {
+                value += arguments[i++] + values[j++];
+              }
+
+              update.fn(value);
+            } else update.fn(arguments[i++]);
           }
 
           return content;
