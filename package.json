@@ -41,8 +41,8 @@
     "@ungap/create-content": "^0.1.4",
     "@ungap/template-tag-arguments": "^0.3.0",
     "@ungap/weakmap": "^0.1.4",
-    "domdiff": "^2.0.5",
-    "domtagger": "^0.5.2",
+    "domdiff": "^2.0.6",
+    "domtagger": "^0.5.3",
     "hyperhtml-style": "^0.1.2",
     "hyperhtml-wire": "^2.1.0"
   },
