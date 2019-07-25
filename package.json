@@ -1,6 +1,6 @@
 {
   "name": "lighterhtml",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "description": "The hyperHTML strength & experience without its complexity",
   "main": "cjs/index.js",
   "module": "esm/index.js",
