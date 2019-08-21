@@ -10,6 +10,59 @@ The _hyperHTML_ strength & experience without its complexity 🎉
   * **simpler** than [lit-html](https://github.com/polymer/lit-html) 💡
   * **fueling** this [heresy](https://github.com/WebReflection/heresy/#readme) too 🔥
 
+## V1 Changes + New Feature
+
+Removed `transform` export and made default [domtagger](https://github.com/WebReflection/domtagger) customizable via `custom` export.
+
+```js
+import { custom } from 'lighterhtml';
+
+const { html, render } = custom({
+
+  // the domtagger attributes handler
+  attribute: callback => (node, name, original) => {
+    // return a function that will handle the attribute value
+    // the function will receive just the new value
+    if (name === 'double')
+      return value => {
+        node[name] = value + value;
+      };
+    // the received callback is usable as return fallback
+    return callback(node, name, original);
+  },
+
+  // the domtagger any-content handler
+  any: callback => (node, childNodes) => {
+    // return a function that will handle handle all special cases
+    // the function will receive just the new *hole* value
+    if (node.nodeName === 'CUSTOM') {
+      return value => {
+        node.appendChild(value);
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node, childNodes);
+  },
+
+  // the domtagger text for text only cases
+  text: callback => (node) => {
+    // return a function that will handle handle text content cases
+    // the function will receive just the new text value
+    if (node.nodeName === 'WRAP') {
+      return value => {
+        node.textContent = `(${value})`;
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node);
+  },
+
+  // optionally you can use the special transform handler too
+  // in this case, and in V1, there won't be any meaningful callback
+  // just return any transformed text you like
+  transform: _ => markup => String(markup)
+});
+```
 
 ### faster than hyperHTML
 
