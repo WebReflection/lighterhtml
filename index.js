@@ -171,6 +171,12 @@ var lighterhtml = (function (document,exports) {
 
   var isArray = Array.isArray;
   var wireType = Wire.prototype.nodeType;
+  Object.freeze(Hole);
+
+  function Hole(type, args) {
+    this.type = type;
+    this.args = args;
+  }
 
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
@@ -1378,40 +1384,59 @@ var lighterhtml = (function (document,exports) {
     return callback(this);
   }
 
+  var create = Object.create,
+      keys = Object.keys;
   var wm = new WeakMap$1();
   var container = new WeakMap$1();
-  var current = null; // can be used with any useRef hook
-  // returns an `html` and `svg` function
+  var dtPrototype = Tagger.prototype;
+  var current = null;
 
-  var hook = function hook(useRef) {
+  var lighterhtml = function lighterhtml(Tagger) {
+    var html = outer('html', Tagger);
+    var svg = outer('svg', Tagger);
     return {
-      html: createHook(useRef, html),
-      svg: createHook(useRef, svg)
+      html: html,
+      svg: svg,
+      hook: function hook(useRef) {
+        return {
+          html: createHook(useRef, html),
+          svg: createHook(useRef, svg)
+        };
+      },
+      render: function render(node, callback) {
+        var value = update.call(this, node, callback, Tagger);
+
+        if (container.get(node) !== value) {
+          container.set(node, value);
+          appendClean(node, value);
+        }
+
+        return node;
+      }
     };
-  }; // generic content render
+  };
 
-  function render(node, callback) {
-    var value = update.call(this, node, callback);
+  var custom = function custom(overrides) {
+    var prototype = create(dtPrototype);
+    keys(overrides).forEach(function (key) {
+      // assign the method after passing along the previous one
+      // falling back to String for the transform case to have API
+      // consistency
+      prototype[key] = overrides[key](prototype[key]) || String;
+    });
+    Tagger$1.prototype = prototype;
+    return lighterhtml(Tagger$1);
 
-    if (container.get(node) !== value) {
-      container.set(node, value);
-      appendClean(node, value);
+    function Tagger$1() {
+      return Tagger.apply(this, arguments);
     }
+  };
 
-    return node;
-  } // keyed render via render(node, () => html`...`)
-  // non keyed renders in the wild via html`...`
-
-  var html = outer('html');
-  var svg = outer('svg'); // an indirect exposure of a domtagger capability
-  // usable to transform once per template any layout
-
-  var transform = function transform(callback) {
-    var transform = Tagger.prototype.transform;
-    Tagger.prototype.transform = transform ? function (markup) {
-      return callback(transform(markup));
-    } : callback;
-  }; // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var _lighterhtml = lighterhtml(Tagger),
+      html = _lighterhtml.html,
+      svg = _lighterhtml.svg,
+      render = _lighterhtml.render,
+      hook = _lighterhtml.hook;
 
   function appendClean(node, fragment) {
     node.textContent = '';
@@ -1430,7 +1455,7 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
-  function outer(type) {
+  function outer(type, Tagger) {
     var wm = new WeakMap$1();
 
     tag["for"] = function (identity, id) {
@@ -1447,12 +1472,12 @@ var lighterhtml = (function (document,exports) {
       var tagger = new Tagger(type);
 
       var callback = function callback() {
-        return tagger.apply(null, unrollArray(args, 1, 1));
+        return tagger.apply(null, unrollArray(args, 1, 1, Tagger));
       };
 
       return ref[id] = function () {
         args = tta.apply(null, arguments);
-        var result = update(tagger, callback);
+        var result = update(tagger, callback, Tagger);
         return wire || (wire = wiredContent(result));
       };
     }
@@ -1482,7 +1507,7 @@ var lighterhtml = (function (document,exports) {
     return info;
   }
 
-  function update(reference, callback) {
+  function update(reference, callback, Tagger) {
     var prev = current;
     current = wm.get(reference) || set(reference);
     current.i = 0;
@@ -1490,7 +1515,7 @@ var lighterhtml = (function (document,exports) {
     var value;
 
     if (ret instanceof Hole) {
-      value = asNode$1(unroll(ret, 0), current.update);
+      value = asNode$1(unroll(ret, 0, Tagger), current.update);
       var _current = current,
           i = _current.i,
           length = _current.length,
@@ -1506,7 +1531,7 @@ var lighterhtml = (function (document,exports) {
     return value;
   }
 
-  function unroll(hole, level) {
+  function unroll(hole, level, Tagger) {
     var _current2 = current,
         i = _current2.i,
         length = _current2.length,
@@ -1522,7 +1547,7 @@ var lighterhtml = (function (document,exports) {
       tpl: args[0],
       wire: null
     });
-    unrollArray(args, 1, level + 1);
+    unrollArray(args, 1, level + 1, Tagger);
     var info = stack[i];
 
     if (stacked) {
@@ -1550,15 +1575,15 @@ var lighterhtml = (function (document,exports) {
     return wire;
   }
 
-  function unrollArray(arr, i, level) {
+  function unrollArray(arr, i, level, Tagger) {
     for (var length = arr.length; i < length; i++) {
       var value = arr[i];
 
       if (typeof(value) === 'object' && value) {
         if (value instanceof Hole) {
-          arr[i] = unroll(value, level - 1);
+          arr[i] = unroll(value, level - 1, Tagger);
         } else if (isArray(value)) {
-          arr[i] = unrollArray(value, 0, level++);
+          arr[i] = unrollArray(value, 0, level++, Tagger);
         }
       }
     }
@@ -1572,18 +1597,12 @@ var lighterhtml = (function (document,exports) {
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   }
 
-  Object.freeze(Hole);
-  function Hole(type, args) {
-    this.type = type;
-    this.args = args;
-  }
-
   exports.Hole = Hole;
+  exports.custom = custom;
   exports.hook = hook;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
-  exports.transform = transform;
 
   return exports;
 
