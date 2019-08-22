@@ -1,6 +1,6 @@
 {
   "name": "lighterhtml-plus",
-  "version": "0.17.0",
+  "version": "1.1.0",
   "description": "The hyperHTML strength & experience without its complexity",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -45,7 +45,7 @@
     "attributechanged": "^0.2.0",
     "disconnected": "^0.2.1",
     "domdiff": "^2.0.5",
-    "domtagger": "^0.5.0",
+    "domtagger": "^0.5.2",
     "hyperhtml-style": "^0.1.2",
     "hyperhtml-wire": "^2.1.0"
   },

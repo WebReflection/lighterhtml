@@ -12,6 +12,7 @@ const WS = typeof WeakSet === ('' + void 0) ?
   } :
   WeakSet;
 
+exports.Hole = Hole;
 exports.Wire = Wire;
 exports.WS = WS;
 exports.isArray = isArray;
@@ -19,4 +20,9 @@ exports.wireType = wireType;
 
 function add(key) {
   return this.set(key, true);
+}
+
+function Hole(type, args) {
+  this.type = type;
+  this.args = args;
 }

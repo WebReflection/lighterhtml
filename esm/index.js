@@ -1,42 +1,72 @@
 import WeakMap from '@ungap/weakmap';
 import tta from '@ungap/template-tag-arguments';
-import {Wire, wireType, isArray} from './shared.js';
-import Tagger from './tagger.js';
+import {Hole, Wire, wireType, isArray} from './shared.js';
+import DefaultTagger from './tagger.js';
 
+const {create, keys} = Object;
 const wm = new WeakMap;
 const container = new WeakMap;
 
+const dtPrototype = DefaultTagger.prototype;
+
 let current = null;
 
-// can be used with any useRef hook
-// returns an `html` and `svg` function
-export const hook = useRef => ({
-  html: createHook(useRef, html),
-  svg: createHook(useRef, svg)
-});
+const lighterhtml = Tagger => {
+  const html = outer('html', Tagger);
+  const svg = outer('svg', Tagger);
+  return {
+    html, svg,
+    hook: useRef => ({
+      html: createHook(useRef, html),
+      svg: createHook(useRef, svg)
+    }),
+    render(node, callback) {
+      const value = update.call(this, node, callback, Tagger);
+      if (container.get(node) !== value) {
+        container.set(node, value);
+        appendClean(node, value);
+      }
+      return node;
+    }
+  };
+};
 
-// generic content render
-export function render(node, callback) {
-  const value = update.call(this, node, callback);
-  if (container.get(node) !== value) {
-    container.set(node, value);
-    appendClean(node, value);
+const custom = overrides => {
+  const prototype = create(dtPrototype);
+  keys(overrides).forEach(key => {
+    // assign the method after passing along the previous one
+    // falling back to String for the transform case to have API
+    // consistency
+    prototype[key] = overrides[key](prototype[key]) || String;
+  });
+  Tagger.prototype = prototype;
+  return lighterhtml(Tagger);
+  function Tagger() {
+    return DefaultTagger.apply(this, arguments);
   }
-  return node;
-}
+};
 
-// keyed render via render(node, () => html`...`)
-// non keyed renders in the wild via html`...`
-export const html = outer('html');
-export const svg = outer('svg');
+const {html, svg, render, hook} = lighterhtml(DefaultTagger);
 
-// an indirect exposure of a domtagger capability
-// usable to transform once per template any layout
-export const transform = callback => {
-  const {transform} = Tagger.prototype;
-  Tagger.prototype.transform = transform ?
-    markup => callback(transform(markup)) :
-    callback;
+export {
+
+  // keyed render via render(node, () => html`...`)
+  // non keyed renders in the wild via html`...`
+  html, svg,
+
+  // generic content render: render(where, () => what)
+  render,
+
+  // can be used with any useRef hook
+  // returns an `html` and `svg` function
+  hook,
+
+  // a way to define custom lighterhtml behaviors
+  // const { html } = override({attribute: fn => (...args) => fn(...args)});
+  custom,
+
+  // exposed for third parts libraries
+  Hole
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -61,7 +91,7 @@ function createHook(useRef, view) {
   };
 }
 
-function outer(type) {
+function outer(type, Tagger) {
   const wm = new WeakMap;
   tag.for = (identity, id) => {
     const ref = wm.get(identity) || set(identity);
@@ -74,10 +104,10 @@ function outer(type) {
     let args = [];
     let wire = null;
     const tagger = new Tagger(type);
-    const callback = () => tagger.apply(null, unrollArray(args, 1, 1));
+    const callback = () => tagger.apply(null, unrollArray(args, 1, 1, Tagger));
     return (ref[id] = function () {
       args = tta.apply(null, arguments);
-      const result = update(tagger, callback);
+      const result = update(tagger, callback, Tagger);
       return wire || (wire = wiredContent(result));
     });
   }
@@ -104,14 +134,14 @@ function set(node) {
   return info;
 }
 
-function update(reference, callback) {
+function update(reference, callback, Tagger) {
   const prev = current;
   current = wm.get(reference) || set(reference);
   current.i = 0;
   const ret = callback.call(this);
   let value;
   if (ret instanceof Hole) {
-    value = asNode(unroll(ret, 0), current.update);
+    value = asNode(unroll(ret, 0, Tagger), current.update);
     const {i, length, stack, update} = current;
     if (i < length)
       stack.splice(current.length = i);
@@ -124,7 +154,7 @@ function update(reference, callback) {
   return value;
 }
 
-function unroll(hole, level) {
+function unroll(hole, level, Tagger) {
   const {i, length, stack} = current;
   const {type, args} = hole;
   const stacked = i < length;
@@ -137,7 +167,7 @@ function unroll(hole, level) {
       tpl: args[0],
       wire: null
     });
-  unrollArray(args, 1, level + 1);
+  unrollArray(args, 1, level + 1, Tagger);
   const info = stack[i];
   if (stacked) {
     const {l:control, kind, tag, tpl, wire} = info;
@@ -158,14 +188,14 @@ function unroll(hole, level) {
   return wire;
 }
 
-function unrollArray(arr, i, level) {
+function unrollArray(arr, i, level, Tagger) {
   for (const {length} = arr; i < length; i++) {
     const value = arr[i];
     if (typeof value === 'object' && value) {
       if (value instanceof Hole) {
-        arr[i] = unroll(value, level - 1);
+        arr[i] = unroll(value, level - 1, Tagger);
       } else if (isArray(value)) {
-        arr[i] = unrollArray(value, 0, level++);
+        arr[i] = unrollArray(value, 0, level++, Tagger);
       }
     }
   }
@@ -178,10 +208,4 @@ function wiredContent(node) {
   return length === 1 ?
     childNodes[0] :
     (length ? new Wire(childNodes) : node);
-}
-
-Object.freeze(Hole);
-export function Hole(type, args) {
-  this.type = type;
-  this.args = args;
 }

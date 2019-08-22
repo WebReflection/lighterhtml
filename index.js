@@ -181,6 +181,11 @@ var lighterhtml = (function (document,exports) {
     return this.set(key, true);
   }
 
+  function Hole(type, args) {
+    this.type = type;
+    this.args = args;
+  }
+
   /*! (c) Andrea Giammarchi - ISC */
   var self$1 = null ||
   /* istanbul ignore next */
@@ -275,6 +280,11 @@ var lighterhtml = (function (document,exports) {
           }
 
           return had;
+        },
+        forEach: function forEach(callback, context) {
+          k.forEach(function (key, i) {
+            callback.call(context, v[i], key, this);
+          }, this);
         },
         get: function get(key) {
           return contains(key) ? v[i] : void 0;
@@ -746,15 +756,6 @@ var lighterhtml = (function (document,exports) {
     return VOID_ELEMENTS.test($1) ? $0 : '<' + $1 + $2 + '></' + $1 + '>';
   }
 
-  function create(type, node, path, name) {
-    return {
-      name: name,
-      node: node,
-      path: path,
-      type: type
-    };
-  }
-
   function find(node, path) {
     var length = path.length;
     var i = 0;
@@ -789,7 +790,7 @@ var lighterhtml = (function (document,exports) {
             holes.push( // basicHTML or other non standard engines
             // might end up having comments in nodes
             // where they shouldn't, hence this check.
-            SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? create('text', node, path) : create('any', child, path.concat(i)));
+            SHOULD_USE_TEXT_CONTENT.test(node.nodeName) ? Text(node, path) : Any(child, path.concat(i)));
           } else {
             switch (textContent.slice(0, 2)) {
               case '/*':
@@ -814,7 +815,7 @@ var lighterhtml = (function (document,exports) {
           /* istanbul ignore if */
           if (SHOULD_USE_TEXT_CONTENT.test(node.nodeName) && trim.call(child.textContent) === UIDC) {
             parts.shift();
-            holes.push(create('text', node, path));
+            holes.push(Text(node, path));
           }
 
           break;
@@ -844,21 +845,21 @@ var lighterhtml = (function (document,exports) {
         /* istanbul ignore else */
 
         if (!cache.has(name)) {
-          var realName = parts.shift().replace(/^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?[^\2]*$/, '$1');
+          var realName = parts.shift().replace(direct ? /^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?$/ : new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")', 'i'), '$1');
           var value = attributes[realName] || // the following ignore is covered by browsers
           // while basicHTML is already case-sensitive
 
           /* istanbul ignore next */
           attributes[realName.toLowerCase()];
           cache.set(name, value);
-          if (direct) holes.push(create('attr', null, path, realName));else {
+          if (direct) holes.push(Attr(value, path, realName, null));else {
             var skip = sparse.length - 2;
 
             while (skip--) {
               parts.shift();
             }
 
-            holes.push(create('attr', sparse, path, realName));
+            holes.push(Attr(value, path, realName, sparse));
           }
         }
 
@@ -903,6 +904,32 @@ var lighterhtml = (function (document,exports) {
     }
   }
 
+  function Any(node, path) {
+    return {
+      type: 'any',
+      node: node,
+      path: path
+    };
+  }
+
+  function Attr(node, path, name, sparse) {
+    return {
+      type: 'attr',
+      node: node,
+      path: path,
+      name: name,
+      sparse: sparse
+    };
+  }
+
+  function Text(node, path) {
+    return {
+      type: 'text',
+      node: node,
+      path: path
+    };
+  }
+
   // globals
   var parsed = new WeakMap$1();
   var referenced = new WeakMap$1();
@@ -936,8 +963,8 @@ var lighterhtml = (function (document,exports) {
               break;
 
             case 'attr':
-              var sparse = info.node;
-              var fn = options.attribute(node, info.name, sparse);
+              var sparse = info.sparse;
+              var fn = options.attribute(node, info.name, info.node);
               if (sparse === null) updates.push({
                 fn: fn,
                 sparse: false
@@ -1530,40 +1557,59 @@ var lighterhtml = (function (document,exports) {
     return callback(this);
   }
 
+  var create = Object.create,
+      keys = Object.keys;
   var wm = new WeakMap$1();
   var container = new WeakMap$1();
-  var current = null; // can be used with any useRef hook
-  // returns an `html` and `svg` function
+  var dtPrototype = Tagger.prototype;
+  var current = null;
 
-  var hook = function hook(useRef) {
+  var lighterhtml = function lighterhtml(Tagger) {
+    var html = outer('html', Tagger);
+    var svg = outer('svg', Tagger);
     return {
-      html: createHook(useRef, html),
-      svg: createHook(useRef, svg)
+      html: html,
+      svg: svg,
+      hook: function hook(useRef) {
+        return {
+          html: createHook(useRef, html),
+          svg: createHook(useRef, svg)
+        };
+      },
+      render: function render(node, callback) {
+        var value = update.call(this, node, callback, Tagger);
+
+        if (container.get(node) !== value) {
+          container.set(node, value);
+          appendClean(node, value);
+        }
+
+        return node;
+      }
     };
-  }; // generic content render
+  };
 
-  function render(node, callback) {
-    var value = update.call(this, node, callback);
+  var custom = function custom(overrides) {
+    var prototype = create(dtPrototype);
+    keys(overrides).forEach(function (key) {
+      // assign the method after passing along the previous one
+      // falling back to String for the transform case to have API
+      // consistency
+      prototype[key] = overrides[key](prototype[key]) || String;
+    });
+    Tagger$1.prototype = prototype;
+    return lighterhtml(Tagger$1);
 
-    if (container.get(node) !== value) {
-      container.set(node, value);
-      appendClean(node, value);
+    function Tagger$1() {
+      return Tagger.apply(this, arguments);
     }
+  };
 
-    return node;
-  } // keyed render via render(node, () => html`...`)
-  // non keyed renders in the wild via html`...`
-
-  var html = outer('html');
-  var svg = outer('svg'); // an indirect exposure of a domtagger capability
-  // usable to transform once per template any layout
-
-  var transform = function transform(callback) {
-    var transform = Tagger.prototype.transform;
-    Tagger.prototype.transform = transform ? function (markup) {
-      return callback(transform(markup));
-    } : callback;
-  }; // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var _lighterhtml = lighterhtml(Tagger),
+      html = _lighterhtml.html,
+      svg = _lighterhtml.svg,
+      render = _lighterhtml.render,
+      hook = _lighterhtml.hook;
 
   function appendClean(node, fragment) {
     node.textContent = '';
@@ -1582,7 +1628,7 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
-  function outer(type) {
+  function outer(type, Tagger) {
     var wm = new WeakMap$1();
 
     tag["for"] = function (identity, id) {
@@ -1599,12 +1645,12 @@ var lighterhtml = (function (document,exports) {
       var tagger = new Tagger(type);
 
       var callback = function callback() {
-        return tagger.apply(null, unrollArray(args, 1, 1));
+        return tagger.apply(null, unrollArray(args, 1, 1, Tagger));
       };
 
       return ref[id] = function () {
         args = tta.apply(null, arguments);
-        var result = update(tagger, callback);
+        var result = update(tagger, callback, Tagger);
         return wire || (wire = wiredContent(result));
       };
     }
@@ -1634,7 +1680,7 @@ var lighterhtml = (function (document,exports) {
     return info;
   }
 
-  function update(reference, callback) {
+  function update(reference, callback, Tagger) {
     var prev = current;
     current = wm.get(reference) || set(reference);
     current.i = 0;
@@ -1642,7 +1688,7 @@ var lighterhtml = (function (document,exports) {
     var value;
 
     if (ret instanceof Hole) {
-      value = asNode$1(unroll(ret, 0), current.update);
+      value = asNode$1(unroll(ret, 0, Tagger), current.update);
       var _current = current,
           i = _current.i,
           length = _current.length,
@@ -1658,7 +1704,7 @@ var lighterhtml = (function (document,exports) {
     return value;
   }
 
-  function unroll(hole, level) {
+  function unroll(hole, level, Tagger) {
     var _current2 = current,
         i = _current2.i,
         length = _current2.length,
@@ -1674,7 +1720,7 @@ var lighterhtml = (function (document,exports) {
       tpl: args[0],
       wire: null
     });
-    unrollArray(args, 1, level + 1);
+    unrollArray(args, 1, level + 1, Tagger);
     var info = stack[i];
 
     if (stacked) {
@@ -1702,15 +1748,15 @@ var lighterhtml = (function (document,exports) {
     return wire;
   }
 
-  function unrollArray(arr, i, level) {
+  function unrollArray(arr, i, level, Tagger) {
     for (var length = arr.length; i < length; i++) {
       var value = arr[i];
 
       if (typeof(value) === 'object' && value) {
         if (value instanceof Hole) {
-          arr[i] = unroll(value, level - 1);
+          arr[i] = unroll(value, level - 1, Tagger);
         } else if (isArray(value)) {
-          arr[i] = unrollArray(value, 0, level++);
+          arr[i] = unrollArray(value, 0, level++, Tagger);
         }
       }
     }
@@ -1724,18 +1770,12 @@ var lighterhtml = (function (document,exports) {
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   }
 
-  Object.freeze(Hole);
-  function Hole(type, args) {
-    this.type = type;
-    this.args = args;
-  }
-
   exports.Hole = Hole;
+  exports.custom = custom;
   exports.hook = hook;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
-  exports.transform = transform;
 
   return exports;
 
