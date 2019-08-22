@@ -1,13 +1,68 @@
 # lighterhtml
 
+<sup>**Social Media Photo by [Kristine Weilert](https://unsplash.com/@kristineweilert) on [Unsplash](https://unsplash.com/)**</sup>
+
 [![donate](https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&style=flat)](https://github.com/WebReflection/donate) [![Build Status](https://travis-ci.com/WebReflection/lighterhtml.svg?branch=master)](https://travis-ci.com/WebReflection/lighterhtml) ![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC) [![Greenkeeper badge](https://badges.greenkeeper.io/WebReflection/lighterhtml.svg)](https://greenkeeper.io/) ![Blazing Fast](https://img.shields.io/badge/speed-blazing%20🔥-brightgreen.svg)
 
 The _hyperHTML_ strength & experience without its complexity 🎉
 
   * **faster** than [hyperHTML](https://github.com/WebReflection/hyperHTML) ⚡️
   * **simpler** than [lit-html](https://github.com/polymer/lit-html) 💡
-  * fueling the [neverland](https://github.com/WebReflection/neverland/#neverland-) magic 🦄
+  * **fueling** this [heresy](https://github.com/WebReflection/heresy/#readme) too 🔥
 
+## V1 Changes + New Feature
+
+Removed `transform` export and made default [domtagger](https://github.com/WebReflection/domtagger) customizable via `custom` export.
+
+```js
+import { custom } from 'lighterhtml';
+
+const { html, render } = custom({
+
+  // the domtagger attributes handler
+  attribute: callback => (node, name, original) => {
+    // return a function that will handle the attribute value
+    // the function will receive just the new value
+    if (name === 'double')
+      return value => {
+        node[name] = value + value;
+      };
+    // the received callback is usable as return fallback
+    return callback(node, name, original);
+  },
+
+  // the domtagger any-content handler
+  any: callback => (node, childNodes) => {
+    // return a function that will handle handle all special cases
+    // the function will receive just the new *hole* value
+    if (node.nodeName === 'CUSTOM') {
+      return value => {
+        node.appendChild(value);
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node, childNodes);
+  },
+
+  // the domtagger text for text only cases
+  text: callback => (node) => {
+    // return a function that will handle handle text content cases
+    // the function will receive just the new text value
+    if (node.nodeName === 'WRAP') {
+      return value => {
+        node.textContent = `(${value})`;
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node);
+  },
+
+  // optionally you can use the special transform handler too
+  // in this case, and in V1, there won't be any meaningful callback
+  // just return any transformed text you like
+  transform: _ => markup => String(markup)
+});
+```
 
 ### faster than hyperHTML
 
