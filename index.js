@@ -62,7 +62,7 @@ var lighterhtml = (function (document,exports) {
     var RAW = 'raw';
 
     var isBroken = function isBroken(UA) {
-      return /(Firefox|Safari)\/(\d+)/.test(UA) && !/(Chrom|Android)\/(\d+)/.test(UA);
+      return /(Firefox|Safari)\/(\d+)/.test(UA) && !/(Chrom[eium]+|Android)\/(\d+)/.test(UA);
     };
 
     var broken = isBroken((document.defaultView.navigator || {}).userAgent);
