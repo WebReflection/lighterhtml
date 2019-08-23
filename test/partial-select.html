@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+	<head>
+    <script src="../index.js"></script>
+	</head>
+	<body>
+		<script>
+      const {html, render} = lighterhtml;
+
+const option = (item) => html`
+	<option value="${item.id}" selected="${item.id === 2}">${item.text}</option>
+`;
+
+const state = [
+	{id: 0, text:'select something...'},
+  {id: 1, text:'one'},
+  {id: 2, text:'two'},
+]
+
+const view = () => html`
+    <select>
+      ${option(state[0])}
+      ${state.slice(1).map(option)}
+    </select>
+`;
+
+render(document.body, view);
+
+
+		</script>
+	</body>
+<html>
