@@ -1601,7 +1601,7 @@ var lighterhtml = (function (document,exports) {
       // `sanitize` exposes the original domsanitizer while
       // all other unknown methods, including `transform`,
       // fallbacks to generic String
-      prototype[key] = overrides[key](prototype[key] || (key === 'sanitize' ? domsanitizer : String));
+      prototype[key] = overrides[key](prototype[key] || (key === 'convert' ? domsanitizer : String));
     });
     Tagger$1.prototype = prototype;
     return lighterhtml(Tagger$1);

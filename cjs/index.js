@@ -42,7 +42,7 @@ const custom = overrides => {
     // fallbacks to generic String
     prototype[key] = overrides[key](
       prototype[key] ||
-      (key === 'sanitize' ? domsanitizer : String)
+      (key === 'convert' ? domsanitizer : String)
     );
   });
   Tagger.prototype = prototype;

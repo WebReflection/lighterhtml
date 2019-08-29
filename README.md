@@ -61,10 +61,10 @@ const { html, render } = custom({
   // in this case, and in V1, the callback is just the String one
   transform: callback => markup => callback(markup),
 
-  // same goes for sanitize, with the callback being the one
-  // originally used to sanitize the template
+  // same goes for convert, with the callback being the one
+  // originally used to "convert" the template from Array to HTML
   // see: https://github.com/WebReflection/domtagger/issues/17#issuecomment-526151473
-  sanitize: callback => template => callback(template)
+  convert: callback => template => callback(template)
 });
 ```
 
