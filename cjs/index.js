@@ -1,5 +1,6 @@
 'use strict';
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
+const domsanitizer = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domsanitizer'));
 const tta = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/template-tag-arguments'));
 const {Hole, Wire, wireType, isArray} = require('./shared.js');
 const DefaultTagger = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('./tagger.js'));
@@ -36,9 +37,13 @@ const custom = overrides => {
   const prototype = create(dtPrototype);
   keys(overrides).forEach(key => {
     // assign the method after passing along the previous one
-    // falling back to String for the transform case to have API
-    // consistency
-    prototype[key] = overrides[key](prototype[key]) || String;
+    // `sanitize` exposes the original domsanitizer while
+    // all other unknown methods, including `transform`,
+    // fallbacks to generic String
+    prototype[key] = overrides[key](
+      prototype[key] ||
+      (key === 'sanitize' ? domsanitizer : String)
+    );
   });
   Tagger.prototype = prototype;
   return lighterhtml(Tagger);

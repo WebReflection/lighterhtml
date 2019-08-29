@@ -1,4 +1,5 @@
 import WeakMap from '@ungap/weakmap';
+import domsanitizer from 'domsanitizer';
 import tta from '@ungap/template-tag-arguments';
 import {Hole, Wire, wireType, isArray} from './shared.js';
 import DefaultTagger from './tagger.js';
@@ -35,9 +36,13 @@ const custom = overrides => {
   const prototype = create(dtPrototype);
   keys(overrides).forEach(key => {
     // assign the method after passing along the previous one
-    // falling back to String for the transform case to have API
-    // consistency
-    prototype[key] = overrides[key](prototype[key]) || String;
+    // `sanitize` exposes the original domsanitizer while
+    // all other unknown methods, including `transform`,
+    // fallbacks to generic String
+    prototype[key] = overrides[key](
+      prototype[key] ||
+      (key === 'sanitize' ? domsanitizer : String)
+    );
   });
   Tagger.prototype = prototype;
   return lighterhtml(Tagger);

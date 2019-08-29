@@ -65,7 +65,6 @@ const { html, render } = custom({
   // originally used to sanitize the template
   // see: https://github.com/WebReflection/domtagger/issues/17#issuecomment-526151473
   sanitize: callback => template => callback(template)
-
 });
 ```
 
