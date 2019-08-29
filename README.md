@@ -58,9 +58,14 @@ const { html, render } = custom({
   },
 
   // optionally you can use the special transform handler too
-  // in this case, and in V1, there won't be any meaningful callback
-  // just return any transformed text you like
-  transform: _ => markup => String(markup)
+  // in this case, and in V1, the callback is just the String one
+  transform: callback => markup => callback(markup),
+
+  // same goes for sanitize, with the callback being the one
+  // originally used to sanitize the template
+  // see: https://github.com/WebReflection/domtagger/issues/17#issuecomment-526151473
+  sanitize: callback => template => callback(template)
+
 });
 ```
 
