@@ -36,7 +36,7 @@ const custom = overrides => {
   const prototype = create(dtPrototype);
   keys(overrides).forEach(key => {
     // assign the method after passing along the previous one
-    // `sanitize` exposes the original domsanitizer while
+    // `convert` exposes the original domsanitizer while
     // all other unknown methods, including `transform`,
     // fallbacks to generic String
     prototype[key] = overrides[key](
