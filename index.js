@@ -852,7 +852,9 @@ var lighterhtml = (function (document,exports) {
 
     while (i < length) {
       // Edge HTML bug #16878726
-      var attr = remove[i++];
+      var attr = remove[i++]; // IE/Edge bug lighterhtml#63
+
+      attr.value = '';
       if (/^id$/i.test(attr.name)) node.removeAttribute(attr.name); // standard browsers would work just fine here
       else node.removeAttributeNode(attr);
     } // This is a very specific Firefox/Safari issue
@@ -915,7 +917,7 @@ var lighterhtml = (function (document,exports) {
   var referenced = new WeakMap$1();
 
   function createInfo(options, template) {
-    var markup = (options.sanitize || domsanitizer)(template);
+    var markup = (options.convert || domsanitizer)(template);
     var transform = options.transform;
     if (transform) markup = transform(markup);
     var content = createContent(markup, options.type);
