@@ -825,7 +825,13 @@ var lighterhtml = (function (document,exports) {
         /* istanbul ignore else */
 
         if (!cache.has(name)) {
-          var realName = parts.shift().replace(direct ? /^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?$/ : new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")', 'i'), '$1');
+          var realName = parts.shift().replace(direct ? /^(?:|[\S\s]*?\s)(\S+?)\s*=\s*('|")?$/ : // TODO: while working on yet another IE/Edge bug I've realized
+          //        the current not direct logic easily breaks there
+          //        because the `name` might not be the real needed one.
+          //        Use a better RegExp to find last attribute instead
+          //        of trusting `name` is what we are looking for.
+          //        Thanks IE/Edge, I hate you both.
+          new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")', 'i'), '$1');
           var value = attributes[realName] || // the following ignore is covered by browsers
           // while basicHTML is already case-sensitive
 
@@ -849,14 +855,19 @@ var lighterhtml = (function (document,exports) {
 
     length = remove.length;
     i = 0;
+    /* istanbul ignore next */
+
+    var cleanValue = 0 < length && UID_IE && !('ownerSVGElement' in node);
 
     while (i < length) {
       // Edge HTML bug #16878726
-      var attr = remove[i++]; // IE/Edge bug lighterhtml#63
+      var attr = remove[i++]; // IE/Edge bug lighterhtml#63 - clean the value or it'll persist
 
-      attr.value = '';
-      if (/^id$/i.test(attr.name)) node.removeAttribute(attr.name); // standard browsers would work just fine here
-      else node.removeAttributeNode(attr);
+      /* istanbul ignore next */
+
+      if (cleanValue) attr.value = ''; // IE/Edge bug lighterhtml#64 - don't use removeAttributeNode
+
+      node.removeAttribute(attr.name);
     } // This is a very specific Firefox/Safari issue
     // but since it should be a not so common pattern,
     // it's probably worth patching regardless.

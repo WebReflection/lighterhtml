@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+  .form-checkbox {
+    -webkit-appearance: none;
+      -moz-appearance: none;
+            appearance: none;
+    -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+    display: block;
+    vertical-align: middle;
+    background-origin: border-box;
+    -webkit-user-select: none;
+      -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    flex-shrink: 0;
+    height: 1em;
+    width: 1em;
+    color: #4299e1;
+    background-color: #fff;
+    border-color: #aaa;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0.25rem;
+  }
+
+  .form-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.707 7.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L7 8.586 5.707 7.293z'/%3e%3c/svg%3e");
+    border-color: transparent;
+    background-color: currentColor;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  @media not print {
+    .form-checkbox::-ms-check {
+      border-width: 1px;
+      color: transparent;
+      background: inherit;
+      border-color: inherit;
+      border-radius: inherit;
+    }
+  }
+
+  .form-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+    border-color: rgba(0, 0, 0, 0.4);
+  }
+  </style>
+  <script src="../index.js"></script>
+  <script>
+  this.onload = function () {
+    var render = lighterhtml.render;
+    var html = lighterhtml.html;
+
+    function input(checked, index) {
+      return html([
+        '<input class="form-checkbox" type="checkbox" checked=',
+        ' name=',
+        '>'
+      ], checked, 'bar' + index);
+    }
+
+    render(
+        document.querySelector('#root'),
+        function () {
+          return html(['', ''], [false, true].map(input));
+        }
+    );
+
+
+  };
+  </script>
+</head>
+<body>
+  <div>
+    <input type="checkbox" class="form-checkbox" name="foo1">
+    <input type="checkbox" class="form-checkbox" name="foo2" checked>
+  </div>
+  <div id="root"></div>  
+</body>
+</html>
