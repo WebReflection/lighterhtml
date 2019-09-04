@@ -877,7 +877,9 @@ var lighterhtml = (function (document,exports) {
 
     while (i < length) {
       // Edge HTML bug #16878726
-      var attr = remove[i++];
+      var attr = remove[i++]; // IE/Edge bug lighterhtml#63
+
+      attr.value = '';
       if (/^id$/i.test(attr.name)) node.removeAttribute(attr.name); // standard browsers would work just fine here
       else node.removeAttributeNode(attr);
     } // This is a very specific Firefox/Safari issue
@@ -940,7 +942,7 @@ var lighterhtml = (function (document,exports) {
   var referenced = new WeakMap$1();
 
   function createInfo(options, template) {
-    var markup = (options.sanitize || domsanitizer)(template);
+    var markup = (options.convert || domsanitizer)(template);
     var transform = options.transform;
     if (transform) markup = transform(markup);
     var content = createContent(markup, options.type);
@@ -1598,7 +1600,7 @@ var lighterhtml = (function (document,exports) {
     var prototype = create(dtPrototype);
     keys(overrides).forEach(function (key) {
       // assign the method after passing along the previous one
-      // `sanitize` exposes the original domsanitizer while
+      // `convert` exposes the original domsanitizer while
       // all other unknown methods, including `transform`,
       // fallbacks to generic String
       prototype[key] = overrides[key](prototype[key] || (key === 'convert' ? domsanitizer : String));
