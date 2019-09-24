@@ -105,9 +105,13 @@ const hyperRef = node => {
   };
 };
 
-const hyperSetter = (node, name) => value => {
-  node[name] = value;
-};
+const hyperSetter = (node, name, svg) => svg ?
+  value => {
+    node.setAttribute(name, value);
+  } :
+  value => {
+    node[name] = value;
+  };
 
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
@@ -147,7 +151,7 @@ Tagger.prototype = {
         return hyperRef(node);
       default:
         if (name.slice(0, 1) === '.')
-          return hyperSetter(node, name.slice(1));
+          return hyperSetter(node, name.slice(1), OWNER_SVG_ELEMENT in node);
         if (name.slice(0, 2) === 'on')
           return hyperEvent(node, name);
         if (name in node && !(

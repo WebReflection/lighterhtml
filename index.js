@@ -1401,8 +1401,10 @@ var lighterhtml = (function (document,exports) {
     };
   };
 
-  var hyperSetter = function hyperSetter(node, name) {
-    return function (value) {
+  var hyperSetter = function hyperSetter(node, name, svg) {
+    return svg ? function (value) {
+      node.setAttribute(name, value);
+    } : function (value) {
       node[name] = value;
     };
   }; // list of attributes that should not be directly assigned
@@ -1445,7 +1447,7 @@ var lighterhtml = (function (document,exports) {
           return hyperRef(node);
 
         default:
-          if (name.slice(0, 1) === '.') return hyperSetter(node, name.slice(1));
+          if (name.slice(0, 1) === '.') return hyperSetter(node, name.slice(1), OWNER_SVG_ELEMENT in node);
           if (name.slice(0, 2) === 'on') return hyperEvent(node, name);
           if (name in node && !(OWNER_SVG_ELEMENT in node || readOnly.test(name))) return hyperProperty(node, name);
           return hyperAttribute(node, original);
