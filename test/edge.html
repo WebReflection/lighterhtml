@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>lighterhtml edge/ie svg</title>
+  <script src="../index.js"></script>
+  <script>
+  this.onload = function () {
+    var path = lighterhtml.svg(['<path .d="', '" />'], 'M150 0 L75 200 L225 200 Z');
+    document.querySelector('svg').appendChild(path);
+  };
+  </script>
+</head>
+<body>
+  <svg height="210" width="400"></svg>
+</body>
+</html>
