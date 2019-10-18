@@ -11,12 +11,8 @@
     <script async>
       const {render, html, svg} = lighterhtml;
       function repeater(i) {
-        render(document.body, () => html`<div>Hello ${
-          [
-            html`[${i}] first <strong>world</strong> [${i}]`,
-            html`[${i}] second <strong>world</strong> [${i}]`
-          ]
-        }!</div>`);
+        const hasModifier = Math.random() < .5;
+        render(document.body, () => html`<div class="block__element${hasModifier ? '--modifier' : ''}"></div>`);
       }
       var i = 0; setInterval(() => repeater(++i), 1000);
       </script>
