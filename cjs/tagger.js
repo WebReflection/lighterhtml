@@ -92,7 +92,12 @@ const hyperRef = node => {
 
 const hyperSetter = (node, name, svg) => svg ?
   value => {
-    node.setAttribute(name, value);
+    try {
+      node[name] = value;
+    }
+    catch (nope) {
+      node.setAttribute(name, value);
+    }
   } :
   value => {
     node[name] = value;
