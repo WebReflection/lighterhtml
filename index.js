@@ -1335,9 +1335,10 @@ var lighterhtml = (function (document,exports) {
 
           default:
             fastPath = false;
-            oldValue = value;
 
             if (isArray(value)) {
+              oldValue = value;
+
               if (value.length === 0) {
                 if (childNodes.length) {
                   childNodes = domdiff(node.parentNode, childNodes, [], diffOptions);
@@ -1355,9 +1356,7 @@ var lighterhtml = (function (document,exports) {
                     break;
 
                   case 'object':
-                    if (isArray(value[0])) {
-                      value = value.concat.apply([], value);
-                    }
+                    if (isArray(value[0])) value = value.concat.apply([], value);
 
                   default:
                     childNodes = domdiff(node.parentNode, childNodes, value, diffOptions);
@@ -1365,13 +1364,19 @@ var lighterhtml = (function (document,exports) {
                 }
               }
             } else if (canDiff(value)) {
+              oldValue = value;
               childNodes = domdiff(node.parentNode, childNodes, value.nodeType === 11 ? slice.call(value.childNodes) : [value], diffOptions);
             } else if ('text' in value) {
               anyContent(String(value.text));
             } else if ('any' in value) {
               anyContent(value.any);
             } else if ('html' in value) {
-              childNodes = domdiff(node.parentNode, childNodes, slice.call(createContent([].concat(value.html).join(''), nodeType).childNodes), diffOptions);
+              var newValue = [].concat(value.html).join('');
+
+              if (newValue !== oldValue) {
+                oldValue = newValue;
+                childNodes = domdiff(node.parentNode, childNodes, slice.call(createContent(newValue, nodeType).childNodes), diffOptions);
+              }
             } else if ('length' in value) {
               anyContent(slice.call(value));
             }

@@ -205,8 +205,8 @@ Tagger.prototype = {
           }
         default:
           fastPath = false;
-          oldValue = value;
           if (isArray(value)) {
+            oldValue = value;
             if (value.length === 0) {
               if (childNodes.length) {
                 childNodes = domdiff(
@@ -227,9 +227,8 @@ Tagger.prototype = {
                   anyContent(value.map(invoke, node));
                   break;
                 case 'object':
-                  if (isArray(value[0])) {
+                  if (isArray(value[0]))
                     value = value.concat.apply([], value);
-                  }
                 default:
                   childNodes = domdiff(
                     node.parentNode,
@@ -241,6 +240,7 @@ Tagger.prototype = {
               }
             }
           } else if (canDiff(value)) {
+            oldValue = value;
             childNodes = domdiff(
               node.parentNode,
               childNodes,
@@ -254,17 +254,16 @@ Tagger.prototype = {
           } else if ('any' in value) {
             anyContent(value.any);
           } else if ('html' in value) {
-            childNodes = domdiff(
-              node.parentNode,
-              childNodes,
-              slice.call(
-                createContent(
-                  [].concat(value.html).join(''),
-                  nodeType
-                ).childNodes
-              ),
-              diffOptions
-            );
+            const newValue = [].concat(value.html).join('');
+            if (newValue !== oldValue) {
+              oldValue = newValue;
+              childNodes = domdiff(
+                node.parentNode,
+                childNodes,
+                slice.call(createContent(newValue, nodeType).childNodes),
+                diffOptions
+              );
+            }
           } else if ('length' in value) {
             anyContent(slice.call(value));
           }
