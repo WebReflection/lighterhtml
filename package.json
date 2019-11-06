@@ -25,16 +25,16 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/preset-env": "^7.4.5",
-    "ascjs": "^3.0.1",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "ascjs": "^3.1.0",
     "babel-plugin-remove-ungap": "^1.2.0",
     "drop-babel-typeof": "^1.0.3",
-    "rollup": "^1.16.4",
+    "rollup": "^1.26.3",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-terser": "^5.1.0",
+    "rollup-plugin-terser": "^5.1.2",
     "uglify-es": "^3.3.9"
   },
   "dependencies": {
@@ -46,7 +46,7 @@
     "disconnected": "^0.2.1",
     "domdiff": "^2.1.0",
     "domsanitizer": "^0.2.2",
-    "domtagger": "^0.5.9",
+    "domtagger": "^0.5.10",
     "hyperhtml-style": "^0.1.2",
     "hyperhtml-wire": "^2.1.0"
   },

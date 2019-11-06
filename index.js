@@ -869,7 +869,7 @@ var lighterhtml = (function (document,exports) {
           //        Use a better RegExp to find last attribute instead
           //        of trusting `name` is what we are looking for.
           //        Thanks IE/Edge, I hate you both.
-          new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")', 'i'), '$1');
+          new RegExp('^(?:|[\\S\\s]*?\\s)(' + name + ')\\s*=\\s*(\'|")[\\S\\s]*', 'i'), '$1');
           var value = attributes[realName] || // the following ignore is covered by browsers
           // while basicHTML is already case-sensitive
 
@@ -1600,13 +1600,19 @@ var lighterhtml = (function (document,exports) {
   var lighterhtml = function lighterhtml(Tagger) {
     var html = outer('html', Tagger);
     var svg = outer('svg', Tagger);
+    var inner = {
+      html: innerTag('html', Tagger, true),
+      svg: innerTag('svg', Tagger, true)
+    };
     return {
       html: html,
       svg: svg,
+      inner: inner,
       hook: function hook(useRef) {
         return {
           html: createHook(useRef, html),
-          svg: createHook(useRef, svg)
+          svg: createHook(useRef, svg),
+          inner: inner
         };
       },
       render: function render(node, callback) {
@@ -1642,6 +1648,7 @@ var lighterhtml = (function (document,exports) {
   var _lighterhtml = lighterhtml(Tagger),
       html = _lighterhtml.html,
       svg = _lighterhtml.svg,
+      inner = _lighterhtml.inner,
       render = _lighterhtml.render,
       hook = _lighterhtml.hook;
 
@@ -1662,8 +1669,16 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
+  function innerTag(type, Tagger, hole) {
+    return function () {
+      var args = tta.apply(null, arguments);
+      return hole || current ? new Hole(type, args) : new Tagger(type).apply(null, args);
+    };
+  }
+
   function outer(type, Tagger) {
     var wm = new WeakMap$1();
+    var tag = innerTag(type, Tagger, false);
 
     tag["for"] = function (identity, id) {
       var ref = wm.get(identity) || set(identity);
@@ -1695,11 +1710,6 @@ var lighterhtml = (function (document,exports) {
       };
       wm.set(identity, ref);
       return ref;
-    }
-
-    function tag() {
-      var args = tta.apply(null, arguments);
-      return current ? new Hole(type, args) : new Tagger(type).apply(null, args);
     }
   }
 
@@ -1808,6 +1818,7 @@ var lighterhtml = (function (document,exports) {
   exports.custom = custom;
   exports.hook = hook;
   exports.html = html;
+  exports.inner = inner;
   exports.render = render;
   exports.svg = svg;
 
