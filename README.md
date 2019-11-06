@@ -135,6 +135,7 @@ The module exports the following:
   * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
   * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide a keyed updated per each component
   * `Hole` class for 3rd parts (internal use)
+  * `inner`, either via `import {html, svg, inner} from 'lighterhtml'` or via `const {html, svg, inner} = hook(useRef)`. The `inner.html` and `inner.svg` primitives must be used when creation of nodes happen within components that use hooks.
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 

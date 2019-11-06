@@ -16,11 +16,16 @@ let current = null;
 const lighterhtml = Tagger => {
   const html = outer('html', Tagger);
   const svg = outer('svg', Tagger);
+  const inner = {
+    html: innerTag('html', Tagger, true),
+    svg: innerTag('svg', Tagger, true)
+  };
   return {
-    html, svg,
+    html, svg, inner,
     hook: useRef => ({
       html: createHook(useRef, html),
-      svg: createHook(useRef, svg)
+      svg: createHook(useRef, svg),
+      inner
     }),
     render(node, callback) {
       const value = update.call(this, node, callback, Tagger);
@@ -83,8 +88,18 @@ function createHook(useRef, view) {
   };
 }
 
+function innerTag(type, Tagger, hole) {
+  return function () {
+    const args = tta.apply(null, arguments);
+    return hole || current ?
+      new Hole(type, args) :
+      new Tagger(type).apply(null, args);
+  };
+}
+
 function outer(type, Tagger) {
   const wm = new WeakMap;
+  const tag = innerTag(type, Tagger, false);
   tag.for = (identity, id) => {
     const ref = wm.get(identity) || set(identity);
     if (id == null)
@@ -107,12 +122,6 @@ function outer(type, Tagger) {
     const ref = {'$': null};
     wm.set(identity, ref);
     return ref;
-  }
-  function tag() {
-    const args = tta.apply(null, arguments);
-    return current ?
-      new Hole(type, args) :
-      new Tagger(type).apply(null, args);
   }
 }
 

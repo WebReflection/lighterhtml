@@ -1431,13 +1431,19 @@ var lighterhtml = (function (document,exports) {
   var lighterhtml = function lighterhtml(Tagger) {
     var html = outer('html', Tagger);
     var svg = outer('svg', Tagger);
+    var inner = {
+      html: innerTag('html', Tagger, true),
+      svg: innerTag('svg', Tagger, true)
+    };
     return {
       html: html,
       svg: svg,
+      inner: inner,
       hook: function hook(useRef) {
         return {
           html: createHook(useRef, html),
-          svg: createHook(useRef, svg)
+          svg: createHook(useRef, svg),
+          inner: inner
         };
       },
       render: function render(node, callback) {
@@ -1493,8 +1499,16 @@ var lighterhtml = (function (document,exports) {
     };
   }
 
+  function innerTag(type, Tagger, hole) {
+    return function () {
+      var args = tta.apply(null, arguments);
+      return hole || current ? new Hole(type, args) : new Tagger(type).apply(null, args);
+    };
+  }
+
   function outer(type, Tagger) {
     var wm = new WeakMap$1();
+    var tag = innerTag(type, Tagger, false);
 
     tag["for"] = function (identity, id) {
       var ref = wm.get(identity) || set(identity);
@@ -1526,11 +1540,6 @@ var lighterhtml = (function (document,exports) {
       };
       wm.set(identity, ref);
       return ref;
-    }
-
-    function tag() {
-      var args = tta.apply(null, arguments);
-      return current ? new Hole(type, args) : new Tagger(type).apply(null, args);
     }
   }
 
