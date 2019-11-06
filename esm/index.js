@@ -56,13 +56,13 @@ const custom = overrides => {
   }
 };
 
-const {html, svg, render, hook} = lighterhtml(DefaultTagger);
+const {html, svg, inner, render, hook} = lighterhtml(DefaultTagger);
 
 export {
 
   // keyed render via render(node, () => html`...`)
   // non keyed renders in the wild via html`...`
-  html, svg,
+  html, svg, inner,
 
   // generic content render: render(where, () => what)
   render,

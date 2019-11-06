@@ -1479,6 +1479,7 @@ var lighterhtml = (function (document,exports) {
   var _lighterhtml = lighterhtml(Tagger),
       html = _lighterhtml.html,
       svg = _lighterhtml.svg,
+      inner = _lighterhtml.inner,
       render = _lighterhtml.render,
       hook = _lighterhtml.hook;
 
@@ -1648,6 +1649,7 @@ var lighterhtml = (function (document,exports) {
   exports.custom = custom;
   exports.hook = hook;
   exports.html = html;
+  exports.inner = inner;
   exports.render = render;
   exports.svg = svg;
 

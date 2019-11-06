@@ -57,10 +57,11 @@ const custom = overrides => {
   }
 };
 
-const {html, svg, render, hook} = lighterhtml(DefaultTagger);
+const {html, svg, inner, render, hook} = lighterhtml(DefaultTagger);
 
 exports.html = html;
 exports.svg = svg;
+exports.inner = inner;
 exports.render = render;
 exports.hook = hook;
 exports.custom = custom;
