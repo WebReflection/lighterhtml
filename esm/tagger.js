@@ -111,10 +111,10 @@ const slice = [].slice;
 // simplifies text node creation
 const text = (node, text) => node.ownerDocument.createTextNode(text);
 
-export default function Tagger(type) {
+export function Tagger(type) {
   this.type = type;
   return domtagger(this);
-}
+};
 
 Tagger.prototype = {
 

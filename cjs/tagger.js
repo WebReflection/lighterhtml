@@ -116,7 +116,7 @@ function Tagger(type) {
   this.type = type;
   return domtagger(this);
 }
-Object.defineProperty(exports, '__esModule', {value: true}).default = Tagger
+exports.Tagger = Tagger;
 
 Tagger.prototype = {
 

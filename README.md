@@ -8,7 +8,23 @@ The _hyperHTML_ strength & experience without its complexity 🎉
 
   * **faster** than [hyperHTML](https://github.com/WebReflection/hyperHTML) ⚡️
   * **simpler** than [lit-html](https://github.com/polymer/lit-html) 💡
-  * **fueling** this [heresy](https://github.com/WebReflection/heresy/#readme) too 🔥
+  * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
+
+## V2 Breaking Changes & Improvements
+
+### Breaking
+
+  * dropped the ambiguous ability to produce nodes when no `render(...)` is invoked. When needed, which is the minority of the cases, you need to explicitly use `html.node` or `svg.node`, instead of just `html` or `svg`. For every other cases, use `render(where, what)`.
+  * the `render(where, what)` does not need a callback anymore. You can now ``render(node, html`<p>content</p>`)`` right away. If a callback is provided, that will still be invoked.
+  * removed `useHook` as it's unnecessary since you can use `useRef` through `html.for(...)` or `svg.for(...)` within any `useRef` provided by your library of choice (i.e. [dom-augmentor](https://github.com/WebReflection/dom-augmentor#readme))
+  * the recently introduced `inner.html/svg` has been removed, as completely unnatural and error prone (just use `html` anywhere, it'll work).
+
+## Improvements
+
+  * a fundamental core-logic implementation that was trashing any node after one or more collections has been refactored and fixed. The current logic create a stack per each array found down the rendering road, isolating those DOM updates per stack. This means that performance have been improved, and GC operations reduced.
+  * `html` and `svg` template literals tags, now offer both `.for(ref[, id])` and `.node`, to either retain the same content (keyed render) or create fresh new nodes out of the box as one-off operation (via `.node`).
+  * slightly reduced code size, which is always nice to have, after a refactoring
+
 
 ## V1 Changes + New Feature
 
@@ -86,7 +102,7 @@ If you don't believe it, check the [DBMonster](https://webreflection.github.io/l
 
 In _lit-html_, the `html` function tag is worthless, if used without its `render`.
 
-In _lighterhtml_ though, the `html` tag can be used in the wild to create any, one-off, real DOM, [as shown in this pen](https://codepen.io/WebReflection/pen/jXdJBR?editors=0010).
+In _lighterhtml_ though, the `html.node` or `svg.node` tag, can be used in the wild to create any, one-off, real DOM, [as shown in this pen](https://codepen.io/WebReflection/pen/jXdJBR?editors=0010).
 
 ```js
 // lighterhtml: import the `html` tag and use it right away
@@ -94,8 +110,8 @@ import {html} from '//unpkg.com/lighterhtml?module';
 
 // a one off, safe, runtime list 👍
 const list = ['some', '<b>nasty</b>', 'list'];
-document.body.appendChild(html`
-  <ul>${list.map(text => html`
+document.body.appendChild(html.node`
+  <ul>${list.map(text => html.node`
     <li>${text}</li>
   `)}
   </ul>
@@ -104,7 +120,6 @@ document.body.appendChild(html`
 
 Strawberry on top, when the `html` or `svg` tag is used through _lighterhtml_ `render`, it automatically creates all the keyed performance you'd expect from _hyperHTML_ wires, without needing to manually address any reference: pain point? defeated! 🍾
 
-"_but ... how?_", if you're asking, the answer is simple: _lighterhtml_ is based on the same [augmentor](https://github.com/WebReflection/augmentor#augmentor)'s hooks concept, followed by automatically addressed [hyperhtml-wire](https://github.com/WebReflection/hyperhtml-wire#hyperhtml-wire)s, which in turns brings a battle tested solution for the [O(ND) Eugene W. Myers' Algorithm](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.4.6927&rep=rep1&type=pdf) based [domdiff](https://github.com/WebReflection/domdiff#domdiff), and its extra variations.
 
 
 ### Available as lighterhtml-plus too!
@@ -130,23 +145,21 @@ Following, the usual multi import pattern behind every project of mine:
 
 The module exports the following:
 
-  * `html` tag function, create as one-off any sort of html content, or wired content when used within a `render` call
-  * `svg` tag function, create as one-off any sort of SVG content, or wired content when used within a `render` call
-  * `render(node, fn)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout, as well as any real DOM content, if needed
-  * `hook(useRef)` that returns hooks compatible `html` and `svg` utilities, using a `useRef(null)` reference to provide a keyed updated per each component
+  * `html` tag function to create any sort of HTML content when used within a `render` call. It carries two extra utilities, `html.for(ref[, id])`, to hard-reference a specific node, and `html.node` to create one-off dom nodes in the wild without using the `render`.
+  * `svg` tag function to create any sort of SVG content when used within a `render` call. It carries two extra utilities, `svg.for(ref[, id])`, to hard-reference a specific node, and `svg.node` to create one-off dom nodes in the wild without using the `render`.
+  * `render(node, fn|Hole)` to pollute a `node` with whatever is returned from the `fn` parameters, including `html` or `svg` tagged layout
   * `Hole` class for 3rd parts (internal use)
-  * `inner`, either via `import {html, svg, inner} from 'lighterhtml'` or via `const {html, svg, inner} = hook(useRef)`. The `inner.html` and `inner.svg` primitives must be used when creation of nodes happen within components that use hooks.
 
 You can test live a `hook` example in [this Code Pen](https://codepen.io/WebReflection/pen/maQXwq?editors=0010).
 
 
 ### What's different from hyperHTML ?
 
-  * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly ask for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique, and it's the string `default` when not specified. This makes content hard wired whenever it's needed.
-  * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If you'll pass `{set current(node) { ... }}` that'll be invoked per each update, in case you need the node outside `useRef`.
+  * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly ask for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique. This creates content hard wired whenever it's needed.
+  * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect.
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
-  * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates. Promises might be supported again in the future to align with isomorphic SSR, but right now these are not handled at all.
-  * the `onconnected` and `ondisconnected` special events are gone. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
+  * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates.
+  * the `onconnected` and `ondisconnected` special events are available only in _lighterhtml-plus_. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
   * an array of functions will be called automatically, like functions are already called when found in the wild
   * the `Component` can be easily replaced with hooks or automatic keyed renders
 
@@ -154,7 +167,7 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
 const {render, html} = lighterhtml;
 
 // all it takes to have components with lighterhtml
-const Comp = (name) => html`<p>Hello ${name}!</p>`;
+const Comp = name => html`<p>Hello ${name}!</p>`;
 
 // for demo purpose, check in console keyed updates
 // meaning you won't see a single change per second
@@ -169,7 +182,7 @@ setInterval(
 );
 
 function greetings(users) {
-  render(document.body, () => html`${users.map(Comp)}`);
+  render(document.body, html`${users.map(Comp)}`);
 }
 ```
 
@@ -187,7 +200,7 @@ import {render, html} from '//unpkg.com/lighterhtml?module';
 
 document.body.appendChild(
   // as unkeyed one-off content, right away 🎉
-  html`<strong>any</strong> one-off content!<div/>`
+  html.node`<strong>any</strong> one-off content!<div/>`
 );
 
 // as automatically rendered wired content 🤯

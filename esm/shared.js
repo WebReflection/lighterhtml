@@ -1,18 +1,14 @@
 import Wire from 'hyperhtml-wire';
 
 const {isArray} = Array;
+const {create, freeze, keys} = Object;
 const wireType = Wire.prototype.nodeType;
 
-Object.freeze(Hole);
-
 export {
-  Hole,
   Wire,
+  create,
+  freeze,
   isArray,
+  keys,
   wireType
 };
-
-function Hole(type, args) {
-  this.type = type;
-  this.args = args;
-}
