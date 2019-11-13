@@ -6,6 +6,7 @@ _config.yml
 .DS_Store
 .gitignore
 .travis.yml
+.github/FUNDING.yml
 package-lock.json
 rollup.config.js
 es.config.js
