@@ -206,12 +206,12 @@ document.body.appendChild(
 // as automatically rendered wired content 🤯
 todo(document.body.lastChild);
 function todo(node, items = []) {
-  render(node, () => html`
-  <ul>${items.map((what, i) => html`
-    <li data-i=${i} onclick=${remove}> ${what} </li>
-  `)}
-    <button onclick=${add}> add </button>
-  </ul>`);
+  render(node, html`
+  <ul>${
+  items.map((what, i) => html`
+    <li data-i=${i} onclick=${remove}> ${what} </li>`)
+  }</ul>
+  <button onclick=${add}> add </button>`);
   function add() {
     items.push(prompt('do'));
     todo(node, items);
@@ -238,14 +238,13 @@ customElements.define('my-ce', class extends HTMLElement {
     super();
     this.state = {yup: 0, nope: 0};
     this.render = render.bind(
-      // used as update callback context
-      this,
+      null,
       // used as target node
       // it could either be the node itself
       // or its shadow root, even a closed one
       this.attachShadow({mode: 'closed'}),
       // the update callback
-      this.render
+      this.render.bind(this)
     );
     // first render
     this.render();
