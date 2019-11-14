@@ -13,8 +13,8 @@ const {render, html} = lighterhtml;
 setInterval((...LIs) => {
   render(
     document.body,
-    () => html`<ul>${
-      LIs.map((li, i) => render(li, () => html`content ${i}`))
+    html`<ul>${
+      LIs.map((li, i) => render(li, html`content ${i}`))
     }</ul>`);
   },
   1000,

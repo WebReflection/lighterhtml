@@ -9,10 +9,10 @@
 </head>
 <body>
     <script async>
-      const {render, html, svg} = lighterhtml;
+      const {render, html} = lighterhtml;
       function repeater(i) {
         const hasModifier = Math.random() < .5;
-        render(document.body, () => html`<div class="block__element${hasModifier ? '--modifier' : ''}"></div>`);
+        render(document.body, html`<div class="block__element${hasModifier ? '--modifier' : ''}">test</div>`);
       }
       var i = 0; setInterval(() => repeater(++i), 1000);
       </script>

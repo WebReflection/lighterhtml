@@ -6,9 +6,9 @@
     <title>Eyeo GmbH - Circumvention Test Case</title>
     <script src="../index.js"></script>
     <script type="module">
-      const {render, hook} = lighterhtml;
+      const {render, html: $html} = lighterhtml;
       import {augmentor, useRef, useState} from 'https://unpkg.com/augmentor?module';
-      const {html, svg} = hook(useRef);
+      const html = (...args) => $html.for(useRef(null))(...args);
       const Component = fn => function () {
         return augmentor(fn).apply(this, arguments);
       };

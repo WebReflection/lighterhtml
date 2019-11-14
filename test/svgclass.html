@@ -14,15 +14,14 @@ const someClass = "foobar";
 todo(document.body);
 function todo(node, items = []) {
   let texts = ['a', 'b'];
-  const child = () => html`
+  render(node, html`
   <svg width="200" height="200">
     <g class="foo">
     ${texts.map((t, i) => svg`
       <rect x=${20 * i} y="35" width=10 height=10 class=${t}></rect>
     `)}
     </g>
-  </svg>`;
-  render(node, child);
+  </svg>`);
 }
   </script>
 </body>

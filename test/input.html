@@ -15,7 +15,7 @@ setInterval(
     const input = document.querySelector('input') || {value: ''};
     render(
       document.body,
-      () => html`<input value=${input.value} .test=${Math.random()}>`
+      html`<input value=${input.value} .test=${Math.random()}>`
     )
   },
   100

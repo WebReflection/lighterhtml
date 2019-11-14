@@ -19,14 +19,14 @@
         this.state = {yup: 0, nope: 0};
         this.render = render.bind(
           // used as update callback context
-          this,
+          null,
           // used as target node
           // it could either be the node itself
           // this,
           // or even a closed mode Shadow root
           this.attachShadow({mode: 'closed'}),
           // the callback
-          this.render
+          this.render.bind(this)
         );
 
         // here we go!

@@ -13,7 +13,7 @@
       const target = document.querySelector('#app');
 
       function updateTable(dbs) {
-        render(target, () => html`
+        render(target, html`
         <table class="table table-striped latest-data">
           <tbody>${dbs.map((db, i) => html`
             <tr key="${db.dbname}">${[
