@@ -12,6 +12,7 @@
     "es": "rollup --config es.config.js && sed -i.bck 's/var /\\/*! (c) Andrea Giammarchi - ISC *\\/var /' es.js && rm es.js.bck",
     "min": "echo '/*! (c) Andrea Giammarchi - ISC */' > min.js && uglifyjs index.js -c -m >> min.js",
     "rollup": "rollup --config rollup.config.js && drop-babel-typeof index.js",
+    "test": "echo 'no test for CI'",
     "size": "cat index.js | wc -c;cat min.js | wc -c;gzip -c9 min.js | wc -c;cat es.js | wc -c;gzip -c9 es.js | wc -c"
   },
   "keywords": [
