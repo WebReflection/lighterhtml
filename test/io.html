@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>holedhtml</title>
+  <script src="../index.js"></script>
+  <script>
+  var render = holedhtml.render;
+  var html = holedhtml.html;
+  function list() {
+    var arr = [];
+    var length = (Math.random() * 10) | 0;
+    for (var i = 0; i < length; i++)
+      arr[i] = String.fromCharCode(i + 80);
+    return arr;
+  }
+  function item(c) {
+    return html(['<li>', '</li>'], c);
+  }
+  this.onload = function () {
+    setInterval(
+      function () {
+        render(document.body, function () {
+          return html([
+            '', '<ul>', '</ul>', ''
+          ], 'a', list().map(function (c, i) {
+              if (i === 1)
+                return html(['<li><ul>', '</ul></li>'], list().map(item));
+              return item(c);
+            }), 'b');
+        });
+      },
+      1000
+    );
+  };
+  </script>
+</head>
+</html>
