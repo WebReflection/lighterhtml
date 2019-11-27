@@ -44,7 +44,7 @@
     "@ungap/weakmap": "^0.1.4",
     "domdiff": "^2.2.0",
     "domsanitizer": "^0.2.2",
-    "domtagger": "^0.5.11",
+    "domtagger": "^0.6.0",
     "hyperhtml-style": "^0.1.2",
     "hyperhtml-wire": "^2.1.0"
   },
