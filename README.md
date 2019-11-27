@@ -2,13 +2,14 @@
 
 <sup>**Social Media Photo by [Kristine Weilert](https://unsplash.com/@kristineweilert) on [Unsplash](https://unsplash.com/)**</sup>
 
-[![donate](https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&style=flat)](https://github.com/WebReflection/donate) [![Build Status](https://travis-ci.com/WebReflection/lighterhtml.svg?branch=master)](https://travis-ci.com/WebReflection/lighterhtml) ![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC) [![Greenkeeper badge](https://badges.greenkeeper.io/WebReflection/lighterhtml.svg)](https://greenkeeper.io/) ![Blazing Fast](https://img.shields.io/badge/speed-blazing%20🔥-brightgreen.svg)
+[![Build Status](https://travis-ci.com/WebReflection/lighterhtml.svg?branch=master)](https://travis-ci.com/WebReflection/lighterhtml) ![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC) [![Greenkeeper badge](https://badges.greenkeeper.io/WebReflection/lighterhtml.svg)](https://greenkeeper.io/) ![Blazing Fast](https://img.shields.io/badge/speed-blazing%20🔥-brightgreen.svg)
 
 The _hyperHTML_ strength & experience without its complexity 🎉
 
   * **faster** than [hyperHTML](https://github.com/WebReflection/hyperHTML) ⚡️
   * **simpler** than [lit-html](https://github.com/polymer/lit-html) 💡
   * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
+
 
 ## V2 Breaking Changes & Improvements
 
@@ -124,11 +125,7 @@ Strawberry on top, when the `html` or `svg` tag is used through _lighterhtml_ `r
 
 ### Available as lighterhtml-plus too!
 
-Born just as own fork of this project, `lighterhtml-plus` enhances the HTML5 experience through these extras:
-
-  * `onconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have Custom Elements like callbacks
-  * `ondisconnected` callback, as in [hyperHTML](https://github.com/WebReflection/hyperHTML#hyperhtml), to have counter events when nodes get disconnected
-  * `onattributechanged` callback, as in [wickedElements](https://github.com/WebReflection/wicked-elements#wickedelements), to have attributes change notifications, Custom Elements like
+If you are looking for Custom Elements like events out of the box, [lighterhtml-plus](https://github.com/WebReflection/lighterhtml-plus#readme) is your next stop 👍
 
 
 ### How to import lighterhtml/-plus
