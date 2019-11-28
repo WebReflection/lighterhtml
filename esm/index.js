@@ -75,7 +75,8 @@ const unroll = (Tagger, info, hole, counter) => {
   const {stack} = info;
   const {i, iLength} = counter;
   const {type, args} = hole;
-  if (i === iLength)
+  const unknown = i === iLength;
+  if (unknown)
     counter.iLength = stack.push({
       type,
       id: args[0],
@@ -85,14 +86,14 @@ const unroll = (Tagger, info, hole, counter) => {
   counter.i++;
   unrollArray(Tagger, info, args, counter);
   const entry = stack[i];
-  if (i < iLength && entry.id === args[0] && entry.type === type)
-    entry.tag.apply(null, args);
-  else {
+  if (unknown || entry.id !== args[0] || entry.type !== type) {
     entry.type = type;
     entry.id = args[0];
     entry.tag = new Tagger(type);
     entry.wire = wiredContent(entry.tag.apply(null, args));
   }
+  else
+    entry.tag.apply(null, args);
   return entry.wire;
 };
 
