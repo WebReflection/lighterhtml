@@ -5,8 +5,6 @@ import hyperStyle from 'hyperhtml-style';
 
 import {wireType, isArray} from './shared.js';
 
-const OWNER_SVG_ELEMENT = 'ownerSVGElement';
-
 // returns nodes from wires and components
 const asNode = (item, i) => item.nodeType === wireType ?
   (
@@ -126,26 +124,25 @@ Tagger.prototype = {
   //    so that you can style=${{width: 120}}. In this case, the behavior has been
   //    fully inspired by Preact library and its simplicity.
   attribute(node, name, original) {
+    const isSVG = this.type === 'svg';
     switch (name) {
       case 'class':
-        if (OWNER_SVG_ELEMENT in node)
+        if (isSVG)
           return hyperAttribute(node, original);
         name = 'className';
       case 'data':
       case 'props':
         return hyperProperty(node, name);
       case 'style':
-        return hyperStyle(node, original, OWNER_SVG_ELEMENT in node);
+        return hyperStyle(node, original, isSVG);
       case 'ref':
         return hyperRef(node);
       default:
         if (name.slice(0, 1) === '.')
-          return hyperSetter(node, name.slice(1), OWNER_SVG_ELEMENT in node);
+          return hyperSetter(node, name.slice(1), isSVG);
         if (name.slice(0, 2) === 'on')
           return hyperEvent(node, name);
-        if (name in node && !(
-          OWNER_SVG_ELEMENT in node || readOnly.test(name)
-        ))
+        if (name in node && !(isSVG || readOnly.test(name)))
           return hyperProperty(node, name);
         return hyperAttribute(node, original);
 
@@ -162,7 +159,7 @@ Tagger.prototype = {
   //    update the node with the resulting list of content
   any(node, childNodes) {
     const diffOptions = {node: asNode, before: node};
-    const nodeType = OWNER_SVG_ELEMENT in node ? /* istanbul ignore next */ 'svg' : 'html';
+    const {type} = this;
     let fastPath = false;
     let oldValue;
     const anyContent = value => {
@@ -258,7 +255,7 @@ Tagger.prototype = {
               slice.call(
                 createContent(
                   [].concat(value.html).join(''),
-                  nodeType
+                  type
                 ).childNodes
               ),
               diffOptions

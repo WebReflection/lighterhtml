@@ -58,10 +58,10 @@ const retrieve = (Tagger, info, hole) => {
   };
   const wire = unroll(Tagger, info, hole, counter);
   const {a, i, aLength, iLength} = counter;
-  if ((a + 1) < aLength)
-    sub.splice(a + 1);
-  if ((i + 1) < iLength)
-    stack.splice(i + 1);
+  if (a < aLength)
+    sub.splice(a);
+  if (i < iLength)
+    stack.splice(i);
   return wire;
 };
 
@@ -82,6 +82,7 @@ const unroll = (Tagger, info, hole, counter) => {
       tag: null,
       wire: null
     });
+  counter.i++;
   unrollArray(Tagger, info, args, counter);
   const entry = stack[i];
   if (i < iLength && entry.id === args[0] && entry.type === type)
@@ -99,10 +100,8 @@ const unrollArray = (Tagger, info, args, counter) => {
   for (let i = 1, {length} = args; i < length; i++) {
     const hole = args[i];
     if (typeof hole === 'object' && hole) {
-      if (hole instanceof Hole) {
-        counter.i++;
+      if (hole instanceof Hole)
         args[i] = unroll(Tagger, info, hole, counter);
-      }
       else if (isArray(hole)) {
         for (let i = 0, {length} = hole; i < length; i++) {
           const inner = hole[i];
@@ -142,9 +141,9 @@ export const custom = overrides => {
       (key === 'convert' ? domsanitizer : String)
     );
   });
-  CustomTqgger.prototype = prototype;
-  return createRender(CustomTqgger);
-  function CustomTqgger() {
+  CustomTagger.prototype = prototype;
+  return createRender(CustomTagger);
+  function CustomTagger() {
     return Tagger.apply(this, arguments);
   }
 };
