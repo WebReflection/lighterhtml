@@ -1451,7 +1451,8 @@ var lighterhtml = (function (document,exports) {
         iLength = counter.iLength;
     var type = hole.type,
         args = hole.args;
-    if (i === iLength) counter.iLength = stack.push({
+    var unknown = i === iLength;
+    if (unknown) counter.iLength = stack.push({
       type: type,
       id: args[0],
       tag: null,
@@ -1460,12 +1461,14 @@ var lighterhtml = (function (document,exports) {
     counter.i++;
     unrollArray(Tagger, info, args, counter);
     var entry = stack[i];
-    if (i < iLength && entry.id === args[0] && entry.type === type) entry.tag.apply(null, args);else {
+
+    if (unknown || entry.id !== args[0] || entry.type !== type) {
       entry.type = type;
       entry.id = args[0];
       entry.tag = new Tagger(type);
       entry.wire = wiredContent(entry.tag.apply(null, args));
-    }
+    } else entry.tag.apply(null, args);
+
     return entry.wire;
   };
 
