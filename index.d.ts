@@ -10,9 +10,10 @@ export interface Tag<T> extends TemplateFunction<Hole> {
 
 export declare const html: Tag<HTMLElement>;
 export declare const svg: Tag<SVGElement>;
+export type Renderable = Hole | HTMLElement | SVGElement;
 export declare function render<T extends Node>(
   node: T,
-  renderer: (() => Hole) | Hole,
+  renderer: (() => Renderable) | Renderable,
 ): T;
 export declare function custom(
   // TODO: This should be defined in `domtagger`
