@@ -1368,7 +1368,7 @@ var lighterhtml = (function (document,exports) {
       render: function render(where, what) {
         var hole = typeof what === 'function' ? what() : what;
         var info = cache.get(where) || setCache(where);
-        var wire = hole instanceof Hole ? retrieve(Tagger, info, hole) : hole;
+        var wire = hole instanceof LighterHole ? retrieve(Tagger, info, hole) : hole;
 
         if (wire !== info.wire) {
           info.wire = wire;
@@ -1416,7 +1416,7 @@ var lighterhtml = (function (document,exports) {
     return hole;
 
     function hole() {
-      return new Hole(type, tta.apply(null, arguments));
+      return new LighterHole(type, tta.apply(null, arguments));
     }
   };
 
@@ -1477,11 +1477,11 @@ var lighterhtml = (function (document,exports) {
       var hole = args[i];
 
       if (typeof(hole) === 'object' && hole) {
-        if (hole instanceof Hole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
+        if (hole instanceof LighterHole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
           for (var _i = 0, _length = hole.length; _i < _length; _i++) {
             var inner = hole[_i];
 
-            if (typeof(inner) === 'object' && inner && inner instanceof Hole) {
+            if (typeof(inner) === 'object' && inner && inner instanceof LighterHole) {
               var sub = info.sub;
               var a = counter.a,
                   aLength = counter.aLength;
@@ -1501,8 +1501,8 @@ var lighterhtml = (function (document,exports) {
     return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   };
 
-  freeze(Hole);
-  function Hole(type, args) {
+  freeze(LighterHole);
+  function LighterHole(type, args) {
     this.type = type;
     this.args = args;
   }
@@ -1524,7 +1524,7 @@ var lighterhtml = (function (document,exports) {
       html = _createRender.html,
       svg = _createRender.svg;
 
-  exports.Hole = Hole;
+  exports.LighterHole = LighterHole;
   exports.custom = custom;
   exports.html = html;
   exports.render = render;

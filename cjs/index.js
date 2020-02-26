@@ -16,7 +16,8 @@ const createRender = Tagger => ({
   render(where, what) {
     const hole = typeof what === 'function' ? what() : what;
     const info = cache.get(where) || setCache(where);
-    const wire = hole instanceof Hole ? retrieve(Tagger, info, hole) : hole;
+    const wire = hole instanceof LighterHole ?
+                  retrieve(Tagger, info, hole) : hole;
     if (wire !== info.wire) {
       info.wire = wire;
       where.textContent = '';
@@ -47,7 +48,7 @@ const outer = (type, Tagger) => {
   };
   return hole;
   function hole() {
-    return new Hole(type, tta.apply(null, arguments));
+    return new LighterHole(type, tta.apply(null, arguments));
   }
 };
 
@@ -102,12 +103,12 @@ const unrollArray = (Tagger, info, args, counter) => {
   for (let i = 1, {length} = args; i < length; i++) {
     const hole = args[i];
     if (typeof hole === 'object' && hole) {
-      if (hole instanceof Hole)
+      if (hole instanceof LighterHole)
         args[i] = unroll(Tagger, info, hole, counter);
       else if (isArray(hole)) {
         for (let i = 0, {length} = hole; i < length; i++) {
           const inner = hole[i];
-          if (typeof inner === 'object' && inner && inner instanceof Hole) {
+          if (typeof inner === 'object' && inner && inner instanceof LighterHole) {
             const {sub} = info;
             const {a, aLength} = counter;
             if (a === aLength)
@@ -129,12 +130,12 @@ const wiredContent = node => {
     (length ? new Wire(childNodes) : node);
 };
 
-freeze(Hole);
-function Hole(type, args) {
+freeze(LighterHole);
+function LighterHole(type, args) {
   this.type = type;
   this.args = args;
 }
-exports.Hole = Hole;
+exports.LighterHole = LighterHole;
 
 const custom = overrides => {
   const prototype = create(tProto);
