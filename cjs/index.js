@@ -134,8 +134,9 @@ freeze(LighterHole);
 function LighterHole(type, args) {
   this.type = type;
   this.args = args;
-}
-exports.LighterHole = LighterHole;
+};
+const Hole = LighterHole;
+exports.Hole = Hole;
 
 const custom = overrides => {
   const prototype = create(tProto);

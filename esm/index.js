@@ -130,10 +130,11 @@ const wiredContent = node => {
 };
 
 freeze(LighterHole);
-export function LighterHole(type, args) {
+function LighterHole(type, args) {
   this.type = type;
   this.args = args;
 };
+export const Hole = LighterHole;
 
 export const custom = overrides => {
   const prototype = create(tProto);

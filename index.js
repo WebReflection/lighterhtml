@@ -1502,10 +1502,12 @@ var lighterhtml = (function (document,exports) {
   };
 
   freeze(LighterHole);
+
   function LighterHole(type, args) {
     this.type = type;
     this.args = args;
   }
+  var Hole = LighterHole;
   var custom = function custom(overrides) {
     var prototype = create(tProto);
     keys(overrides).forEach(function (key) {
@@ -1524,7 +1526,7 @@ var lighterhtml = (function (document,exports) {
       html = _createRender.html,
       svg = _createRender.svg;
 
-  exports.LighterHole = LighterHole;
+  exports.Hole = Hole;
   exports.custom = custom;
   exports.html = html;
   exports.render = render;
