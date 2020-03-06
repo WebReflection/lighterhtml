@@ -53,12 +53,12 @@ const hyperEvent = (node, name) => {
   if (name.toLowerCase() in node)
     type = type.toLowerCase();
   return newValue => {
-    if (oldValue !== newValue) {
+    const info = isArray(newValue) ? newValue : [newValue, false];
+    if (oldValue !== info[0]) {
       if (oldValue)
-        node.removeEventListener(type, oldValue, false);
-      oldValue = newValue;
-      if (newValue)
-        node.addEventListener(type, newValue, false);
+        node.removeEventListener(type, oldValue, info[1]);
+      if (oldValue = info[0])
+        node.addEventListener(type, oldValue, info[1]);
     }
   };
 };

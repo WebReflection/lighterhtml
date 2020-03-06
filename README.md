@@ -11,23 +11,35 @@ The _hyperHTML_ strength & experience without its complexity 🎉
   * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
 
 
-## V2 Breaking Changes & Improvements
+## V2.1 Introducing A New Listener Feature
 
-### Breaking
+Until version 2.1, there was no way to define different options for any listener. The `el.addEventListener(type, listener, false)` was the only kind of operation possible behind the scene.
+
+In _v2.1_ though, whenever a second option is needed, it is now possible to pass an `Array` instead, in the form `[listener, {once: true}]`, as example, or `[listener, true]` to use capture instead of bubbling, and so on and so forth.
+
+Bear in mind, specially for the `once` case, if the listener is different per each update, like `onclick=${[() => stuff(), {once: true}]}`, it will be set each time that update happens, so that in this case is better to use always the same listener, either via outer scope callback, or via reference, using `useRef` and the `handleEvent` pattern, as example.
+
+If you never needed to add a different second option, there is nothing you should do, everything will work exactly as it did before.
+
+
+
+### V2 Breaking Changes & Improvements
+
+#### Breaking
 
   * dropped the ambiguous ability to produce nodes when no `render(...)` is invoked. When needed, which is the minority of the cases, you need to explicitly use `html.node` or `svg.node`, instead of just `html` or `svg`. For every other cases, use `render(where, what)`.
   * the `render(where, what)` does not need a callback anymore. You can now ``render(node, html`<p>content</p>`)`` right away. If a callback is provided, that will still be invoked.
   * removed `useHook` as it's unnecessary since you can use `useRef` through `html.for(...)` or `svg.for(...)` within any `useRef` provided by your library of choice (i.e. [dom-augmentor](https://github.com/WebReflection/dom-augmentor#readme))
   * the recently introduced `inner.html/svg` has been removed, as completely unnatural and error prone (just use `html` anywhere, it'll work).
 
-## Improvements
+### Improvements
 
   * a fundamental core-logic implementation that was trashing any node after one or more collections has been refactored and fixed. The current logic create a stack per each array found down the rendering road, isolating those DOM updates per stack. This means that performance have been improved, and GC operations reduced.
   * `html` and `svg` template literals tags, now offer both `.for(ref[, id])` and `.node`, to either retain the same content (keyed render) or create fresh new nodes out of the box as one-off operation (via `.node`).
   * slightly reduced code size, which is always nice to have, after a refactoring
 
 
-## V1 Changes + New Feature
+### V1 Changes + New Feature
 
 Removed `transform` export and made default [domtagger](https://github.com/WebReflection/domtagger) customizable via `custom` export.
 
@@ -159,6 +171,7 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
   * the `onconnected` and `ondisconnected` special events are available only in _lighterhtml-plus_. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
   * an array of functions will be called automatically, like functions are already called when found in the wild
   * the `Component` can be easily replaced with hooks or automatic keyed renders
+  * if a listener is an `Array` such as `[listener, {once: true}]`, the second entry of the array will be used as option.
 
 ```js
 const {render, html} = lighterhtml;
