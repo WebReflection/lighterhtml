@@ -99,26 +99,29 @@ const unroll = (Tagger, info, hole, counter) => {
 };
 
 const unrollArray = (Tagger, info, args, counter) => {
-  for (let i = 1, {length} = args; i < length; i++) {
+  let {a, aLength} = counter;
+  for (let i = 1, {length} = args, {sub} = info; i < length; i++) {
     const hole = args[i];
     if (typeof hole === 'object' && hole) {
       if (hole instanceof LighterHole)
         args[i] = unroll(Tagger, info, hole, counter);
       else if (isArray(hole)) {
+        const {length} = hole;
+        const next = a + length;
+        while (aLength < next)
+          aLength = sub.push(null);
         for (let i = 0, {length} = hole; i < length; i++) {
           const inner = hole[i];
-          if (typeof inner === 'object' && inner && inner instanceof LighterHole) {
-            const {sub} = info;
-            const {a, aLength} = counter;
-            if (a === aLength)
-              counter.aLength = sub.push(newInfo());
-            counter.a++;
-            hole[i] = retrieve(Tagger, sub[a], inner);
-          }
+          if (typeof inner === 'object' && inner && inner instanceof LighterHole)
+            hole[i] = retrieve(Tagger, sub[a] || (sub[a] = newInfo()), inner);
+          a++;
         }
       }
     }
+    a++;
   }
+  counter.a = a;
+  counter.aLength = aLength;
 };
 
 const wiredContent = node => {

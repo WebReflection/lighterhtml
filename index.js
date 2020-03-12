@@ -1474,26 +1474,34 @@ var lighterhtml = (function (document,exports) {
   };
 
   var unrollArray = function unrollArray(Tagger, info, args, counter) {
-    for (var i = 1, length = args.length; i < length; i++) {
+    var a = counter.a,
+        aLength = counter.aLength;
+
+    for (var i = 1, length = args.length, sub = info.sub; i < length; i++) {
       var hole = args[i];
 
       if (typeof(hole) === 'object' && hole) {
         if (hole instanceof LighterHole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
-          for (var _i = 0, _length = hole.length; _i < _length; _i++) {
-            var inner = hole[_i];
+          var _length = hole.length;
+          var next = a + _length;
 
-            if (typeof(inner) === 'object' && inner && inner instanceof LighterHole) {
-              var sub = info.sub;
-              var a = counter.a,
-                  aLength = counter.aLength;
-              if (a === aLength) counter.aLength = sub.push(newInfo());
-              counter.a++;
-              hole[_i] = retrieve(Tagger, sub[a], inner);
-            }
+          while (aLength < next) {
+            aLength = sub.push(null);
+          }
+
+          for (var _i = 0, _length2 = hole.length; _i < _length2; _i++) {
+            var inner = hole[_i];
+            if (typeof(inner) === 'object' && inner && inner instanceof LighterHole) hole[_i] = retrieve(Tagger, sub[a] || (sub[a] = newInfo()), inner);
+            a++;
           }
         }
       }
+
+      a++;
     }
+
+    counter.a = a;
+    counter.aLength = aLength;
   };
 
   var wiredContent = function wiredContent(node) {
