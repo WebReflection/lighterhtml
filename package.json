@@ -46,7 +46,8 @@
     "domsanitizer": "^0.2.2",
     "domtagger": "^0.6.1",
     "hyperhtml-style": "^0.1.2",
-    "hyperhtml-wire": "^2.1.0"
+    "uarray": "^1.0.0",
+    "uwire": "^1.0.0"
   },
   "repository": {
     "type": "git",

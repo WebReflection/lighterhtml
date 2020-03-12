@@ -3,18 +3,8 @@ const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default 
 const domdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domdiff'));
 const domtagger = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domtagger'));
 const hyperStyle = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('hyperhtml-style'));
-
-const {wireType, isArray} = require('./shared.js');
-
-// returns nodes from wires and components
-const asNode = (item, i) => item.nodeType === wireType ?
-  (
-    (1 / i) < 0 ?
-      (i ? item.remove(true) : item.lastChild) :
-      (i ? item.valueOf(true) : item.firstChild)
-  ) :
-  item
-;
+const {isArray, slice} = require('uarray');
+const {diffable} = require('uwire');
 
 // returns true if domdiff can handle the value
 const canDiff = value => 'ELEMENT_NODE' in value;
@@ -104,9 +94,6 @@ const hyperSetter = (node, name, svg) => svg ?
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
 
-// reused every slice time
-const slice = [].slice;
-
 // simplifies text node creation
 const text = (node, text) => node.ownerDocument.createTextNode(text);
 
@@ -160,7 +147,7 @@ Tagger.prototype = {
   //  * it's an Array, resolve all values if Promises and/or
   //    update the node with the resulting list of content
   any(node, childNodes) {
-    const diffOptions = {node: asNode, before: node};
+    const diffOptions = {node: diffable, before: node};
     const {type} = this;
     let fastPath = false;
     let oldValue;
