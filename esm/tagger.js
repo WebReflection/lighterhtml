@@ -2,18 +2,8 @@ import createContent from '@ungap/create-content';
 import domdiff from 'domdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
-
-import {wireType, isArray} from './shared.js';
-
-// returns nodes from wires and components
-const asNode = (item, i) => item.nodeType === wireType ?
-  (
-    (1 / i) < 0 ?
-      (i ? item.remove(true) : item.lastChild) :
-      (i ? item.valueOf(true) : item.firstChild)
-  ) :
-  item
-;
+import {isArray, slice} from 'uarray';
+import {diffable} from 'uwire';
 
 // returns true if domdiff can handle the value
 const canDiff = value => 'ELEMENT_NODE' in value;
@@ -103,9 +93,6 @@ const hyperSetter = (node, name, svg) => svg ?
 // list of attributes that should not be directly assigned
 const readOnly = /^(?:form|list)$/i;
 
-// reused every slice time
-const slice = [].slice;
-
 // simplifies text node creation
 const text = (node, text) => node.ownerDocument.createTextNode(text);
 
@@ -158,7 +145,7 @@ Tagger.prototype = {
   //  * it's an Array, resolve all values if Promises and/or
   //    update the node with the resulting list of content
   any(node, childNodes) {
-    const diffOptions = {node: asNode, before: node};
+    const diffOptions = {node: diffable, before: node};
     const {type} = this;
     let fastPath = false;
     let oldValue;
