@@ -1,20 +1,21 @@
 import WeakMap from '@ungap/weakmap';
 import tta from '@ungap/template-tag-arguments';
 import domsanitizer from 'domsanitizer';
+import umap from 'umap';
 
 import {Tagger} from './tagger.js';
 import {Wire, create, freeze, isArray, keys} from './shared.js';
 
 const tProto = Tagger.prototype;
 
-const cache = new WeakMap;
+const cache = umap(new WeakMap);
 
 const createRender = Tagger => ({
   html: outer('html', Tagger),
   svg: outer('svg', Tagger),
   render(where, what) {
     const hole = typeof what === 'function' ? what() : what;
-    const info = cache.get(where) || setCache(where);
+    const info = cache.get(where) || cache.set(where, newInfo());
     const wire = hole instanceof LighterHole ?
                   retrieve(Tagger, info, hole) : hole;
     if (wire !== info.wire) {
@@ -29,17 +30,12 @@ const createRender = Tagger => ({
 const newInfo = () => ({sub: [], stack: [], wire: null});
 
 const outer = (type, Tagger) => {
-  const cache = new WeakMap;
+  const cache = umap(new WeakMap);
   const fixed = info => function () {
     return retrieve(Tagger, info, hole.apply(null, arguments));
   };
-  const set = ref => {
-    const memo = create(null);
-    cache.set(ref, memo);
-    return memo;
-  };
   hole.for = (ref, id) => {
-    const memo = cache.get(ref) || set(ref);
+    const memo = cache.get(ref) || cache.set(ref, create(null));
     return memo[id] || (memo[id] = fixed(newInfo()));
   };
   hole.node = function () {
@@ -64,12 +60,6 @@ const retrieve = (Tagger, info, hole) => {
   if (i < iLength)
     stack.splice(i);
   return wire;
-};
-
-const setCache = where => {
-  const info = newInfo();
-  cache.set(where, info);
-  return info;
 };
 
 const unroll = (Tagger, info, hole, counter) => {

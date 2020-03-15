@@ -168,6 +168,22 @@ var lighterhtml = (function (document,exports) {
     return VOID_ELEMENTS.test($1) ? $0 : '<' + $1 + $2 + '></' + $1 + '>';
   }
 
+  var umap = (function (_) {
+    return {
+      // About: get: _.get.bind(_)
+      // It looks like WebKit/Safari didn't optimize bind at all,
+      // so that using bind slows it down by 60%.
+      // Firefox and Chrome are just fine in both cases,
+      // so let's use the approach that works fast everywhere 👍
+      get: function get(key) {
+        return _.get(key);
+      },
+      set: function set(key, value) {
+        return _.set(key, value), value;
+      }
+    };
+  });
+
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
 
@@ -1360,7 +1376,7 @@ var lighterhtml = (function (document,exports) {
   }
 
   var tProto = Tagger.prototype;
-  var cache = new WeakMap$1();
+  var cache = umap(new WeakMap$1());
 
   var createRender = function createRender(Tagger) {
     return {
@@ -1368,7 +1384,7 @@ var lighterhtml = (function (document,exports) {
       svg: outer('svg', Tagger),
       render: function render(where, what) {
         var hole = typeof what === 'function' ? what() : what;
-        var info = cache.get(where) || setCache(where);
+        var info = cache.get(where) || cache.set(where, newInfo());
         var wire = hole instanceof LighterHole ? retrieve(Tagger, info, hole) : hole;
 
         if (wire !== info.wire) {
@@ -1391,7 +1407,7 @@ var lighterhtml = (function (document,exports) {
   };
 
   var outer = function outer(type, Tagger) {
-    var cache = new WeakMap$1();
+    var cache = umap(new WeakMap$1());
 
     var fixed = function fixed(info) {
       return function () {
@@ -1399,14 +1415,8 @@ var lighterhtml = (function (document,exports) {
       };
     };
 
-    var set = function set(ref) {
-      var memo = create(null);
-      cache.set(ref, memo);
-      return memo;
-    };
-
     hole["for"] = function (ref, id) {
-      var memo = cache.get(ref) || set(ref);
+      var memo = cache.get(ref) || cache.set(ref, create(null));
       return memo[id] || (memo[id] = fixed(newInfo()));
     };
 
@@ -1438,12 +1448,6 @@ var lighterhtml = (function (document,exports) {
     if (a < aLength) sub.splice(a);
     if (i < iLength) stack.splice(i);
     return wire;
-  };
-
-  var setCache = function setCache(where) {
-    var info = newInfo();
-    cache.set(where, info);
-    return info;
   };
 
   var unroll = function unroll(Tagger, info, hole, counter) {
