@@ -55,5 +55,6 @@ export class Hole {
   constructor(type: string, args: readonly [TemplateStringsArray, ...any[]]);
 
   readonly type: string;
-  readonly args: readonly [TemplateStringsArray, ...any[]];
+  readonly template: TemplateStringsArray;
+  readonly values: any[];
 }
