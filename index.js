@@ -1,8 +1,6 @@
 var lighterhtml = (function (document,exports) {
   'use strict';
 
-  
-
   /*! (c) Andrea Giammarchi - ISC */
   var self = null ||
   /* istanbul ignore next */
@@ -55,6 +53,8 @@ var lighterhtml = (function (document,exports) {
   }
 
   var WeakMap$1 = self.WeakMap;
+
+  
 
   var isNoOp = false;
 
@@ -168,6 +168,11 @@ var lighterhtml = (function (document,exports) {
     return VOID_ELEMENTS.test($1) ? $0 : '<' + $1 + $2 + '></' + $1 + '>';
   }
 
+  var isArray = Array.isArray;
+  var _ref = [],
+      indexOf = _ref.indexOf,
+      slice = _ref.slice;
+
   var umap = (function (_) {
     return {
       // About: get: _.get.bind(_)
@@ -183,6 +188,50 @@ var lighterhtml = (function (document,exports) {
       }
     };
   });
+
+  var ELEMENT_NODE$1 = 1;
+  var nodeType = 111;
+
+  var remove = function remove(_ref) {
+    var firstChild = _ref.firstChild,
+        lastChild = _ref.lastChild;
+    var range = document.createRange();
+    range.setStartAfter(firstChild);
+    range.setEndAfter(lastChild);
+    range.deleteContents();
+    return firstChild;
+  };
+
+  var diffable = function diffable(node, operation) {
+    return node.nodeType === nodeType ? 1 / operation < 0 ? operation ? remove(node) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
+  };
+  var persistent = function persistent(fragment) {
+    var childNodes = fragment.childNodes;
+    var length = childNodes.length; // If the fragment has no content
+    // it should return undefined and break
+
+    if (length < 2) return childNodes[0];
+    var nodes = slice.call(childNodes, 0);
+    var firstChild = nodes[0];
+    var lastChild = nodes[length - 1];
+    return {
+      ELEMENT_NODE: ELEMENT_NODE$1,
+      nodeType: nodeType,
+      firstChild: firstChild,
+      lastChild: lastChild,
+      valueOf: function valueOf() {
+        if (childNodes.length !== length) {
+          var i = 0;
+
+          while (i < length) {
+            fragment.appendChild(nodes[i++]);
+          }
+        }
+
+        return fragment;
+      }
+    };
+  };
 
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
@@ -239,7 +288,6 @@ var lighterhtml = (function (document,exports) {
     }
   }(document);
 
-  var iOF = [].indexOf;
   var append = function append(get, parent, children, start, end, before) {
     var isSelect = 'selectedIndex' in parent;
     var noSelection = isSelect;
@@ -251,7 +299,7 @@ var lighterhtml = (function (document,exports) {
       if (isSelect && noSelection && child.selected) {
         noSelection = !noSelection;
         var selectedIndex = parent.selectedIndex;
-        parent.selectedIndex = selectedIndex < 0 ? start : iOF.call(parent.querySelectorAll('option'), child);
+        parent.selectedIndex = selectedIndex < 0 ? start : indexOf.call(parent.querySelectorAll('option'), child);
       }
 
       start++;
@@ -263,7 +311,7 @@ var lighterhtml = (function (document,exports) {
   var identity = function identity(O) {
     return O;
   };
-  var indexOf = function indexOf(moreNodes, moreStart, moreEnd, lessNodes, lessStart, lessEnd, compare) {
+  var indexOf$1 = function indexOf(moreNodes, moreStart, moreEnd, lessNodes, lessStart, lessEnd, compare) {
     var length = lessEnd - lessStart;
     /* istanbul ignore if */
 
@@ -294,7 +342,7 @@ var lighterhtml = (function (document,exports) {
   var next = function next(get, list, i, length, before) {
     return i < length ? get(list[i], 0) : 0 < i ? get(list[i - 1], -0).nextSibling : before;
   };
-  var remove = function remove(get, children, start, end) {
+  var remove$1 = function remove(get, children, start, end) {
     while (start < end) {
       drop(get(children[start++], -1));
     }
@@ -492,7 +540,7 @@ var lighterhtml = (function (document,exports) {
 
         case DELETION:
           // TODO: bulk removes for sequential nodes
-          if (-1 < live.indexOf(currentNodes[currentStart])) currentStart++;else remove(get, currentNodes, currentStart++, currentStart);
+          if (-1 < live.indexOf(currentNodes[currentStart])) currentStart++;else remove$1(get, currentNodes, currentStart++, currentStart);
           break;
       }
     }
@@ -568,7 +616,7 @@ var lighterhtml = (function (document,exports) {
 
 
     if (futureSame && currentStart < currentEnd) {
-      remove(get, currentNodes, currentStart, currentEnd);
+      remove$1(get, currentNodes, currentStart, currentEnd);
       return futureNodes;
     }
 
@@ -577,7 +625,7 @@ var lighterhtml = (function (document,exports) {
     var i = -1; // 2 simple indels: the shortest sequence is a subsequence of the longest
 
     if (currentChanges < futureChanges) {
-      i = indexOf(futureNodes, futureStart, futureEnd, currentNodes, currentStart, currentEnd, compare); // inner diff
+      i = indexOf$1(futureNodes, futureStart, futureEnd, currentNodes, currentStart, currentEnd, compare); // inner diff
 
       if (-1 < i) {
         append(get, parentNode, futureNodes, futureStart, i, get(currentNodes[currentStart], 0));
@@ -587,11 +635,11 @@ var lighterhtml = (function (document,exports) {
     }
     /* istanbul ignore else */
     else if (futureChanges < currentChanges) {
-        i = indexOf(currentNodes, currentStart, currentEnd, futureNodes, futureStart, futureEnd, compare); // outer diff
+        i = indexOf$1(currentNodes, currentStart, currentEnd, futureNodes, futureStart, futureEnd, compare); // outer diff
 
         if (-1 < i) {
-          remove(get, currentNodes, currentStart, i);
-          remove(get, currentNodes, i + futureChanges, currentEnd);
+          remove$1(get, currentNodes, currentStart, i);
+          remove$1(get, currentNodes, i + futureChanges, currentEnd);
           return futureNodes;
         }
       } // common case with one replacement for many nodes
@@ -602,7 +650,7 @@ var lighterhtml = (function (document,exports) {
 
     if (currentChanges < 2 || futureChanges < 2) {
       append(get, parentNode, futureNodes, futureStart, futureEnd, get(currentNodes[currentStart], 0));
-      remove(get, currentNodes, currentStart, currentEnd);
+      remove$1(get, currentNodes, currentStart, currentEnd);
       return futureNodes;
     } // the half match diff part has been skipped in petit-dom
     // https://github.com/yelouafi/petit-dom/blob/bd6f5c919b5ae5297be01612c524c40be45f14a7/src/vdom.js#L391-L397
@@ -843,7 +891,7 @@ var lighterhtml = (function (document,exports) {
   }
 
   // globals
-  var parsed = new WeakMap$1();
+  var parsed = umap(new WeakMap$1());
 
   function createInfo(options, template) {
     var markup = (options.convert || domsanitizer)(template);
@@ -853,7 +901,7 @@ var lighterhtml = (function (document,exports) {
     cleanContent(content);
     var holes = [];
     parse(content, holes, template.slice(0), []);
-    var info = {
+    return {
       content: content,
       updates: function updates(content) {
         var updates = [];
@@ -932,12 +980,10 @@ var lighterhtml = (function (document,exports) {
         };
       }
     };
-    parsed.set(template, info);
-    return info;
   }
 
   function createDetails(options, template) {
-    var info = parsed.get(template) || createInfo(options, template);
+    var info = parsed.get(template) || parsed.set(template, createInfo(options, template));
     return info.updates(importNode.call(document, info.content, true));
   }
 
@@ -1048,71 +1094,6 @@ var lighterhtml = (function (document,exports) {
     }
   }();
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var Wire = function (slice, proto) {
-    proto = Wire.prototype;
-    proto.ELEMENT_NODE = 1;
-    proto.nodeType = 111;
-
-    proto.remove = function (keepFirst) {
-      var childNodes = this.childNodes;
-      var first = this.firstChild;
-      var last = this.lastChild;
-      this._ = null;
-
-      if (keepFirst && childNodes.length === 2) {
-        last.parentNode.removeChild(last);
-      } else {
-        var range = this.ownerDocument.createRange();
-        range.setStartBefore(keepFirst ? childNodes[1] : first);
-        range.setEndAfter(last);
-        range.deleteContents();
-      }
-
-      return first;
-    };
-
-    proto.valueOf = function (forceAppend) {
-      var fragment = this._;
-      var noFragment = fragment == null;
-      if (noFragment) fragment = this._ = this.ownerDocument.createDocumentFragment();
-
-      if (noFragment || forceAppend) {
-        for (var n = this.childNodes, i = 0, l = n.length; i < l; i++) {
-          fragment.appendChild(n[i]);
-        }
-      }
-
-      return fragment;
-    };
-
-    return Wire;
-
-    function Wire(childNodes) {
-      var nodes = this.childNodes = slice.call(childNodes, 0);
-      this.firstChild = nodes[0];
-      this.lastChild = nodes[nodes.length - 1];
-      this.ownerDocument = nodes[0].ownerDocument;
-      this._ = null;
-    }
-  }([].slice);
-
-  var isArray = Array.isArray;
-  var create = Object.create,
-      freeze = Object.freeze,
-      keys = Object.keys;
-  var wireType = Wire.prototype.nodeType;
-
-  var asNode = function asNode(item, i) {
-    return item.nodeType === wireType ? 1 / i < 0 ? i ? item.remove(true) : item.lastChild : i ? item.valueOf(true) : item.firstChild : item;
-  }; // returns true if domdiff can handle the value
-
-
-  var canDiff = function canDiff(value) {
-    return 'ELEMENT_NODE' in value;
-  }; // generic attributes helpers
-
-
   var hyperAttribute = function hyperAttribute(node, original) {
     var oldValue;
     var owner = false;
@@ -1195,9 +1176,7 @@ var lighterhtml = (function (document,exports) {
   }; // list of attributes that should not be directly assigned
 
 
-  var readOnly = /^(?:form|list)$/i; // reused every slice time
-
-  var slice = [].slice; // simplifies text node creation
+  var readOnly = /^(?:form|list)$/i; // simplifies text node creation
 
   var text = function text(node, _text) {
     return node.ownerDocument.createTextNode(_text);
@@ -1250,7 +1229,7 @@ var lighterhtml = (function (document,exports) {
     //    update the node with the resulting list of content
     any: function any(node, childNodes) {
       var diffOptions = {
-        node: asNode,
+        node: diffable,
         before: node
       };
       var type = this.type;
@@ -1318,7 +1297,7 @@ var lighterhtml = (function (document,exports) {
                     break;
                 }
               }
-            } else if (canDiff(value)) {
+            } else if ('ELEMENT_NODE' in value) {
               childNodes = domdiff(node.parentNode, childNodes, value.nodeType === 11 ? slice.call(value.childNodes) : [value], diffOptions);
             } else if ('text' in value) {
               anyContent(String(value.text));
@@ -1375,6 +1354,9 @@ var lighterhtml = (function (document,exports) {
     return callback(this);
   }
 
+  var create = Object.create,
+      freeze = Object.freeze,
+      keys = Object.keys;
   var tProto = Tagger.prototype;
   var cache = umap(new WeakMap$1());
 
@@ -1390,7 +1372,7 @@ var lighterhtml = (function (document,exports) {
         if (wire !== info.wire) {
           info.wire = wire;
           where.textContent = '';
-          where.appendChild(wire.valueOf(true));
+          where.appendChild(wire.valueOf());
         }
 
         return where;
@@ -1421,7 +1403,7 @@ var lighterhtml = (function (document,exports) {
     };
 
     hole.node = function () {
-      return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf(true);
+      return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf();
     };
 
     return hole;
@@ -1471,7 +1453,7 @@ var lighterhtml = (function (document,exports) {
       entry.type = type;
       entry.id = args[0];
       entry.tag = new Tagger(type);
-      entry.wire = wiredContent(entry.tag.apply(null, args));
+      entry.wire = persistent(entry.tag.apply(null, args));
     } else entry.tag.apply(null, args);
 
     return entry.wire;
@@ -1480,30 +1462,21 @@ var lighterhtml = (function (document,exports) {
   var unrollArray = function unrollArray(Tagger, info, args, counter) {
     for (var i = 1, length = args.length; i < length; i++) {
       var hole = args[i];
+      if (hole instanceof LighterHole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
+        for (var _i = 0, _length = hole.length; _i < _length; _i++) {
+          var inner = hole[_i];
 
-      if (typeof(hole) === 'object' && hole) {
-        if (hole instanceof LighterHole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
-          for (var _i = 0, _length = hole.length; _i < _length; _i++) {
-            var inner = hole[_i];
-
-            if (typeof(inner) === 'object' && inner && inner instanceof LighterHole) {
-              var sub = info.sub;
-              var a = counter.a,
-                  aLength = counter.aLength;
-              if (a === aLength) counter.aLength = sub.push(newInfo());
-              counter.a++;
-              hole[_i] = retrieve(Tagger, sub[a], inner);
-            }
+          if (inner instanceof LighterHole) {
+            var sub = info.sub;
+            var a = counter.a,
+                aLength = counter.aLength;
+            if (a === aLength) counter.aLength = sub.push(newInfo());
+            counter.a++;
+            hole[_i] = retrieve(Tagger, sub[a], inner);
           }
         }
       }
     }
-  };
-
-  var wiredContent = function wiredContent(node) {
-    var childNodes = node.childNodes;
-    var length = childNodes.length;
-    return length === 1 ? childNodes[0] : length ? new Wire(childNodes) : node;
   };
 
   freeze(LighterHole);

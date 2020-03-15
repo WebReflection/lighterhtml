@@ -42,12 +42,12 @@
     "@ungap/create-content": "^0.1.4",
     "@ungap/template-tag-arguments": "^0.3.1",
     "@ungap/weakmap": "^0.1.4",
-    "domdiff": "^2.2.1",
+    "domdiff": "^2.2.2",
     "domsanitizer": "^0.2.2",
-    "domtagger": "^0.6.1",
+    "domtagger": "^0.6.2",
     "hyperhtml-style": "^0.1.2",
-    "hyperhtml-wire": "^2.1.0",
-    "umap": "^1.0.2"
+    "umap": "^1.0.2",
+    "uwire": "^1.0.1"
   },
   "repository": {
     "type": "git",

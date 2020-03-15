@@ -2,10 +2,13 @@
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
 const tta = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/template-tag-arguments'));
 const domsanitizer = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domsanitizer'));
+const {isArray} = require('uarray');
 const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
+const {persistent} = require('uwire');
 
 const {Tagger} = require('./tagger.js');
-const {Wire, create, freeze, isArray, keys} = require('./shared.js');
+
+const {create, freeze, keys} = Object;
 
 const tProto = Tagger.prototype;
 
@@ -22,7 +25,7 @@ const createRender = Tagger => ({
     if (wire !== info.wire) {
       info.wire = wire;
       where.textContent = '';
-      where.appendChild(wire.valueOf(true));
+      where.appendChild(wire.valueOf());
     }
     return where;
   }
@@ -40,7 +43,7 @@ const outer = (type, Tagger) => {
     return memo[id] || (memo[id] = fixed(newInfo()));
   };
   hole.node = function () {
-    return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf(true);
+    return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf();
   };
   return hole;
   function hole() {
@@ -82,7 +85,7 @@ const unroll = (Tagger, info, hole, counter) => {
     entry.type = type;
     entry.id = args[0];
     entry.tag = new Tagger(type);
-    entry.wire = wiredContent(entry.tag.apply(null, args));
+    entry.wire = persistent(entry.tag.apply(null, args));
   }
   else
     entry.tag.apply(null, args);
@@ -92,32 +95,22 @@ const unroll = (Tagger, info, hole, counter) => {
 const unrollArray = (Tagger, info, args, counter) => {
   for (let i = 1, {length} = args; i < length; i++) {
     const hole = args[i];
-    if (typeof hole === 'object' && hole) {
-      if (hole instanceof LighterHole)
-        args[i] = unroll(Tagger, info, hole, counter);
-      else if (isArray(hole)) {
-        for (let i = 0, {length} = hole; i < length; i++) {
-          const inner = hole[i];
-          if (typeof inner === 'object' && inner && inner instanceof LighterHole) {
-            const {sub} = info;
-            const {a, aLength} = counter;
-            if (a === aLength)
-              counter.aLength = sub.push(newInfo());
-            counter.a++;
-            hole[i] = retrieve(Tagger, sub[a], inner);
-          }
+    if (hole instanceof LighterHole)
+      args[i] = unroll(Tagger, info, hole, counter);
+    else if (isArray(hole)) {
+      for (let i = 0, {length} = hole; i < length; i++) {
+        const inner = hole[i];
+        if (inner instanceof LighterHole) {
+          const {sub} = info;
+          const {a, aLength} = counter;
+          if (a === aLength)
+            counter.aLength = sub.push(newInfo());
+          counter.a++;
+          hole[i] = retrieve(Tagger, sub[a], inner);
         }
       }
     }
   }
-};
-
-const wiredContent = node => {
-  const childNodes = node.childNodes;
-  const {length} = childNodes;
-  return length === 1 ?
-    childNodes[0] :
-    (length ? new Wire(childNodes) : node);
 };
 
 freeze(LighterHole);
