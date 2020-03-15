@@ -19,9 +19,9 @@ const createRender = Tagger => ({
   svg: outer('svg', Tagger),
   render(where, what) {
     const hole = typeof what === 'function' ? what() : what;
-    const info = cache.get(where) || cache.set(where, newInfo());
+    const info = cache.get(where) || cache.set(where, createCache());
     const wire = hole instanceof LighterHole ?
-                  retrieve(Tagger, info, hole) : hole;
+                  unroll(Tagger, info, hole) : hole;
     if (wire !== info.wire) {
       info.wire = wire;
       where.textContent = '';
@@ -31,19 +31,23 @@ const createRender = Tagger => ({
   }
 });
 
-const newInfo = () => ({sub: [], stack: [], wire: null});
+const createCache = () => ({stack: [], entry: null, wire: null});
 
 const outer = (type, Tagger) => {
   const cache = umap(new WeakMap);
   const fixed = info => function () {
-    return retrieve(Tagger, info, hole.apply(null, arguments));
+    return unroll(Tagger, info, hole.apply(null, arguments));
   };
   hole.for = (ref, id) => {
     const memo = cache.get(ref) || cache.set(ref, create(null));
-    return memo[id] || (memo[id] = fixed(newInfo()));
+    return memo[id] || (memo[id] = fixed(createCache()));
   };
   hole.node = function () {
-    return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf();
+    return unroll(
+      Tagger,
+      createCache(),
+      hole.apply(null, arguments)
+    ).valueOf();
   };
   return hole;
   function hole() {
@@ -51,72 +55,52 @@ const outer = (type, Tagger) => {
   }
 };
 
-const retrieve = (Tagger, info, hole) => {
-  const {sub, stack} = info;
-  const counter = {
-    a: 0, aLength: sub.length,
-    i: 0, iLength: stack.length
-  };
-  const wire = unroll(Tagger, info, hole, counter);
-  const {a, i, aLength, iLength} = counter;
-  if (a < aLength)
-    sub.splice(a);
-  if (i < iLength)
-    stack.splice(i);
-  return wire;
-};
-
-const unroll = (Tagger, info, hole, counter) => {
-  const {stack} = info;
-  const {i, iLength} = counter;
-  const {type, args} = hole;
-  const unknown = i === iLength;
-  if (unknown)
-    counter.iLength = stack.push({
+const unroll = (Tagger, info, {type, template, values}) => {
+  const {length} = values;
+  unrollValues(Tagger, info, values, length);
+  let {entry} = info;
+  if (!entry || (entry.template !== template || entry.type !== type)) {
+    const tag = new Tagger(type);
+    info.entry = (entry = {
       type,
-      id: args[0],
-      tag: null,
-      wire: null
+      template,
+      tag,
+      wire: persistent(tag(template, ...values))
     });
-  counter.i++;
-  unrollArray(Tagger, info, args, counter);
-  const entry = stack[i];
-  if (unknown || entry.id !== args[0] || entry.type !== type) {
-    entry.type = type;
-    entry.id = args[0];
-    entry.tag = new Tagger(type);
-    entry.wire = persistent(entry.tag.apply(null, args));
   }
   else
-    entry.tag.apply(null, args);
+    entry.tag(template, ...values);
   return entry.wire;
 };
 
-const unrollArray = (Tagger, info, args, counter) => {
-  for (let i = 1, {length} = args; i < length; i++) {
-    const hole = args[i];
-    if (hole instanceof LighterHole)
-      args[i] = unroll(Tagger, info, hole, counter);
-    else if (isArray(hole)) {
-      for (let i = 0, {length} = hole; i < length; i++) {
-        const inner = hole[i];
-        if (inner instanceof LighterHole) {
-          const {sub} = info;
-          const {a, aLength} = counter;
-          if (a === aLength)
-            counter.aLength = sub.push(newInfo());
-          counter.a++;
-          hole[i] = retrieve(Tagger, sub[a], inner);
-        }
-      }
-    }
+const unrollValues = (Tagger, {stack}, values, length) => {
+  for (let i = 0; i < length; i++) {
+    const hole = values[i];
+    if (hole instanceof Hole)
+      values[i] = unroll(
+        Tagger,
+        stack[i] || (stack[i] = createCache()),
+        hole
+      );
+    else if (isArray(hole))
+      unrollValues(
+        Tagger,
+        stack[i] || (stack[i] = createCache()),
+        hole,
+        hole.length
+      );
+    else
+      stack[i] = null;
   }
+  if (length < stack.length)
+    stack.splice(length);
 };
 
 freeze(LighterHole);
 function LighterHole(type, args) {
   this.type = type;
-  this.args = args;
+  this.template = args.shift();
+  this.values = args;
 };
 const Hole = LighterHole;
 exports.Hole = Hole;

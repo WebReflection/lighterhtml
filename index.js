@@ -1,6 +1,28 @@
 var lighterhtml = (function (document,exports) {
   'use strict';
 
+  
+
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    }
+  }
+
+  function _iterableToArray(iter) {
+    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
   /*! (c) Andrea Giammarchi - ISC */
   var self = null ||
   /* istanbul ignore next */
@@ -53,8 +75,6 @@ var lighterhtml = (function (document,exports) {
   }
 
   var WeakMap$1 = self.WeakMap;
-
-  
 
   var isNoOp = false;
 
@@ -1366,8 +1386,8 @@ var lighterhtml = (function (document,exports) {
       svg: outer('svg', Tagger),
       render: function render(where, what) {
         var hole = typeof what === 'function' ? what() : what;
-        var info = cache.get(where) || cache.set(where, newInfo());
-        var wire = hole instanceof LighterHole ? retrieve(Tagger, info, hole) : hole;
+        var info = cache.get(where) || cache.set(where, createCache());
+        var wire = hole instanceof LighterHole ? unroll(Tagger, info, hole) : hole;
 
         if (wire !== info.wire) {
           info.wire = wire;
@@ -1380,10 +1400,10 @@ var lighterhtml = (function (document,exports) {
     };
   };
 
-  var newInfo = function newInfo() {
+  var createCache = function createCache() {
     return {
-      sub: [],
       stack: [],
+      entry: null,
       wire: null
     };
   };
@@ -1393,17 +1413,17 @@ var lighterhtml = (function (document,exports) {
 
     var fixed = function fixed(info) {
       return function () {
-        return retrieve(Tagger, info, hole.apply(null, arguments));
+        return unroll(Tagger, info, hole.apply(null, arguments));
       };
     };
 
     hole["for"] = function (ref, id) {
       var memo = cache.get(ref) || cache.set(ref, create(null));
-      return memo[id] || (memo[id] = fixed(newInfo()));
+      return memo[id] || (memo[id] = fixed(createCache()));
     };
 
     hole.node = function () {
-      return retrieve(Tagger, newInfo(), hole.apply(null, arguments)).valueOf();
+      return unroll(Tagger, createCache(), hole.apply(null, arguments)).valueOf();
     };
 
     return hole;
@@ -1413,77 +1433,46 @@ var lighterhtml = (function (document,exports) {
     }
   };
 
-  var retrieve = function retrieve(Tagger, info, hole) {
-    var sub = info.sub,
-        stack = info.stack;
-    var counter = {
-      a: 0,
-      aLength: sub.length,
-      i: 0,
-      iLength: stack.length
-    };
-    var wire = unroll(Tagger, info, hole, counter);
-    var a = counter.a,
-        i = counter.i,
-        aLength = counter.aLength,
-        iLength = counter.iLength;
-    if (a < aLength) sub.splice(a);
-    if (i < iLength) stack.splice(i);
-    return wire;
-  };
+  var unroll = function unroll(Tagger, info, _ref) {
+    var _entry;
 
-  var unroll = function unroll(Tagger, info, hole, counter) {
-    var stack = info.stack;
-    var i = counter.i,
-        iLength = counter.iLength;
-    var type = hole.type,
-        args = hole.args;
-    var unknown = i === iLength;
-    if (unknown) counter.iLength = stack.push({
-      type: type,
-      id: args[0],
-      tag: null,
-      wire: null
-    });
-    counter.i++;
-    unrollArray(Tagger, info, args, counter);
-    var entry = stack[i];
+    var type = _ref.type,
+        template = _ref.template,
+        values = _ref.values;
+    var length = values.length;
+    unrollValues(Tagger, info, values, length);
+    var entry = info.entry;
 
-    if (unknown || entry.id !== args[0] || entry.type !== type) {
-      entry.type = type;
-      entry.id = args[0];
-      entry.tag = new Tagger(type);
-      entry.wire = persistent(entry.tag.apply(null, args));
-    } else entry.tag.apply(null, args);
+    if (!entry || entry.template !== template || entry.type !== type) {
+      var tag = new Tagger(type);
+      info.entry = entry = {
+        type: type,
+        template: template,
+        tag: tag,
+        wire: persistent(tag.apply(void 0, [template].concat(_toConsumableArray(values))))
+      };
+    } else (_entry = entry).tag.apply(_entry, [template].concat(_toConsumableArray(values)));
 
     return entry.wire;
   };
 
-  var unrollArray = function unrollArray(Tagger, info, args, counter) {
-    for (var i = 1, length = args.length; i < length; i++) {
-      var hole = args[i];
-      if (hole instanceof LighterHole) args[i] = unroll(Tagger, info, hole, counter);else if (isArray(hole)) {
-        for (var _i = 0, _length = hole.length; _i < _length; _i++) {
-          var inner = hole[_i];
+  var unrollValues = function unrollValues(Tagger, _ref2, values, length) {
+    var stack = _ref2.stack;
 
-          if (inner instanceof LighterHole) {
-            var sub = info.sub;
-            var a = counter.a,
-                aLength = counter.aLength;
-            if (a === aLength) counter.aLength = sub.push(newInfo());
-            counter.a++;
-            hole[_i] = retrieve(Tagger, sub[a], inner);
-          }
-        }
-      }
+    for (var i = 0; i < length; i++) {
+      var hole = values[i];
+      if (hole instanceof Hole) values[i] = unroll(Tagger, stack[i] || (stack[i] = createCache()), hole);else if (isArray(hole)) unrollValues(Tagger, stack[i] || (stack[i] = createCache()), hole, hole.length);else stack[i] = null;
     }
+
+    if (length < stack.length) stack.splice(length);
   };
 
   freeze(LighterHole);
 
   function LighterHole(type, args) {
     this.type = type;
-    this.args = args;
+    this.template = args.shift();
+    this.values = args;
   }
   var Hole = LighterHole;
   var custom = function custom(overrides) {
