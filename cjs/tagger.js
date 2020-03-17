@@ -72,7 +72,10 @@ const hyperProperty = (node, name) => {
 // special hooks helpers
 const hyperRef = node => {
   return ref => {
-    ref.current = node;
+    if (typeof ref === 'function')
+      ref(node);
+    else
+      ref.current = node;
   };
 };
 
