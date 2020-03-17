@@ -11,6 +11,25 @@ The _hyperHTML_ strength & experience without its complexity 🎉
   * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
 
 
+## V3 Declarative `data` and `aria` attributes.
+
+Since the introduction of `.setter=${value}` made special cases such as `data=${...}` and `props=${...}` redundant, as it's always possible to simply attach any kind of data via `.data=${...}` or `.props=${...}`, version 3 enhances the declarative power of the _template_ to _HTML_ translation.
+
+```js
+// the aria special case
+html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
+//=> <div aria-labelledby="id" role="button"></div>
+
+// the data special case
+html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
+//=> <div data-key="value" data-other-key="otherValue"></div>
+```
+
+This means the previous `data=${...}` behavior should be substituted with `.data=${...}` and it's now possible to better reflect declarative intents in nodes, simplifying both `data-*` attributes and `aria-*` ones.
+
+Please note using `data-name=${value}`, as well as `aria-name=${value}` is still handled like any other regular attribute, hence it will work as expected, actually faster when the values don't change frequently, as both `aria` and `data` special cases simply loop through the object keys and assign their values to node's attributes.
+
+
 ## V2.1 Introducing A New Listener Feature
 
 Until version 2.1, there was no way to define different options for any listener. The `el.addEventListener(type, listener, false)` was the only kind of operation possible behind the scene.
@@ -166,6 +185,8 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
 
   * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly ask for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique. This creates content hard wired whenever it's needed.
   * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
+  * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
+  * if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
   * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates.
   * the `onconnected` and `ondisconnected` special events are available only in _lighterhtml-plus_. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
@@ -286,10 +307,18 @@ Born [at the beginning of 2017](https://medium.com/@WebReflection/hyperhtml-a-vi
 
 It has also been used in production to deliver [HyperHTMLElement](https://github.com/WebReflection/hyperHTML-Element#hyperhtml-element) components to ~100M users, or to show [W3C specifications](https://github.com/w3c/respec), so that in case of bugs, _hyperHTML_ will most likely be on the fast lane for bug fixes, and _lighterhtml_ will eventually follow, whenever it's needed.
 
-On top of this, all modules used in _lighterhtml_ are part of _hyperHTML_ core, and the [./tagger.js](https://github.com/WebReflection/lighterhtml/blob/master/esm/tagger.js) file is mostly a copy and paste of the _hyperHTML_ [./objects/Update.js](https://github.com/WebReflection/hyperHTML/blob/master/esm/objects/Updates.js) one.
+On top of this, most modules used in _lighterhtml_ are also part of _hyperHTML_ core, and the [./tagger.js](https://github.com/WebReflection/lighterhtml/blob/master/esm/tagger.js) file is mostly a copy and paste of the _hyperHTML_ [./objects/Update.js](https://github.com/WebReflection/hyperHTML/blob/master/esm/objects/Updates.js) one.
 
 However, as tech and software evolve, I wanted to see if squashing together everything I know about template literals, thanks to _hyperHTML_ development, and everything I've recently learned about hooks, could've been merged together to deliver the easiest way ever to declare any non-virtual DOM view on the Web.
 
 And this is what _lighterhtml_ is about, an attempt to simplify to the extreme the `.bind(...)` and `.wire(...)` concept of _hyperHTML_, through a package that requires pretty much zero knowledge about those internals.
 
 _lighterhtml_ is also relatively new, so that some disabled functionality might come back, or slightly change, but if you like the idea, and you have tested it works for your project, feel free to ditch _hyperHTML_ in favor of _lighterhtml_, so that you can help maturing this project too.
+
+
+
+### Should I use micro html instead ?
+
+_[µhtml](https://github.com/WebReflection/uhtml#readme)_ is a great way to start playing around with most _lighterhtml_ features. As it's simply a subset, you can eventually switch to lighterhtml later on, whenever you miss, or need, some extra feature.
+
+For a complete comparison of features and libraries around my repositories, please [have a look at this gist](https://gist.github.com/WebReflection/761052d6dae7c8207d2fcba7cdede295).
