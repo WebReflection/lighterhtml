@@ -27,11 +27,11 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.0",
-    "ascjs": "^3.1.2",
+    "@babel/preset-env": "^7.9.5",
+    "ascjs": "^4.0.0",
     "babel-plugin-remove-ungap": "^1.2.0",
     "drop-babel-typeof": "^1.0.3",
-    "rollup": "^2.2.0",
+    "rollup": "^2.7.2",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
@@ -46,7 +46,7 @@
     "domsanitizer": "^0.2.2",
     "domtagger": "^0.6.2",
     "hyperhtml-style": "^0.1.2",
-    "uhandlers": "^0.2.0",
+    "uhandlers": "^0.3.1",
     "umap": "^1.0.2",
     "uwire": "^1.0.1"
   },

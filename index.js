@@ -1137,7 +1137,9 @@ var lighterhtml = (function (document,exports) {
   var attribute = function attribute(node, name) {
     var oldValue,
         orphan = true;
-    var attributeNode = document.createAttribute(name);
+    /* istanbul ignore next */
+
+    var attributeNode = document.createAttributeNS('ownerSVGElement' in node ? 'http://www.w3.org/2000/svg' : null, name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
