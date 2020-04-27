@@ -1134,12 +1134,12 @@ var lighterhtml = (function (document,exports) {
       }
     };
   };
-  var attribute = function attribute(node, name) {
+  var attribute = function attribute(node, name, svg) {
     var oldValue,
         orphan = true;
     /* istanbul ignore next */
 
-    var attributeNode = document.createAttributeNS('ownerSVGElement' in node ? 'http://www.w3.org/2000/svg' : null, name);
+    var attributeNode = document.createAttributeNS(svg ? 'http://www.w3.org/2000/svg' : null, name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
@@ -1233,7 +1233,7 @@ var lighterhtml = (function (document,exports) {
 
       switch (name) {
         case 'class':
-          if (isSVG) return attribute(node, name);
+          if (isSVG) return attribute(node, name, isSVG);
           name = 'className';
 
         case 'props':
@@ -1255,7 +1255,7 @@ var lighterhtml = (function (document,exports) {
           if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
           if (name.slice(0, 2) === 'on') return event(node, name);
           if (name in node && !(isSVG || readOnly.test(name))) return hyperProperty(node, name);
-          return attribute(node, name);
+          return attribute(node, name, isSVG);
       }
     },
     // in a hyper(node)`<div>${content}</div>` case

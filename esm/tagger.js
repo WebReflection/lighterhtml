@@ -50,7 +50,7 @@ Tagger.prototype = {
     switch (name) {
       case 'class':
         if (isSVG)
-          return attribute(node, name);
+          return attribute(node, name, isSVG);
         name = 'className';
       case 'props':
         return setter(node, name);
@@ -69,7 +69,7 @@ Tagger.prototype = {
           return event(node, name);
         if (name in node && !(isSVG || readOnly.test(name)))
           return hyperProperty(node, name);
-        return attribute(node, name);
+        return attribute(node, name, isSVG);
 
     }
   },

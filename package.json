@@ -46,7 +46,7 @@
     "domsanitizer": "^0.2.2",
     "domtagger": "^0.6.2",
     "hyperhtml-style": "^0.1.2",
-    "uhandlers": "^0.3.1",
+    "uhandlers": "^0.3.2",
     "umap": "^1.0.2",
     "uwire": "^1.0.1"
   },
