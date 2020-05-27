@@ -26,7 +26,7 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.9.6",
+    "@babel/core": "^7.10.1",
     "@babel/preset-env": "^7.9.6",
     "ascjs": "^4.0.0",
     "babel-plugin-remove-ungap": "^1.2.0",
