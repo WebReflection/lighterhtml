@@ -27,7 +27,7 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.10.2",
-    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-env": "^7.10.2",
     "ascjs": "^4.0.0",
     "babel-plugin-remove-ungap": "^1.2.0",
     "drop-babel-typeof": "^1.0.3",
