@@ -8,7 +8,7 @@
   <script src="../index.js"></script>
   <script>
   this.onload = function () {
-    var path = lighterhtml.svg(['<path .d="', '" />'], 'M150 0 L75 200 L225 200 Z');
+    var path = lighterhtml.svg.node(['<path d="', '" />'], 'M150 0 L75 200 L225 200 Z');
     document.querySelector('svg').appendChild(path);
   };
   </script>

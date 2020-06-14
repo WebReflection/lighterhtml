@@ -1,6 +1,5 @@
 'use strict';
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
-const tta = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/template-tag-arguments'));
 const domsanitizer = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domsanitizer'));
 const {isArray} = require('uarray');
 const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
@@ -125,3 +124,10 @@ const {render, html, svg} = createRender(Tagger);
 exports.render = render;
 exports.html = html;
 exports.svg = svg;
+
+function tta() {
+  let out = [], i = 0, {length} = arguments;
+  while (i < length)
+    out.push(arguments[i++]);
+  return out;
+}
