@@ -1416,6 +1416,9 @@ var lighterhtml = (function (document,exports) {
         case 'ref':
           return ref(node);
 
+        case '.dataset':
+          return data(node);
+
         case 'data':
           // https://github.com/WebReflection/uhtml/issues/14
           if (!(name in node)) return data(node);

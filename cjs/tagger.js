@@ -62,6 +62,8 @@ Tagger.prototype = {
         return hyperStyle(node, original, isSVG);
       case 'ref':
         return ref(node);
+      case '.dataset':
+        return data(node);
       case 'data':
         // https://github.com/WebReflection/uhtml/issues/14
         if (!(name in node))

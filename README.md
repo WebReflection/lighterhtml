@@ -20,8 +20,12 @@ Since the introduction of `.setter=${value}` made special cases such as `data=${
 html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
 //=> <div aria-labelledby="id" role="button"></div>
 
-// the data special case
+// the *deprecated* dataset special case
 html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
+//=> <div data-key="value" data-other-key="otherValue"></div>
+
+// the *new* dataset special case
+html`<div .dataset=${{key: 'value', otherKey: 'otherValue'}} />`;
 //=> <div data-key="value" data-other-key="otherValue"></div>
 ```
 
@@ -186,7 +190,8 @@ You can test live a `hook` example in [this Code Pen](https://codepen.io/WebRefl
   * the wired content is not strongly referenced as it is for `hyperHTML.wire(ref[, type:id])` **unless** you explicitly ask for it via `html.for(ref[, id])` or `svg.for(ref[, id])`, where in both cases, the `id` doesn't need any colon to be unique. This creates content hard wired whenever it's needed.
   * the `ref=${object}` attribute works same as React, you pass an object via `const obj = useRef(null)` and you'll have `obj.current` on any effect. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
   * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
-  * if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
+  * _deprecated_: if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
+  * if the attribute name is `.dataset`, as in `.dataset=${object}`, the `node.dataset` gets populated with all values.
   * intents, hence `define`, are not implemented. Most tasks can be achieved via hooks.
   * promises are not in neither. You can update asynchronously anything via hooks or via custom element forced updates.
   * the `onconnected` and `ondisconnected` special events are available only in _lighterhtml-plus_. These might come back in the future but right now _dom-augmentor_ replaces these via `useEffect(callback, [])`. Please note the empty array as second argument.
