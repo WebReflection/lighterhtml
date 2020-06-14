@@ -1410,14 +1410,15 @@ var lighterhtml = (function (document,exports) {
         case 'aria':
           return aria(node);
 
-        case 'data':
-          return data(node);
-
         case 'style':
           return hyperStyle(node, original, isSVG);
 
         case 'ref':
           return ref(node);
+
+        case 'data':
+          // https://github.com/WebReflection/uhtml/issues/14
+          if (!(name in node)) return data(node);
 
         default:
           if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
