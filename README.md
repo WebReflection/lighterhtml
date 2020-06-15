@@ -41,7 +41,7 @@ html`<div .dataset=${{key: 'value', otherKey: 'otherValue'}} />`;
 //=> <div data-key="value" data-other-key="otherValue"></div>
 ```
 
-This means the previous `data=${...}` behavior should be substituted with `.data=${...}` and it's now possible to better reflect declarative intents in nodes, simplifying both `data-*` attributes and `aria-*` ones.
+This means the previous `data=${...}` behavior should be substituted with `.dataset=${...}` and it's now possible to better reflect declarative intents in nodes, simplifying both `data-*` attributes and `aria-*` ones.
 
 Please note using `data-name=${value}`, as well as `aria-name=${value}` is still handled like any other regular attribute, hence it will work as expected, actually faster when the values don't change frequently, as both `aria` and `data` special cases simply loop through the object keys and assign their values to node's attributes.
 
