@@ -1,5 +1,4 @@
 import WeakMap from '@ungap/weakmap';
-import tta from '@ungap/template-tag-arguments';
 import domsanitizer from 'domsanitizer';
 import {isArray} from 'uarray';
 import umap from 'umap';
@@ -120,3 +119,10 @@ export const custom = overrides => {
 
 const {render, html, svg} = createRender(Tagger);
 export {render, html, svg};
+
+function tta() {
+  let out = [], i = 0, {length} = arguments;
+  while (i < length)
+    out.push(arguments[i++]);
+  return out;
+}

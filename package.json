@@ -40,12 +40,11 @@
   },
   "dependencies": {
     "@ungap/create-content": "^0.2.0",
-    "@ungap/template-tag-arguments": "^0.4.0",
     "@ungap/weakmap": "^0.2.0",
-    "domdiff": "^2.2.2",
     "domsanitizer": "^0.2.2",
     "domtagger": "^0.6.2",
     "hyperhtml-style": "^0.1.2",
+    "udomdiff": "^1.1.0",
     "uhandlers": "^0.3.5",
     "umap": "^1.0.2",
     "uwire": "^1.0.1"

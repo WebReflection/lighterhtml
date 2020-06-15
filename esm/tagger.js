@@ -1,5 +1,5 @@
 import createContent from '@ungap/create-content';
-import domdiff from 'domdiff';
+import udomdiff from 'udomdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
 import {aria, attribute, data, event, ref, setter} from 'uhandlers';
@@ -62,10 +62,6 @@ Tagger.prototype = {
         return ref(node);
       case '.dataset':
         return data(node);
-      case 'data':
-        // https://github.com/WebReflection/uhtml/issues/14
-        if (!(name in node))
-          return data(node);
       default:
         if (name.slice(0, 1) === '.')
           return setter(node, name.slice(1));
@@ -87,7 +83,6 @@ Tagger.prototype = {
   //  * it's an Array, resolve all values if Promises and/or
   //    update the node with the resulting list of content
   any(node, childNodes) {
-    const diffOptions = {node: diffable, before: node};
     const {type} = this;
     let fastPath = false;
     let oldValue;
@@ -104,11 +99,12 @@ Tagger.prototype = {
           } else {
             fastPath = true;
             oldValue = value;
-            childNodes = domdiff(
+            childNodes = udomdiff(
               node.parentNode,
               childNodes,
               [text(node, value)],
-              diffOptions
+              diffable,
+              node
             );
           }
           break;
@@ -119,11 +115,12 @@ Tagger.prototype = {
         case 'undefined':
           if (value == null) {
             fastPath = false;
-            childNodes = domdiff(
+            childNodes = udomdiff(
               node.parentNode,
               childNodes,
               [],
-              diffOptions
+              diffable,
+              node
             );
             break;
           }
@@ -133,11 +130,12 @@ Tagger.prototype = {
           if (isArray(value)) {
             if (value.length === 0) {
               if (childNodes.length) {
-                childNodes = domdiff(
+                childNodes = udomdiff(
                   node.parentNode,
                   childNodes,
                   [],
-                  diffOptions
+                  diffable,
+                  node
                 );
               }
             } else {
@@ -155,30 +153,32 @@ Tagger.prototype = {
                     value = value.concat.apply([], value);
                   }
                 default:
-                  childNodes = domdiff(
+                  childNodes = udomdiff(
                     node.parentNode,
                     childNodes,
                     value,
-                    diffOptions
+                    diffable,
+                    node
                   );
                   break;
               }
             }
           } else if ('ELEMENT_NODE' in value) {
-            childNodes = domdiff(
+            childNodes = udomdiff(
               node.parentNode,
               childNodes,
               value.nodeType === 11 ?
                 slice.call(value.childNodes) :
                 [value],
-              diffOptions
+                diffable,
+                node
             );
           } else if ('text' in value) {
             anyContent(String(value.text));
           } else if ('any' in value) {
             anyContent(value.any);
           } else if ('html' in value) {
-            childNodes = domdiff(
+            childNodes = udomdiff(
               node.parentNode,
               childNodes,
               slice.call(
@@ -187,7 +187,8 @@ Tagger.prototype = {
                   type
                 ).childNodes
               ),
-              diffOptions
+              diffable,
+              node
             );
           } else if ('length' in value) {
             anyContent(slice.call(value));

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+  // https://github.com/WebReflection/lighterhtml/issues/92
+  // ucdn --debug
+  import {render, html} from '../esm/index.js';
+
+  let state = 0;
+
+  const next = (ev) => {
+    ev.preventDefault();
+    if(state >= views.length - 1) {
+      return;	
+    }
+    state++;
+    update();
+  }
+
+  const back = (ev) => {
+    ev.preventDefault();
+    if (state <= 0) {
+      return;	
+    }
+    state --;
+    update();
+  }
+
+  const refresh = (ev) => {
+    ev.preventDefault();
+    update();
+  };
+
+  const one = (name = 'one') => html`${html`one`}`;
+
+  const two = (name = 'two', value = 'opt') => html`${html`two`}`;
+
+  const three = (value = 'three') => html`<div>${value}</div>`;
+
+  const four = (name = 'four') => html`
+    <div>
+      Four. All good?
+    </div>
+  `;
+
+  const views = [one, two, three, four];
+
+  const view = () => (views[state] || four)();
+
+  const button = (click, text) => html`<button onclick=${click}>${text}</button>`;
+
+  const nav = () => html`  
+    <nav>
+      ${button(back, 'back')}
+      ${button(next, 'next')} 
+      ${button(refresh, 'refresh')}
+    </nav>
+  `
+
+  const main = () => html`
+  <form>
+    ${view()}
+  </form>
+  ${nav()}
+  `;
+
+  const app = () => html`
+    <div>
+      <main>
+      ${main()}
+      </main>
+    </div>
+  `;
+
+  const update = () => render(document.body, app);
+
+  update();
+  </script>
+</head>
+</html>
