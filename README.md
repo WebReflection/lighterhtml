@@ -11,6 +11,18 @@ The _hyperHTML_ strength & experience without its complexity 🎉
   * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
 
 
+## V4 Breaking Changes
+
+I am afraid this major was necessary due recent bugs/discoveries that made me rethink some practice and patch.
+
+  * the recently introduced `data` helper [could conflict](https://github.com/WebReflection/uhtml/issues/14) with some node such as `<object>`, hence it has been replaced by the `.dataset` utility. Since `element.dataset = object` is an invalid operation, the sugar to simplify `data-` attributes is now never ambiguous and future-proof: `<element .dataset=${...} />` it is.
+  * all cross browsers normalizations and features detection to make the template literal unique has been removed, as these were [causing more problems](https://github.com/WebReflection/lighterhtml/issues/92) than these were supposed to solve. If you are targeting IE 11 or older browsers, be sure you use [Babel 7](https://babeljs.io/) to transpile your production code. If you are using *TypeScript*, [be sure](https://github.com/microsoft/TypeScript/issues/27460#issuecomment-643763917) you use Babel 7 to transpile your code, as TS has always been broken with transpiled template literals (and classes, and ...).
+  * the good old [domdiff](https://github.com/WebReflection/domdiff#readme) that served me well, and it still does, has been replaced by its little [udomdiff](https://github.com/WebReflection/domdiff#readme) brother, allowing _lighterhtml_ to weight 1K less than before, still keeping lightning fast performance.
+
+Because of these breaking changes, all libraries around _lighterhtml_ will gradually bump major version too, pointing at this paragraph of the README.
+
+
+
 ## V3 Declarative `data` and `aria` attributes.
 
 Since the introduction of `.setter=${value}` made special cases such as `data=${...}` and `props=${...}` redundant, as it's always possible to simply attach any kind of data via `.data=${...}` or `.props=${...}`, version 3 enhances the declarative power of the _template_ to _HTML_ translation.
