@@ -9,8 +9,8 @@
     "build": "npm run rollup && npm run es && npm run clean && npm run cjs && npm run min && npm run size",
     "cjs": "ascjs esm cjs",
     "clean": "sed -i.bck -e 's/var isNoOp =.*/var isNoOp = false;/' index.js && sed -i.bck 's/(exports)/(document,exports)/;s/({}));/(document,{}));/' index.js && rm index.js.bck",
-    "es": "rollup --config es.config.js && sed -i.bck 's/var /\\/*! (c) Andrea Giammarchi - ISC *\\/var /' es.js && rm es.js.bck",
-    "min": "echo '/*! (c) Andrea Giammarchi - ISC */' > min.js && uglifyjs index.js -c -m >> min.js",
+    "es": "rollup --config es.config.js && echo '/*! (c) Andrea Giammarchi - ISC */' > es.mjs && cat es.js | sed 's/\\/\\*! (c) Andrea Giammarchi - ISC \\*\\///' >> es.mjs && mv es.mjs es.js",
+    "min": "echo '/*! (c) Andrea Giammarchi - ISC */' > min.js && terser index.js -c -m | sed 's/\\/\\*! (c) Andrea Giammarchi - ISC \\*\\///' >> min.js",
     "rollup": "rollup --config rollup.config.js && drop-babel-typeof index.js",
     "test": "echo 'no test for CI'",
     "size": "cat index.js | wc -c;cat min.js | wc -c;gzip -c9 min.js | wc -c;brotli -c9 min.js | wc -c;cat es.js | wc -c;gzip -c9 es.js | wc -c;brotli -c9 es.js | wc -c"
@@ -26,27 +26,27 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.10.2",
-    "@babel/preset-env": "^7.10.2",
+    "@babel/core": "^7.11.4",
+    "@babel/preset-env": "^7.11.0",
+    "@rollup/plugin-babel": "^5.2.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
     "ascjs": "^4.0.1",
     "babel-plugin-remove-ungap": "^1.2.0",
     "drop-babel-typeof": "^1.0.3",
-    "rollup": "^2.16.1",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^6.1.0",
-    "uglify-es": "^3.3.9"
+    "rollup": "^2.26.5",
+    "rollup-plugin-terser": "^7.0.0",
+    "terser": "^5.2.1"
   },
   "dependencies": {
     "@ungap/create-content": "^0.2.0",
-    "@ungap/weakmap": "^0.2.0",
+    "@ungap/weakmap": "^0.2.1",
     "domsanitizer": "^0.2.2",
-    "domtagger": "^0.6.2",
+    "domtagger": "^0.7.0",
     "hyperhtml-style": "^0.1.2",
     "udomdiff": "^1.1.0",
     "uhandlers": "^0.3.5",
     "umap": "^1.0.2",
-    "uwire": "^1.0.1"
+    "uwire": "^1.1.0"
   },
   "repository": {
     "type": "git",
@@ -54,7 +54,6 @@
   },
   "greenkeeper": {
     "ignore": [
-      "uglify-js",
       "rollup",
       "rollup-plugin-babel",
       "rollup-plugin-node-resolve"

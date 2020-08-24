@@ -1,12 +1,13 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+
 export default {
   input: 'esm/index.js',
   plugins: [
-    resolve(),
+    nodeResolve(),
     babel({
-      runtimeHelpers: true,
-      presets: ['@babel/preset-env']
+      presets: ['@babel/preset-env'],
+      babelHelpers: 'bundled'
     })
   ],
   context: 'null',

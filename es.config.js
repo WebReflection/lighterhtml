@@ -1,13 +1,14 @@
-import resolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
 export default {
   input: 'esm/index.js',
   plugins: [
-    resolve(),
+    nodeResolve(),
     babel({
       plugins: [['remove-ungap']],
+      babelHelpers: 'bundled'
     }),
     terser()
   ],
