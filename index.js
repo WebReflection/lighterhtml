@@ -830,9 +830,11 @@ var lighterhtml = (function (document,exports) {
   }();
 
   var aria = function aria(node) {
-    return function (value) {
-      for (var key in value) {
-        node.setAttribute(key === 'role' ? key : "aria-".concat(key), value[key]);
+    return function (values) {
+      for (var key in values) {
+        var name = key === 'role' ? key : "aria-".concat(key);
+        var value = values[key];
+        if (value == null) node.removeAttribute(name);else node.setAttribute(name, value);
       }
     };
   };
@@ -862,9 +864,10 @@ var lighterhtml = (function (document,exports) {
   };
   var data = function data(_ref) {
     var dataset = _ref.dataset;
-    return function (value) {
-      for (var key in value) {
-        dataset[key] = value[key];
+    return function (values) {
+      for (var key in values) {
+        var value = values[key];
+        if (value == null) delete dataset[key];else dataset[key] = value;
       }
     };
   };
