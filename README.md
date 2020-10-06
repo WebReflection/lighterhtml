@@ -2,7 +2,7 @@
 
 <sup>**Social Media Photo by [Kristine Weilert](https://unsplash.com/@kristineweilert) on [Unsplash](https://unsplash.com/)**</sup>
 
-[![Build Status](https://travis-ci.com/WebReflection/lighterhtml.svg?branch=master)](https://travis-ci.com/WebReflection/lighterhtml) ![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC) [![Greenkeeper badge](https://badges.greenkeeper.io/WebReflection/lighterhtml.svg)](https://greenkeeper.io/) ![Blazing Fast](https://img.shields.io/badge/speed-blazing%20🔥-brightgreen.svg)
+![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC) [![Greenkeeper badge](https://badges.greenkeeper.io/WebReflection/lighterhtml.svg)](https://greenkeeper.io/) ![Blazing Fast](https://img.shields.io/badge/speed-blazing%20🔥-brightgreen.svg)
 
 The _hyperHTML_ strength & experience without its complexity 🎉
 
@@ -10,127 +10,10 @@ The _hyperHTML_ strength & experience without its complexity 🎉
   * **simpler** than [lit-html](https://github.com/polymer/lit-html) 💡
   * **fueling** both [neverland](https://github.com/WebReflection/neverland/#readme) and [heresy](https://github.com/WebReflection/heresy/#readme) 🔥
 
+#### Looking for something even smaller?
 
-## V4 Breaking Changes
+If you want 90% of functionalities offered by *lightetrhtml* for 2/3rd of its size, check **[µhtml](https://github.com/WebReflection/uhtml#readme)**, which is also used in "*micro custom elements*" **[µce](https://github.com/WebReflection/uce#readme)** library, hence **[µce-template](https://github.com/WebReflection/uce-template#readme)** too, plus "*micro land*" **[µland](https://github.com/WebReflection/uland#readme)** 🦄
 
-I am afraid this major was necessary due recent bugs/discoveries that made me rethink some practice and patch.
-
-  * the recently introduced `data` helper [could conflict](https://github.com/WebReflection/uhtml/issues/14) with some node such as `<object>`, hence it has been replaced by the `.dataset` utility. Since `element.dataset = object` is an invalid operation, the sugar to simplify `data-` attributes is now never ambiguous and future-proof: `<element .dataset=${...} />` it is.
-  * all cross browsers normalizations and features detection to make the template literal unique has been removed, as these were [causing more problems](https://github.com/WebReflection/lighterhtml/issues/92) than these were supposed to solve. If you are targeting IE 11 or older browsers, be sure you use [Babel 7](https://babeljs.io/) to transpile your production code. If you are using *TypeScript*, [be sure](https://github.com/microsoft/TypeScript/issues/27460#issuecomment-643763917) you use Babel 7 to transpile your code, as TS has always been broken with transpiled template literals (and classes, and ...).
-  * the good old [domdiff](https://github.com/WebReflection/domdiff#readme) that served me well, and it still does, has been replaced by its little [udomdiff](https://github.com/WebReflection/domdiff#readme) brother, allowing _lighterhtml_ to weight 1K less than before, still keeping lightning fast performance.
-
-Because of these breaking changes, all libraries around _lighterhtml_ will gradually bump major version too, pointing at this paragraph of the README.
-
-
-
-## V3 Declarative `data` and `aria` attributes.
-
-Since the introduction of `.setter=${value}` made special cases such as `data=${...}` and `props=${...}` redundant, as it's always possible to simply attach any kind of data via `.data=${...}` or `.props=${...}`, version 3 enhances the declarative power of the _template_ to _HTML_ translation.
-
-```js
-// the aria special case
-html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
-//=> <div aria-labelledby="id" role="button"></div>
-
-// the *deprecated* dataset special case
-html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
-//=> <div data-key="value" data-other-key="otherValue"></div>
-
-// the *new* dataset special case
-html`<div .dataset=${{key: 'value', otherKey: 'otherValue'}} />`;
-//=> <div data-key="value" data-other-key="otherValue"></div>
-```
-
-This means the previous `data=${...}` behavior should be substituted with `.dataset=${...}` and it's now possible to better reflect declarative intents in nodes, simplifying both `data-*` attributes and `aria-*` ones.
-
-Please note using `data-name=${value}`, as well as `aria-name=${value}` is still handled like any other regular attribute, hence it will work as expected, actually faster when the values don't change frequently, as both `aria` and `data` special cases simply loop through the object keys and assign their values to node's attributes.
-
-
-## V2.1 Introducing A New Listener Feature
-
-Until version 2.1, there was no way to define different options for any listener. The `el.addEventListener(type, listener, false)` was the only kind of operation possible behind the scene.
-
-In _v2.1_ though, whenever a second option is needed, it is now possible to pass an `Array` instead, in the form `[listener, {once: true}]`, as example, or `[listener, true]` to use capture instead of bubbling, and so on and so forth.
-
-Bear in mind, specially for the `once` case, if the listener is different per each update, like `onclick=${[() => stuff(), {once: true}]}`, it will be set each time that update happens, so that in this case is better to use always the same listener, either via outer scope callback, or via reference, using `useRef` and the `handleEvent` pattern, as example.
-
-If you never needed to add a different second option, there is nothing you should do, everything will work exactly as it did before.
-
-
-
-### V2 Breaking Changes & Improvements
-
-#### Breaking
-
-  * dropped the ambiguous ability to produce nodes when no `render(...)` is invoked. When needed, which is the minority of the cases, you need to explicitly use `html.node` or `svg.node`, instead of just `html` or `svg`. For every other cases, use `render(where, what)`.
-  * the `render(where, what)` does not need a callback anymore. You can now ``render(node, html`<p>content</p>`)`` right away. If a callback is provided, that will still be invoked.
-  * removed `useHook` as it's unnecessary since you can use `useRef` through `html.for(...)` or `svg.for(...)` within any `useRef` provided by your library of choice (i.e. [dom-augmentor](https://github.com/WebReflection/dom-augmentor#readme))
-  * the recently introduced `inner.html/svg` has been removed, as completely unnatural and error prone (just use `html` anywhere, it'll work).
-
-### Improvements
-
-  * a fundamental core-logic implementation that was trashing any node after one or more collections has been refactored and fixed. The current logic create a stack per each array found down the rendering road, isolating those DOM updates per stack. This means that performance have been improved, and GC operations reduced.
-  * `html` and `svg` template literals tags, now offer both `.for(ref[, id])` and `.node`, to either retain the same content (keyed render) or create fresh new nodes out of the box as one-off operation (via `.node`).
-  * slightly reduced code size, which is always nice to have, after a refactoring
-
-
-### V1 Changes + New Feature
-
-Removed `transform` export and made default [domtagger](https://github.com/WebReflection/domtagger) customizable via `custom` export.
-
-```js
-import { custom } from 'lighterhtml';
-
-const { html, render } = custom({
-
-  // the domtagger attributes handler
-  attribute: callback => (node, name, original) => {
-    // return a function that will handle the attribute value
-    // the function will receive just the new value
-    if (name === 'double')
-      return value => {
-        node[name] = value + value;
-      };
-    // the received callback is usable as return fallback
-    return callback(node, name, original);
-  },
-
-  // the domtagger any-content handler
-  any: callback => (node, childNodes) => {
-    // return a function that will handle handle all special cases
-    // the function will receive just the new *hole* value
-    if (node.nodeName === 'CUSTOM') {
-      return value => {
-        node.appendChild(value);
-      };
-    }
-    // the received callback is usable as return fallback
-    return callback(node, childNodes);
-  },
-
-  // the domtagger text for text only cases
-  text: callback => (node) => {
-    // return a function that will handle handle text content cases
-    // the function will receive just the new text value
-    if (node.nodeName === 'WRAP') {
-      return value => {
-        node.textContent = `(${value})`;
-      };
-    }
-    // the received callback is usable as return fallback
-    return callback(node);
-  },
-
-  // optionally you can use the special transform handler too
-  // in this case, and in V1, the callback is just the String one
-  transform: callback => markup => callback(markup),
-
-  // same goes for convert, with the callback being the one
-  // originally used to "convert" the template from Array to HTML
-  // see: https://github.com/WebReflection/domtagger/issues/17#issuecomment-526151473
-  convert: callback => template => callback(template)
-});
-```
 
 ### faster than hyperHTML
 
@@ -339,3 +222,130 @@ _lighterhtml_ is also relatively new, so that some disabled functionality might 
 _[µhtml](https://github.com/WebReflection/uhtml#readme)_ is a great way to start playing around with most _lighterhtml_ features. As it's simply a subset, you can eventually switch to lighterhtml later on, whenever you miss, or need, some extra feature.
 
 For a complete comparison of features and libraries around my repositories, please [have a look at this gist](https://gist.github.com/WebReflection/761052d6dae7c8207d2fcba7cdede295).
+
+- - -
+
+## History and changes
+
+This session covers all major breaking changes and added features.
+
+### V4 Breaking Changes
+
+I am afraid this major was necessary due recent bugs/discoveries that made me rethink some practice and patch.
+
+  * the recently introduced `data` helper [could conflict](https://github.com/WebReflection/uhtml/issues/14) with some node such as `<object>`, hence it has been replaced by the `.dataset` utility. Since `element.dataset = object` is an invalid operation, the sugar to simplify `data-` attributes is now never ambiguous and future-proof: `<element .dataset=${...} />` it is.
+  * all cross browsers normalizations and features detection to make the template literal unique has been removed, as these were [causing more problems](https://github.com/WebReflection/lighterhtml/issues/92) than these were supposed to solve. If you are targeting IE 11 or older browsers, be sure you use [Babel 7](https://babeljs.io/) to transpile your production code. If you are using *TypeScript*, [be sure](https://github.com/microsoft/TypeScript/issues/27460#issuecomment-643763917) you use Babel 7 to transpile your code, as TS has always been broken with transpiled template literals (and classes, and ...).
+  * the good old [domdiff](https://github.com/WebReflection/domdiff#readme) that served me well, and it still does, has been replaced by its little [udomdiff](https://github.com/WebReflection/domdiff#readme) brother, allowing _lighterhtml_ to weight 1K less than before, still keeping lightning fast performance.
+
+Because of these breaking changes, all libraries around _lighterhtml_ will gradually bump major version too, pointing at this paragraph of the README.
+
+
+
+### V3 Declarative `data` and `aria` attributes.
+
+Since the introduction of `.setter=${value}` made special cases such as `data=${...}` and `props=${...}` redundant, as it's always possible to simply attach any kind of data via `.data=${...}` or `.props=${...}`, version 3 enhances the declarative power of the _template_ to _HTML_ translation.
+
+```js
+// the aria special case
+html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
+//=> <div aria-labelledby="id" role="button"></div>
+
+// the *deprecated* dataset special case
+html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
+//=> <div data-key="value" data-other-key="otherValue"></div>
+
+// the *new* dataset special case
+html`<div .dataset=${{key: 'value', otherKey: 'otherValue'}} />`;
+//=> <div data-key="value" data-other-key="otherValue"></div>
+```
+
+This means the previous `data=${...}` behavior should be substituted with `.dataset=${...}` and it's now possible to better reflect declarative intents in nodes, simplifying both `data-*` attributes and `aria-*` ones.
+
+Please note using `data-name=${value}`, as well as `aria-name=${value}` is still handled like any other regular attribute, hence it will work as expected, actually faster when the values don't change frequently, as both `aria` and `data` special cases simply loop through the object keys and assign their values to node's attributes.
+
+
+### V2.1 Introducing A New Listener Feature
+
+Until version 2.1, there was no way to define different options for any listener. The `el.addEventListener(type, listener, false)` was the only kind of operation possible behind the scene.
+
+In _v2.1_ though, whenever a second option is needed, it is now possible to pass an `Array` instead, in the form `[listener, {once: true}]`, as example, or `[listener, true]` to use capture instead of bubbling, and so on and so forth.
+
+Bear in mind, specially for the `once` case, if the listener is different per each update, like `onclick=${[() => stuff(), {once: true}]}`, it will be set each time that update happens, so that in this case is better to use always the same listener, either via outer scope callback, or via reference, using `useRef` and the `handleEvent` pattern, as example.
+
+If you never needed to add a different second option, there is nothing you should do, everything will work exactly as it did before.
+
+
+
+### V2 Breaking Changes & Improvements
+
+#### Breaking
+
+  * dropped the ambiguous ability to produce nodes when no `render(...)` is invoked. When needed, which is the minority of the cases, you need to explicitly use `html.node` or `svg.node`, instead of just `html` or `svg`. For every other cases, use `render(where, what)`.
+  * the `render(where, what)` does not need a callback anymore. You can now ``render(node, html`<p>content</p>`)`` right away. If a callback is provided, that will still be invoked.
+  * removed `useHook` as it's unnecessary since you can use `useRef` through `html.for(...)` or `svg.for(...)` within any `useRef` provided by your library of choice (i.e. [dom-augmentor](https://github.com/WebReflection/dom-augmentor#readme))
+  * the recently introduced `inner.html/svg` has been removed, as completely unnatural and error prone (just use `html` anywhere, it'll work).
+
+### Improvements
+
+  * a fundamental core-logic implementation that was trashing any node after one or more collections has been refactored and fixed. The current logic create a stack per each array found down the rendering road, isolating those DOM updates per stack. This means that performance have been improved, and GC operations reduced.
+  * `html` and `svg` template literals tags, now offer both `.for(ref[, id])` and `.node`, to either retain the same content (keyed render) or create fresh new nodes out of the box as one-off operation (via `.node`).
+  * slightly reduced code size, which is always nice to have, after a refactoring
+
+
+### V1 Changes + New Feature
+
+Removed `transform` export and made default [domtagger](https://github.com/WebReflection/domtagger) customizable via `custom` export.
+
+```js
+import { custom } from 'lighterhtml';
+
+const { html, render } = custom({
+
+  // the domtagger attributes handler
+  attribute: callback => (node, name, original) => {
+    // return a function that will handle the attribute value
+    // the function will receive just the new value
+    if (name === 'double')
+      return value => {
+        node[name] = value + value;
+      };
+    // the received callback is usable as return fallback
+    return callback(node, name, original);
+  },
+
+  // the domtagger any-content handler
+  any: callback => (node, childNodes) => {
+    // return a function that will handle handle all special cases
+    // the function will receive just the new *hole* value
+    if (node.nodeName === 'CUSTOM') {
+      return value => {
+        node.appendChild(value);
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node, childNodes);
+  },
+
+  // the domtagger text for text only cases
+  text: callback => (node) => {
+    // return a function that will handle handle text content cases
+    // the function will receive just the new text value
+    if (node.nodeName === 'WRAP') {
+      return value => {
+        node.textContent = `(${value})`;
+      };
+    }
+    // the received callback is usable as return fallback
+    return callback(node);
+  },
+
+  // optionally you can use the special transform handler too
+  // in this case, and in V1, the callback is just the String one
+  transform: callback => markup => callback(markup),
+
+  // same goes for convert, with the callback being the one
+  // originally used to "convert" the template from Array to HTML
+  // see: https://github.com/WebReflection/domtagger/issues/17#issuecomment-526151473
+  convert: callback => template => callback(template)
+});
+```
