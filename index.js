@@ -107,7 +107,7 @@ var lighterhtml = (function (document,exports) {
   var COMMENT_NODE = 8;
   var ELEMENT_NODE = 1;
   var TEXT_NODE = 3;
-  var SHOULD_USE_TEXT_CONTENT = /^(?:style|textarea)$/i;
+  var SHOULD_USE_TEXT_CONTENT = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
   var VOID_ELEMENTS = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 
   /*! (c) Andrea Giammarchi - ISC */
