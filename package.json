@@ -44,7 +44,7 @@
     "domtagger": "^0.7.1",
     "hyperhtml-style": "^0.1.2",
     "udomdiff": "^1.1.0",
-    "uhandlers": "^0.3.6",
+    "uhandlers": "^0.4.2",
     "umap": "^1.0.2",
     "uwire": "^1.1.0"
   },

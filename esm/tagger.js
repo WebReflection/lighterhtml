@@ -2,7 +2,7 @@ import createContent from '@ungap/create-content';
 import udomdiff from 'udomdiff';
 import domtagger from 'domtagger';
 import hyperStyle from 'hyperhtml-style';
-import {aria, attribute, data, event, ref, setter} from 'uhandlers';
+import {aria, attribute, boolean, data, event, ref, setter} from 'uhandlers';
 import {diffable} from 'uwire';
 
 import {isArray, slice} from 'uarray';
@@ -65,6 +65,8 @@ Tagger.prototype = {
       default:
         if (name.slice(0, 1) === '.')
           return setter(node, name.slice(1));
+        if (name.slice(0, 1) === '?')
+          return boolean(node, name.slice(1));
         if (name.slice(0, 2) === 'on')
           return event(node, name);
         if (name in node && !(isSVG || readOnly.test(name)))

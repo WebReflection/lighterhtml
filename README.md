@@ -21,6 +21,13 @@ The _hyperHTML_ strength & experience without its complexity 🎉
 
 If you want 90% of functionalities offered by *lightetrhtml* for 2/3rd of its size, check **[µhtml](https://github.com/WebReflection/uhtml#readme)**, which is also used in "*micro custom elements*" **[µce](https://github.com/WebReflection/uce#readme)** library, hence **[µce-template](https://github.com/WebReflection/uce-template#readme)** too, plus "*micro land*" **[µland](https://github.com/WebReflection/uland#readme)** 🦄
 
+---
+
+### 4.2 Highlights
+
+  * the new `?boolean=${value}` syntax from [µhtml](https://github.com/WebReflection/uhtml#readme) has landed in *lighterhtml* too. Feel free to [read this long discussion](https://github.com/WebReflection/discussions/discussions/13) to better understand *why* this syntax is better, or necessary.
+
+---
 
 ### faster than hyperHTML
 

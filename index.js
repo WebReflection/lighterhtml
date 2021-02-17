@@ -862,6 +862,16 @@ var lighterhtml = (function (document,exports) {
       }
     };
   };
+
+  var _boolean = function _boolean(node, key, oldValue) {
+    return function (newValue) {
+      if (oldValue !== !!newValue) {
+        // when IE won't be around anymore ...
+        // node.toggleAttribute(key, oldValue = !!newValue);
+        if (oldValue = !!newValue) node.setAttribute(key, '');else node.removeAttribute(key);
+      }
+    };
+  };
   var data = function data(_ref) {
     var dataset = _ref.dataset;
     return function (values) {
@@ -890,7 +900,7 @@ var lighterhtml = (function (document,exports) {
     };
   };
   var setter = function setter(node, key) {
-    return function (value) {
+    return key === 'dataset' ? data(node) : function (value) {
       node[key] = value;
     };
   };
@@ -956,6 +966,7 @@ var lighterhtml = (function (document,exports) {
 
         default:
           if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
+          if (name.slice(0, 1) === '?') return _boolean(node, name.slice(1));
           if (name.slice(0, 2) === 'on') return event(node, name);
           if (name in node && !(isSVG || readOnly.test(name))) return hyperProperty(node, name);
           return attribute(node, name);

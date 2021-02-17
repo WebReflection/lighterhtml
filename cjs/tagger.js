@@ -3,7 +3,7 @@ const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default 
 const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('udomdiff'));
 const domtagger = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('domtagger'));
 const hyperStyle = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('hyperhtml-style'));
-const {aria, attribute, data, event, ref, setter} = require('uhandlers');
+const {aria, attribute, boolean, data, event, ref, setter} = require('uhandlers');
 const {diffable} = require('uwire');
 
 const {isArray, slice} = require('uarray');
@@ -67,6 +67,8 @@ Tagger.prototype = {
       default:
         if (name.slice(0, 1) === '.')
           return setter(node, name.slice(1));
+        if (name.slice(0, 1) === '?')
+          return boolean(node, name.slice(1));
         if (name.slice(0, 2) === 'on')
           return event(node, name);
         if (name in node && !(isSVG || readOnly.test(name)))
